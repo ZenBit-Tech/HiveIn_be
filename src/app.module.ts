@@ -6,7 +6,6 @@ import { FirstModule } from './modules/first-module/entities/first-module.entity
 import { FirstModuleModule } from './modules/first-module/first-module.module';
 import { ConfigModule } from '@nestjs/config';
 
-
 @Module({
   imports: [
     TypeOrmModule.forRoot({
