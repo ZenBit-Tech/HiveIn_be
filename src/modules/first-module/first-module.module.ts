@@ -3,10 +3,9 @@ import { FirstModuleService } from './first-module.service';
 import { FirstModuleController } from './first-module.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FirstModule } from './entities/first-module.entity';
-import { DatabaseModule } from '../database/database.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([FirstModule]) /* DatabaseModule */],
+  imports: [TypeOrmModule.forFeature([FirstModule])],
   controllers: [FirstModuleController],
   providers: [FirstModuleService],
 })
