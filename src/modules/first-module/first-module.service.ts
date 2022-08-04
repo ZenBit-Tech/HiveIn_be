@@ -16,11 +16,11 @@ export class FirstModuleService {
     this.firstModuleRepository.create({
       helloWorld: createFirstModuleDto.helloWorld,
     });
-    return 'This action adds a new firstModule';
+    return 'This action adds a new firstModule'
   }
 
   findAll() {
     console.log('findAll');
-    return `This action returns all firstModule`;
+    return `This action returns all firstModule`
   }
 }
