@@ -15,11 +15,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         port: configService.get<number>('MYSQL_PORT'),
         username: configService.get<string>('MYSQL_USER'),
         password: configService.get<string>('MYSQL_PASSWORD'),
-        database: configService.get<string>('MYSQL_DATABASE'),
+        database: configService.get<string>('MYSQL_DB_NAME'),
         entities: [__dirname + '/entities/**/*.entity{.ts, .js'],
         migrations: [__dirname + '/migrations/*{.ts, .js'],
         logging: true,
         migrationsRun: false,
+        autoLoadEntities: true,
         synchronize: true,
         ssl: {
           rejectUnauthorized: false,
