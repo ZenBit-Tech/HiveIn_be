@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsEmail, MinLength } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsEmail,
+  MinLength,
+  // Contains,
+} from 'class-validator';
 
 export class AuthDto {
   @IsEmail()
@@ -12,6 +18,11 @@ export class AuthDto {
   @IsNotEmpty()
   readonly password: string;
 
+  // DONT WORKS
+  // --
+  // @Contains('freelancer' || 'job owner', {
+  //   message: 'User can be only as a freelancer or job owner',
+  // })
   @IsString()
   @IsNotEmpty()
   readonly role: string;
