@@ -25,21 +25,31 @@ export class AuthService {
         HttpStatus.BAD_REQUEST,
       );
     } else {
-      const newUser = {
-        email: email,
-        password: password,
-        role: role,
-      };
+      if (role === 'freelancer' || role === 'job owner') {
+        const newUser = {
+          email: email,
+          password: password,
+          role: role,
+        };
 
-      bcrypt.genSalt((err, salt) => {
-        bcrypt.hash(newUser.password, salt, (err, hash) => {
-          if (err) console.error(err);
-          else {
-            newUser.password = hash;
-            this.AuthRepo.save(newUser);
-          }
+        bcrypt.genSalt((err, salt) => {
+          bcrypt.hash(newUser.password, salt, (err, hash) => {
+            if (err) console.error(err);
+            else {
+              newUser.password = hash;
+              this.AuthRepo.save(newUser);
+            }
+          });
         });
-      });
+      } else {
+        throw new HttpException(
+          {
+            status: HttpStatus.BAD_REQUEST,
+            error: 'User can be only as a freelancer or job owner',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
     }
   }
 }
