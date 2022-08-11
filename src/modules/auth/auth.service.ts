@@ -13,7 +13,7 @@ export class AuthService {
   ) {}
 
   async signUp(dto: AuthDto) {
-    const { password, email } = dto;
+    const { password, email, role } = dto;
     const user = await this.AuthRepo.findOneBy({ email });
 
     if (user) {
@@ -28,6 +28,7 @@ export class AuthService {
       const newUser = {
         email: email,
         password: password,
+        role: role,
       };
 
       bcrypt.genSalt((err, salt) => {
