@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuthDto } from './dto/auth.dto';
 import { Users } from './entities/users.entity';
-import * as bcrypt from 'bcryptjs';
+import { genSaltSync, hashSync } from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +13,7 @@ export class AuthService {
   ) {}
 
   async signUp(dto: AuthDto) {
-    const { password, email, role } = dto;
+    const { password, email } = dto;
     const user = await this.AuthRepo.findOneBy({ email });
 
     if (user) {
@@ -25,31 +25,16 @@ export class AuthService {
         HttpStatus.BAD_REQUEST,
       );
     } else {
-      if (role === 'freelancer' || role === 'job owner') {
-        const newUser = {
-          email: email,
-          password: password,
-          role: role,
-        };
+      const newUser = {
+        email: email,
+        password: password,
+      };
 
-        bcrypt.genSalt((err, salt) => {
-          bcrypt.hash(newUser.password, salt, (err, hash) => {
-            if (err) console.error(err);
-            else {
-              newUser.password = hash;
-              this.AuthRepo.save(newUser);
-            }
-          });
-        });
-      } else {
-        throw new HttpException(
-          {
-            status: HttpStatus.BAD_REQUEST,
-            error: 'User can be only as a freelancer or job owner',
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+      const salt = genSaltSync(10);
+      newUser.password = hashSync(newUser.password, salt);
+      const createdUser = await this.AuthRepo.save(newUser);
+      if (createdUser) return true;
+      return false;
     }
   }
 }

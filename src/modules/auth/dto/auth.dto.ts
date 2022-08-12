@@ -23,7 +23,4 @@ export class AuthDto {
   // @Contains('freelancer' || 'job owner', {
   //   message: 'User can be only as a freelancer or job owner',
   // })
-  @IsString()
-  @IsNotEmpty()
-  readonly role: string;
 }
