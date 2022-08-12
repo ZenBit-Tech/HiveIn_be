@@ -17,10 +17,4 @@ export class AuthDto {
   @IsString()
   @IsNotEmpty()
   readonly password: string;
-
-  // DONT WORKS
-  // --
-  // @Contains('freelancer' || 'job owner', {
-  //   message: 'User can be only as a freelancer or job owner',
-  // })
 }
