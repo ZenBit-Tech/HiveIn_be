@@ -33,8 +33,8 @@ export class AuthService {
       const salt = genSaltSync(10);
       newUser.password = hashSync(newUser.password, salt);
       const createdUser = await this.AuthRepo.save(newUser);
-      if (createdUser) return true;
-      return false;
+
+      return createdUser ? true : false;
     }
   }
 }
