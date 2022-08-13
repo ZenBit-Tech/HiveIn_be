@@ -9,12 +9,12 @@ import { genSaltSync, hashSync } from 'bcryptjs';
 export class AuthService {
   constructor(
     @InjectRepository(Users)
-    private readonly AuthRepo: Repository<Users>,
+    private readonly authRepo: Repository<Users>,
   ) {}
 
   async signUp(dto: AuthDto) {
     const { password, email } = dto;
-    const user = await this.AuthRepo.findOneBy({ email });
+    const user = await this.authRepo.findOneBy({ email });
 
     if (user) {
       throw new HttpException(
@@ -32,7 +32,7 @@ export class AuthService {
 
       const salt = genSaltSync(10);
       newUser.password = hashSync(newUser.password, salt);
-      const createdUser = await this.AuthRepo.save(newUser);
+      const createdUser = await this.authRepo.save(newUser);
 
       return createdUser ? true : false;
     }
