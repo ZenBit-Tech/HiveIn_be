@@ -64,7 +64,7 @@ export class AuthService {
           HttpStatus.BAD_REQUEST,
         );
       } else {
-        return this.signUser(user.id, user.email);
+        return { accessToken: this.signUser(user.id, user.email) };
       }
     }
   }
