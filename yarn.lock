@@ -939,7 +939,7 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
-"@types/jest@^27.0.0", "@types/jest@^27.0.1":
+"@types/jest@^27.0.0", "@types/jest@^27.5.2":
   "integrity" "sha512-mpT8LJJ4CMeeahobofYWIjFo0xonRS/HfxnVEPMPFSQdGUt1uHCnoPT7Zhb+sjDU2wz0oKV0OLUR0WzrHNgfeA=="
   "resolved" "https://registry.npmjs.org/@types/jest/-/jest-27.5.2.tgz"
   "version" "27.5.2"

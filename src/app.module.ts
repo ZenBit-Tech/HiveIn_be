@@ -4,7 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { FirstModuleModule } from './modules/first-module/first-module.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-
+import { ProfileModule } from './modules/profile/profile.module';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -30,6 +30,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
     ConfigModule.forRoot(),
     FirstModuleModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],
