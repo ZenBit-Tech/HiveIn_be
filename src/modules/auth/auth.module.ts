@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { GoogleOauthModule } from 'src/modules/auth/google-oauth/google-oauth.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       secret: process.env.SECRET_KEY,
       signOptions: { expiresIn: '7200s' },
     }),
+    GoogleOauthModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
