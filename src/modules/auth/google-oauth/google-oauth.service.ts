@@ -9,17 +9,17 @@ import { Repository } from 'typeorm';
 export class GoogleOauthService {
   constructor(
     @InjectRepository(Users)
-    private readonly AuthRepo: Repository<Users>,
+    private readonly authRepo: Repository<Users>,
     private readonly jwtService: JwtService,
   ) {}
 
   async googleSignUp(req: GoogleReq) {
     const { googleId, email } = req.user;
 
-    const googleUser = await this.AuthRepo.findOneBy({ googleId });
+    const googleUser = await this.authRepo.findOneBy({ googleId });
 
     if (!googleUser) {
-      const newUser = await this.AuthRepo.save({
+      const newUser = await this.authRepo.save({
         email,
         googleId,
         password: '',
