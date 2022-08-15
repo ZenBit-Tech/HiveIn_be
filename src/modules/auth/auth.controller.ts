@@ -7,6 +7,7 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
+
 import { AuthDto } from './dto/auth.dto';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -21,9 +22,16 @@ export class AuthController {
   privateRoute(@Request() req) {
     return `Your email, ${req.user.email}`;
   }
+
   @HttpCode(200)
   @Post('sign-up')
   async signUp(@Body() dto: AuthDto) {
     return this.authService.signUp(dto);
+  }
+
+  @HttpCode(200)
+  @Post('sign-in')
+  async signIn(@Body() dto: AuthDto) {
+    return this.authService.signIn(dto);
   }
 }
