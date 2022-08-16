@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { SettingsInfo } from 'src/modules/settings-info/entities/settings-info.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  JoinColumn,
+  OneToOne,
+} from 'typeorm';
 
 @Entity()
 export class Users {
@@ -15,4 +22,8 @@ export class Users {
 
   @Column({ nullable: true })
   role: string;
+
+  @OneToOne(() => SettingsInfo, (settings) => settings.user)
+  @JoinColumn()
+  settingsInfo: SettingsInfo;
 }
