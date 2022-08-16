@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { FirstModuleModule } from './modules/first-module/first-module.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { SettingsInfoModule } from './modules/settings-info/settings-info.module';
@@ -31,7 +30,6 @@ import { SettingsInfoModule } from './modules/settings-info/settings-info.module
       inject: [ConfigService],
     }),
     ConfigModule.forRoot(),
-    FirstModuleModule,
     AuthModule,
     SettingsInfoModule,
   ],

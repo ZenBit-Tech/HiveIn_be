@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Users } from 'src/modules/auth/entities/users.entity';
+import { Users } from 'src/modules/entities/users.entity';
 import { Repository } from 'typeorm';
 import { CreateSettingsInfoDto } from './dto/create-settings-info.dto';
 import { UpdateSettingsInfoDto } from './dto/update-settings-info.dto';
@@ -17,7 +17,7 @@ export class SettingsInfoService {
 
     const currentUser = await this.settingsInfoRepo.findOneBy({ email: email });
 
-    if (!currentUser) return null;
+    if (!currentUser) throw new NotFoundException();
 
     return await this.settingsInfoRepo.save({
       ...currentUser,
@@ -36,7 +36,7 @@ export class SettingsInfoService {
   async update(id: number, updateSettingsInfoDto: UpdateSettingsInfoDto) {
     const currentSettings = await this.findOne(id);
 
-    if (!currentSettings) return null;
+    if (!currentSettings) throw new NotFoundException();
 
     return await this.settingsInfoRepo.save({
       ...currentSettings,
