@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SettingsInfo } from 'src/modules/settings-info/entities/settings-info.entity';
+import { Users } from 'src/modules/auth/entities/users.entity';
 import { Repository } from 'typeorm';
 import { CreateSettingsInfoDto } from './dto/create-settings-info.dto';
 import { UpdateSettingsInfoDto } from './dto/update-settings-info.dto';
@@ -8,12 +8,21 @@ import { UpdateSettingsInfoDto } from './dto/update-settings-info.dto';
 @Injectable()
 export class SettingsInfoService {
   constructor(
-    @InjectRepository(SettingsInfo)
-    private readonly settingsInfoRepo: Repository<SettingsInfo>,
+    @InjectRepository(Users)
+    private readonly settingsInfoRepo: Repository<Users>,
   ) {}
 
   async create(createSettingsInfoDto: CreateSettingsInfoDto) {
-    return await this.settingsInfoRepo.save(createSettingsInfoDto);
+    const { email } = createSettingsInfoDto;
+
+    const currentUser = await this.settingsInfoRepo.findOneBy({ email: email });
+
+    if (!currentUser) return null;
+
+    return await this.settingsInfoRepo.save({
+      ...currentUser,
+      ...createSettingsInfoDto,
+    });
   }
 
   async findAll() {

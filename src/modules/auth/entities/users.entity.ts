@@ -1,11 +1,5 @@
-import { SettingsInfo } from 'src/modules/settings-info/entities/settings-info.entity';
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  JoinColumn,
-  OneToOne,
-} from 'typeorm';
+import { IsEmail, IsPhoneNumber, IsString, MaxLength } from 'class-validator';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Users {
@@ -15,6 +9,8 @@ export class Users {
   id: number;
 
   @Column()
+  @IsEmail()
+  @IsString()
   email: string;
 
   @Column()
@@ -26,7 +22,18 @@ export class Users {
   @Column({ nullable: true })
   googleId: string;
 
-  @OneToOne(() => SettingsInfo, (settings) => settings.user)
-  @JoinColumn()
-  settingsInfo: SettingsInfo;
+  @Column()
+  @IsString()
+  @MaxLength(50)
+  firstName: string;
+
+  @Column()
+  @IsString()
+  @MaxLength(50)
+  lastName: string;
+
+  @Column()
+  @IsString()
+  @IsPhoneNumber()
+  phone: string;
 }
