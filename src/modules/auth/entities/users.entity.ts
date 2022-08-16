@@ -23,6 +23,9 @@ export class Users {
   @Column({ nullable: true })
   role: string;
 
+  @Column({ nullable: true })
+  googleId: string;
+
   @OneToOne(() => SettingsInfo, (settings) => settings.user)
   @JoinColumn()
   settingsInfo: SettingsInfo;
