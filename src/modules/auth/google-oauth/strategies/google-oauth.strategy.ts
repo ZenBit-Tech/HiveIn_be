@@ -30,7 +30,6 @@ export class GoogleOauthStrategy extends PassportStrategy(Strategy, 'google') {
     profile: Profile,
   ): Promise<GoogleUser> {
     const { name, emails, photos, id } = profile;
-
     return {
       googleId: id,
       email: emails[0].value,

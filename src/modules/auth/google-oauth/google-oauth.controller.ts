@@ -1,6 +1,7 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Redirect, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { GoogleOauthService } from 'src/modules/auth/google-oauth/google-oauth.service';
+import { GoogleOauthSessionGuard } from 'src/modules/auth/google-oauth/guards/google-oauth-session.guard';
 import { GoogleOauthGuard } from 'src/modules/auth/google-oauth/guards/google-oauth.guard';
 import { GoogleUser } from 'src/modules/auth/google-oauth/strategies/google-oauth.strategy';
 
@@ -20,7 +21,14 @@ export class GoogleOauthController {
 
   @Get('redirect')
   @UseGuards(GoogleOauthGuard)
-  async googleAuthRedirect(@Req() req: GoogleReq) {
+  @Redirect('http://localhost:3000', 301)
+  async googleAuthRedirect() {
+    return;
+  }
+
+  @Get('success')
+  @UseGuards(GoogleOauthSessionGuard)
+  async sucess(@Req() req: GoogleReq) {
     return this.googleOauthService.googleSignUp(req);
   }
 }

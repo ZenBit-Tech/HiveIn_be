@@ -9,20 +9,24 @@ import { Repository } from 'typeorm';
 export class GoogleOauthService {
   constructor(
     @InjectRepository(Users)
-    private readonly authRepo: Repository<Users>,
+    private readonly userRepo: Repository<Users>,
     private readonly jwtService: JwtService,
   ) {}
 
   async googleSignUp(req: GoogleReq) {
     const { googleId, email } = req.user;
+    console.log(req.user);
 
-    const googleUser = await this.authRepo.findOneBy({ googleId });
+    const googleUser = await this.userRepo.findOneBy({ googleId });
 
     if (!googleUser) {
-      const newUser = await this.authRepo.save({
+      const newUser = await this.userRepo.save({
         email,
         googleId,
         password: '',
+        firstName: '',
+        lastName: '',
+        phone: '',
       });
 
       return this.googleSignIn(newUser);
@@ -40,5 +44,9 @@ export class GoogleOauthService {
         email,
       }),
     };
+  }
+
+  async findUserByGoogleID(googleId: string) {
+    return this.userRepo.findOneBy({ googleId });
   }
 }

@@ -6,6 +6,8 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from 'src/modules/entities/users.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { GoogleOAuthSerializer } from 'src/modules/auth/google-oauth/serializers/google-oauth.serializer';
 
 @Module({
   imports: [
@@ -15,8 +17,11 @@ import { JwtModule } from '@nestjs/jwt';
       secret: process.env.SECRET_KEY,
       signOptions: { expiresIn: '7200s' },
     }),
+    PassportModule.register({
+      session: true,
+    }),
   ],
   controllers: [GoogleOauthController],
-  providers: [GoogleOauthService, GoogleOauthStrategy],
+  providers: [GoogleOauthService, GoogleOauthStrategy, GoogleOAuthSerializer],
 })
 export class GoogleOauthModule {}
