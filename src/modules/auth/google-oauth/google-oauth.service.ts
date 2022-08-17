@@ -15,7 +15,6 @@ export class GoogleOauthService {
 
   async googleSignUp(req: GoogleReq) {
     const { googleId, email, firstName, lastName } = req.user;
-    console.log(req.user);
 
     const googleUser = await this.userRepo.findOneBy({ googleId });
 
@@ -29,14 +28,16 @@ export class GoogleOauthService {
         phone: '',
       });
 
-      return this.googleSignIn(newUser);
+      return newUser;
     }
 
-    return this.googleSignIn(googleUser);
+    return googleUser;
   }
 
-  async googleSignIn(googleUser: Users) {
-    const { id, email } = googleUser;
+  async googleSignIn(req: GoogleReq) {
+    const { googleId } = req.user;
+
+    const { id, email } = await this.userRepo.findOneBy({ googleId });
 
     return {
       token: this.jwtService.sign({

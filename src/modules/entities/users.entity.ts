@@ -8,7 +8,7 @@ export class Users {
   })
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   @IsEmail()
   @IsString()
   email: string;
@@ -19,7 +19,7 @@ export class Users {
   @Column({ nullable: true })
   role: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   googleId: string;
 
   @Column()

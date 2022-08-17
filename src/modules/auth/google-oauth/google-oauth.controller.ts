@@ -21,14 +21,14 @@ export class GoogleOauthController {
 
   @Get('redirect')
   @UseGuards(GoogleOauthGuard)
-  @Redirect('http://localhost:3000', 301)
-  async googleAuthRedirect() {
-    return;
+  @Redirect(process.env.FRONTEND_REDIRECT_URL, 301)
+  async googleAuthRedirect(@Req() req: GoogleReq) {
+    return this.googleOauthService.googleSignUp(req);
   }
 
   @Get('success')
   @UseGuards(GoogleOauthSessionGuard)
   async sucess(@Req() req: GoogleReq) {
-    return this.googleOauthService.googleSignUp(req);
+    return this.googleOauthService.googleSignIn(req);
   }
 }
