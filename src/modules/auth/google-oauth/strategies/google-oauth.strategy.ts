@@ -16,7 +16,6 @@ export interface GoogleUser {
 export class GoogleOauthStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(configService: ConfigService) {
     super({
-      // Put config in `.env`
       clientID: configService.get<string>('OAUTH_GOOGLE_ID'),
       clientSecret: configService.get<string>('OAUTH_GOOGLE_SECRET_KEY'),
       callbackURL: configService.get<string>('OAUTH_GOOGLE_REDIRECT_URL'),

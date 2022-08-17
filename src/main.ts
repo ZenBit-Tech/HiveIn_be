@@ -11,7 +11,7 @@ async function bootstrap() {
   app.use(
     session({
       name: 'GoogleOAuth',
-      secret: 'hello_world',
+      secret: process.env.SECRET_KEY,
       resave: false,
       saveUninitialized: false,
       cookie: { maxAge: 60000 },

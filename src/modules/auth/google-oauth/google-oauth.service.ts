@@ -14,7 +14,7 @@ export class GoogleOauthService {
   ) {}
 
   async googleSignUp(req: GoogleReq) {
-    const { googleId, email } = req.user;
+    const { googleId, email, firstName, lastName } = req.user;
     console.log(req.user);
 
     const googleUser = await this.userRepo.findOneBy({ googleId });
@@ -24,8 +24,8 @@ export class GoogleOauthService {
         email,
         googleId,
         password: '',
-        firstName: '',
-        lastName: '',
+        firstName,
+        lastName,
         phone: '',
       });
 
