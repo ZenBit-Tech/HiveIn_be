@@ -38,10 +38,7 @@ export class SettingsInfoService {
 
     if (!currentSettings) throw new NotFoundException();
 
-    return await this.settingsInfoRepo.save({
-      ...currentSettings,
-      ...updateSettingsInfoDto,
-    });
+    return await this.settingsInfoRepo.save({ id, ...updateSettingsInfoDto });
   }
 
   async remove(id: number) {
