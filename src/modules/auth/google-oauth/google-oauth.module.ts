@@ -4,7 +4,7 @@ import { GoogleOauthController } from 'src/modules/auth/google-oauth/google-oaut
 import { GoogleOauthService } from 'src/modules/auth/google-oauth/google-oauth.service';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Users } from 'src/modules/auth/entities/users.entity';
+import { Users } from 'src/modules/entities/users.entity';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({

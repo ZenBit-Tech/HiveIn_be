@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Users } from 'src/modules/auth/entities/users.entity';
+import { Users } from 'src/modules/entities/users.entity';
 import { GoogleReq } from 'src/modules/auth/google-oauth/google-oauth.controller';
 import { Repository } from 'typeorm';
 
