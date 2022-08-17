@@ -31,17 +31,17 @@ export class Users {
   @Column({ nullable: true, unique: true })
   googleId: string;
 
-  @Column()
+  @Column({ nullable: true })
   @IsString()
   @MaxLength(50)
   firstName: string;
 
-  @Column()
+  @Column({ nullable: true })
   @IsString()
   @MaxLength(50)
   lastName: string;
 
-  @Column()
+  @Column({ nullable: true })
   @IsString()
   @IsPhoneNumber()
   phone: string;

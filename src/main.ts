@@ -7,14 +7,14 @@ import * as passport from 'passport';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
-  app.enableCors();
+  app.enableCors({ credentials: true, origin: 'http://localhost:3000' });
   app.use(
     session({
       name: 'GoogleOAuth',
       secret: process.env.SECRET_KEY,
       resave: false,
       saveUninitialized: false,
-      cookie: { maxAge: 60000 },
+      cookie: { maxAge: 120000 },
     }),
   );
   app.use(passport.initialize());

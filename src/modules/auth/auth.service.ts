@@ -64,15 +64,19 @@ export class AuthService {
           HttpStatus.BAD_REQUEST,
         );
       } else {
-        return { accessToken: this.signUser(user.id, user.email) };
+        return this.signUser(user.id, user.email);
       }
     }
   }
 
-  signUser(userId: number, email: string) {
-    return this.jwtService.sign({
-      sub: userId,
+  signUser(id: number, email: string) {
+    return {
+      token: this.jwtService.sign({
+        sub: id,
+        email,
+      }),
       email,
-    });
+      id,
+    };
   }
 }

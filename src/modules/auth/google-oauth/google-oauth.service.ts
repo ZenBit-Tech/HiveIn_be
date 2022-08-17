@@ -44,6 +44,8 @@ export class GoogleOauthService {
         sub: id,
         email,
       }),
+      email,
+      id,
     };
   }
 
