@@ -37,7 +37,7 @@ export class GoogleOauthService {
   async googleSignIn(req: GoogleReq) {
     const { googleId } = req.user;
 
-    const { id, email } = await this.userRepo.findOneBy({ googleId });
+    const { id, email, role } = await this.userRepo.findOneBy({ googleId });
 
     return {
       token: this.jwtService.sign({
@@ -46,6 +46,7 @@ export class GoogleOauthService {
       }),
       email,
       id,
+      role,
     };
   }
 

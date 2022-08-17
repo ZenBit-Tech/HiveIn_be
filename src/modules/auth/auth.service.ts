@@ -69,7 +69,9 @@ export class AuthService {
     }
   }
 
-  signUser(id: number, email: string) {
+  async signUser(id: number, email: string) {
+    const { role } = await this.authRepo.findOneBy({ email });
+
     return {
       token: this.jwtService.sign({
         sub: id,
@@ -77,6 +79,7 @@ export class AuthService {
       }),
       email,
       id,
+      role,
     };
   }
 }
