@@ -1,6 +1,11 @@
 import { IsEmail, IsPhoneNumber, IsString, MaxLength } from 'class-validator';
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
+export enum UserRole {
+  CLIENT = 'client',
+  FREELANCER = 'freelancer',
+  UNDEFINED = '',
+}
 @Entity()
 export class Users {
   @PrimaryGeneratedColumn({
@@ -16,8 +21,12 @@ export class Users {
   @Column()
   password: string;
 
-  @Column({ nullable: true })
-  role: string;
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.UNDEFINED,
+  })
+  role: UserRole;
 
   @Column({ nullable: true, unique: true })
   googleId: string;
