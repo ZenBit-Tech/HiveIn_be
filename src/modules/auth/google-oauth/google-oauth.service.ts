@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from 'src/modules/entities/users.entity';
 import { GoogleReq } from 'src/modules/auth/google-oauth/google-oauth.controller';
 import { Repository } from 'typeorm';
+import { Response } from 'express';
 
 @Injectable()
 export class GoogleOauthService {
@@ -13,13 +14,13 @@ export class GoogleOauthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async googleSignUp(req: GoogleReq) {
+  async googleSignUp(req: GoogleReq, res: Response) {
     const { googleId, email, firstName, lastName } = req.user;
 
     const googleUser = await this.userRepo.findOneBy({ googleId });
 
     if (!googleUser) {
-      const newUser = await this.userRepo.save({
+      await this.userRepo.save({
         email,
         googleId,
         password: '',
@@ -28,10 +29,10 @@ export class GoogleOauthService {
         phone: '',
       });
 
-      return newUser;
+      return res.redirect(301, process.env.FRONTEND_SIGN_UP_REDIRECT_URL);
     }
 
-    return googleUser;
+    return res.redirect(301, process.env.FRONTEND_SIGN_IN_REDIRECT_URL);
   }
 
   async googleSignIn(req: GoogleReq) {
