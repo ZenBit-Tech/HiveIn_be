@@ -45,10 +45,14 @@ export class Freelancer {
   @JoinColumn({ name: 'userId' })
   user: Users;
 
-  @OneToMany(() => Education, (education) => education.freelancer)
+  @OneToMany(() => Education, (education) => education.freelancer, {
+    cascade: true,
+  })
   education: Education[];
 
-  @OneToMany(() => Experience, (experience) => experience.freelancer)
+  @OneToMany(() => Experience, (experience) => experience.freelancer, {
+    cascade: true,
+  })
   experience: Experience[];
 
   @ManyToMany(() => Skill, (skill) => skill.freelancers, { cascade: true })

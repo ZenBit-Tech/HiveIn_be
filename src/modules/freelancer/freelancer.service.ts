@@ -22,6 +22,8 @@ export class FreelancerService {
       rate: data.rate,
       userId: data.userId,
       skills: skills,
+      experience: data.experiences,
+      education: data.educations,
     });
   }
 
