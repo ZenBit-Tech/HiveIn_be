@@ -52,20 +52,18 @@ export class AuthService {
         },
         HttpStatus.BAD_REQUEST,
       );
+    }
+    const isMatch = compareSync(password, user.password);
+    if (!isMatch) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Password is incorrect',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     } else {
-      const isMatch = await compareSync(password, user.password);
-
-      if (!isMatch) {
-        throw new HttpException(
-          {
-            status: HttpStatus.BAD_REQUEST,
-            error: 'Password is incorrect',
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      } else {
-        return { accessToken: this.signUser(user.id, user.email) };
-      }
+      return { accessToken: this.signUser(user.id, user.email) };
     }
   }
 

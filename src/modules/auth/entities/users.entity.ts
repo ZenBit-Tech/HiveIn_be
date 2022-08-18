@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
 
 @Entity()
 export class Users {
@@ -15,4 +16,7 @@ export class Users {
 
   @Column({ nullable: true })
   role: string;
+
+  @OneToOne(() => Freelancer, (freelancer) => freelancer.user)
+  freelancer: Freelancer;
 }
