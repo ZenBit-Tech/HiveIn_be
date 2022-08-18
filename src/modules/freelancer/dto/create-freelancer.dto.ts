@@ -1,14 +1,12 @@
-import {
-  IsArray,
-  IsNumber,
-  IsObject,
-  isObject,
-  IsString,
-} from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 import { CreateEducationDto } from 'src/modules/education/dto/create-education.dto';
 import { CreateExperienceDto } from 'src/modules/experience/dto/create-experience.dto';
 
 export class CreateFreelancerDto {
+  @IsNumber()
+  @IsOptional()
+  id: number;
+
   @IsString()
   englishLevel: string;
 
@@ -27,11 +25,11 @@ export class CreateFreelancerDto {
   @IsArray()
   skillsIds: number[];
 
-  @IsObject()
+  @IsOptional()
   @IsArray()
   educations: CreateEducationDto[];
 
-  @IsObject()
+  @IsOptional()
   @IsArray()
   experiences: CreateExperienceDto[];
 }

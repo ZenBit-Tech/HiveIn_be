@@ -27,7 +27,7 @@ export class FreelancerController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.freelancerService.findOne(+id);
+    return this.freelancerService.findOneByUserId(+id);
   }
 
   @Patch(':id')

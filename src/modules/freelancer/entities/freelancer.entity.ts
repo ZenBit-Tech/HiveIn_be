@@ -47,15 +47,19 @@ export class Freelancer {
 
   @OneToMany(() => Education, (education) => education.freelancer, {
     cascade: true,
+    nullable: true,
   })
   education: Education[];
 
   @OneToMany(() => Experience, (experience) => experience.freelancer, {
     cascade: true,
+    nullable: true,
   })
   experience: Experience[];
 
-  @ManyToMany(() => Skill, (skill) => skill.freelancers, { cascade: true })
+  @ManyToMany(() => Skill, (skill) => skill.freelancers, {
+    cascade: true,
+  })
   @JoinTable()
   skills: Skill[];
 

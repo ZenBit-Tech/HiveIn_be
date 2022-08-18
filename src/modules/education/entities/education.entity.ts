@@ -38,7 +38,10 @@ export class Education {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => Freelancer, (freelancer) => freelancer.education)
+  @ManyToOne(() => Freelancer, (freelancer) => freelancer.education, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn({ name: 'freelancerId' })
   freelancer: Freelancer;
 

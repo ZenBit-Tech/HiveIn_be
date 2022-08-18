@@ -1,5 +1,6 @@
 import { IsEmail, IsPhoneNumber, IsString, MaxLength } from 'class-validator';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
+import { Freelancer } from '../freelancer/entities/freelancer.entity';
 
 export enum UserRole {
   CLIENT = 'client',
@@ -45,4 +46,7 @@ export class Users {
   @IsString()
   @IsPhoneNumber()
   phone: string;
+
+  @OneToOne(() => Freelancer, (freelancer) => freelancer.user)
+  user: Users;
 }

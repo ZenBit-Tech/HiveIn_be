@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateFreelancerDto } from './dto/create-freelancer.dto';
@@ -11,10 +11,19 @@ export class FreelancerService {
     @InjectRepository(Freelancer)
     private freelancerRepository: Repository<Freelancer>,
   ) {}
-  create(data: CreateFreelancerDto) {
+  async create(data: CreateFreelancerDto) {
     const skills = data.skillsIds.map((value) => ({
       id: value,
     }));
+    if (skills.length < 3) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Insert at least 3 Skills',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     return this.freelancerRepository.save({
       categoryId: data.categoryId,
       englishLevel: data.englishLevel,
@@ -40,16 +49,44 @@ export class FreelancerService {
       .query.getMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} freelancer`;
+  findOneByUserId(id: number) {
+    const freelancerQuery = new FreelancerQueryBuilder(
+      this.freelancerRepository,
+    );
+    return freelancerQuery
+      .init()
+      .getCategory()
+      .getEducation()
+      .getExperience()
+      .getSkills()
+      .query.where(`freelancer.userId = ${id}`)
+      .getOne();
   }
 
-  update(id: number, updateFreelancerDto: UpdateFreelancerDto) {
-    return `This action updates a #${id} freelancer`;
+  async update(id: number, data: UpdateFreelancerDto) {
+    const skills = (data?.skillsIds || []).map((value) => ({
+      id: value,
+    }));
+    if (skills.length < 3) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Insert at least 3 Skills',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return this.freelancerRepository.save({
+      id,
+      skills,
+      education: data.educations,
+      experience: data.experiences,
+      ...data,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} freelancer`;
+  async remove(id: number) {
+    await this.freelancerRepository.delete(id);
   }
 }
 
