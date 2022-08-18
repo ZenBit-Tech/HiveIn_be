@@ -1,4 +1,4 @@
-import { Users } from 'src/modules/auth/entities/users.entity';
+import { Users } from 'src/modules/entities/users.entity';
 import { Category } from 'src/modules/category/entities/category.entity';
 import { Education } from 'src/modules/education/entities/education.entity';
 import { Experience } from 'src/modules/experience/entities/experience.entity';
