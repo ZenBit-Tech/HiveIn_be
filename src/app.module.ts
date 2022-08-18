@@ -5,6 +5,8 @@ import { AppService } from './app.service';
 import { FirstModuleModule } from './modules/first-module/first-module.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
+import { AvatarModule } from './modules/avatar/avatar.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -29,9 +31,15 @@ import { AuthModule } from './modules/auth/auth.module';
       }),
       inject: [ConfigService],
     }),
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    MulterModule.register({
+      dest: '/uploads',
+    }),
     FirstModuleModule,
     AuthModule,
+    AvatarModule,
   ],
   controllers: [AppController],
   providers: [AppService],
