@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuthDto } from './dto/auth.dto';
-import { Users } from './entities/users.entity';
+import { Users } from '../entities/users.entity';
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 
@@ -52,25 +52,34 @@ export class AuthService {
         },
         HttpStatus.BAD_REQUEST,
       );
-    }
-    const isMatch = compareSync(password, user.password);
-    if (!isMatch) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'Password is incorrect',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
     } else {
-      return { accessToken: this.signUser(user.id, user.email) };
+      const isMatch = await compareSync(password, user.password);
+
+      if (!isMatch) {
+        throw new HttpException(
+          {
+            status: HttpStatus.BAD_REQUEST,
+            error: 'Password is incorrect',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      } else {
+        return this.signUser(user.id, user.email);
+      }
     }
   }
 
-  signUser(userId: number, email: string) {
-    return this.jwtService.sign({
-      sub: userId,
+  async signUser(id: number, email: string) {
+    const { role } = await this.authRepo.findOneBy({ email });
+
+    return {
+      token: this.jwtService.sign({
+        sub: id,
+        email,
+      }),
       email,
-    });
+      id,
+      role,
+    };
   }
 }
