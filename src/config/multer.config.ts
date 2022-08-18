@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { Request } from 'express';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, promises } from 'fs';
 import { diskStorage } from 'multer';
 
 export const multerOptions: MulterOptions = {
@@ -18,13 +18,14 @@ export const multerOptions: MulterOptions = {
       );
   },
   storage: diskStorage({
-    destination(
+    async destination(
       req: Request,
       file: Express.Multer.File,
       done: (error: Error | null, filename: string) => void,
     ) {
       const uploadPath = process.env.UPLOADS_DIR;
-      !existsSync(uploadPath) && mkdirSync(uploadPath);
+      if (!existsSync(uploadPath))
+        await promises.mkdir(uploadPath, { recursive: true });
       done(null, uploadPath);
     },
     filename(
