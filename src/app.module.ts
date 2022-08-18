@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { FirstModuleModule } from './modules/first-module/first-module.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
+import { SettingsInfoModule } from './modules/settings-info/settings-info.module';
 
 @Module({
   imports: [
@@ -17,8 +17,8 @@ import { AuthModule } from './modules/auth/auth.module';
         username: configService.get<string>('MYSQL_USER'),
         password: configService.get<string>('MYSQL_PASSWORD'),
         database: configService.get<string>('MYSQL_DB_NAME'),
-        entities: [__dirname + '/entities/**/*.entity{.ts, .js'],
-        migrations: [__dirname + '/migrations/*{.ts, .js'],
+        entities: [__dirname + '/entities/**/*.entity{.ts, .js}'],
+        migrations: [__dirname + '/migrations/*{.ts, .js}'],
         logging: true,
         migrationsRun: false,
         autoLoadEntities: true,
@@ -30,8 +30,8 @@ import { AuthModule } from './modules/auth/auth.module';
       inject: [ConfigService],
     }),
     ConfigModule.forRoot(),
-    FirstModuleModule,
     AuthModule,
+    SettingsInfoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
