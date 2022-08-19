@@ -36,7 +36,7 @@ export class AuthService {
       newUser.password = hashSync(newUser.password, salt);
       const createdUser = await this.authRepo.save(newUser);
 
-      return createdUser ? true : false;
+      return this.signUser(createdUser.id, createdUser.email);
     }
   }
 
