@@ -18,7 +18,7 @@ export class AvatarController {
   @Post('upload')
   @UseInterceptors(FileInterceptor('avatar', multerOptions))
   photoUpload(@UploadedFile() file: Express.Multer.File) {
-    return `localhost:3000/avatar/${file.filename}`;
+    return `localhost:4000/avatar/${file.filename}`;
   }
 
   @Get(':imgurl')
