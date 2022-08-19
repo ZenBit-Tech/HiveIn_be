@@ -1,3 +1,4 @@
+import { ForgotPassword } from '../entities/forgot-password.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from '../entities/users.entity';
@@ -11,7 +12,7 @@ import { GoogleOauthModule } from 'src/modules/auth/google-oauth/google-oauth.mo
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forFeature([Users]),
+    TypeOrmModule.forFeature([Users, ForgotPassword]),
     JwtModule.register({
       secret: process.env.SECRET_KEY,
       signOptions: { expiresIn: '7200s' },

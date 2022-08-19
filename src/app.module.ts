@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { SettingsInfoModule } from './modules/settings-info/settings-info.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -25,6 +26,19 @@ import { SettingsInfoModule } from './modules/settings-info/settings-info.module
         synchronize: true,
         ssl: {
           rejectUnauthorized: false,
+        },
+      }),
+      inject: [ConfigService],
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        transport: {
+          host: 'smtp.sendgrid.net',
+          auth: {
+            user: 'apikey',
+            pass: configService.get<string>('SEND_GRID_KEY'),
+          },
         },
       }),
       inject: [ConfigService],
