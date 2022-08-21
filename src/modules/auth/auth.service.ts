@@ -1,7 +1,5 @@
 import {
   ConflictException,
-  HttpException,
-  HttpStatus,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -10,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuthDto } from './dto/auth.dto';
 import { Users } from '../entities/users.entity';
-import { compare, genSaltSync, hashSync } from 'bcryptjs';
+import { compare, genSalt, hash } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -26,25 +24,18 @@ export class AuthService {
     const user = await this.authRepo.findOneBy({ email });
 
     if (user) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'This email already exist',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    } else {
-      const newUser = {
-        email: email,
-        password: password,
-      };
-
-      const salt = genSaltSync(10);
-      newUser.password = hashSync(newUser.password, salt);
-      const createdUser = await this.authRepo.save(newUser);
-
-      return this.signUser(createdUser.id, createdUser.email);
+      throw new ConflictException('User already exists');
     }
+
+    const salt = await genSalt(10);
+    const hashPassword = await hash(password, salt);
+
+    const createdUser = await this.authRepo.save({
+      email,
+      password: hashPassword,
+    });
+
+    return this.signUser(createdUser.id, createdUser.email);
   }
 
   async signIn(dto: AuthDto) {
