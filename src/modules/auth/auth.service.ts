@@ -1,9 +1,16 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuthDto } from './dto/auth.dto';
 import { Users } from '../entities/users.entity';
-import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
+import { compare, genSaltSync, hashSync } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -45,28 +52,18 @@ export class AuthService {
     const user = await this.authRepo.findOneBy({ email });
 
     if (!user) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'User does not exist',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    } else {
-      const isMatch = await compareSync(password, user.password);
-
-      if (!isMatch) {
-        throw new HttpException(
-          {
-            status: HttpStatus.BAD_REQUEST,
-            error: 'Password is incorrect',
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      } else {
-        return this.signUser(user.id, user.email);
-      }
+      throw new NotFoundException("User doesn't exist");
     }
+
+    if (user.googleId) {
+      throw new ConflictException('User should sign in through Google');
+    }
+
+    const isMatch = await compare(password, user.password);
+
+    if (!isMatch) throw new UnauthorizedException('Password incorrect');
+
+    return this.signUser(user.id, user.email);
   }
 
   async signUser(id: number, email: string) {
