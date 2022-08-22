@@ -19,6 +19,12 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  /* 
+    When you are hashing your data the module will go through a series of rounds to give you a secure hash. 
+    The value you submit here will be used to go through 2^rounds iterations of processing.
+  */
+  private saltRounds = 10;
+
   async signUp(dto: AuthDto) {
     const { password, email } = dto;
     const user = await this.authRepo.findOneBy({ email });
@@ -27,7 +33,7 @@ export class AuthService {
       throw new ConflictException('User already exists');
     }
 
-    const salt = await genSalt(10);
+    const salt = await genSalt(this.saltRounds);
     const hashPassword = await hash(password, salt);
 
     const createdUser = await this.authRepo.save({
