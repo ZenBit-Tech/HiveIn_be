@@ -9,6 +9,7 @@ import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { AuthRestorePasswordDto } from './dto/restore-password.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -18,8 +19,11 @@ export class AuthService {
     @InjectRepository(ForgotPassword)
     private readonly forgotPasswordRepo: Repository<ForgotPassword>,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
     private mailService: MailerService,
   ) {}
+
+  roundsForSalt = 10;
 
   async signUp(dto: AuthDto) {
     const { password, email } = dto;
@@ -97,14 +101,14 @@ export class AuthService {
     if (user) {
       const userAbout = await this.signUser(user.id, user.email);
 
-      const result = await this.forgotPasswordRepo.save({
+      await this.forgotPasswordRepo.save({
         user: user,
         link: userAbout.token,
       });
 
-      console.log(result);
-
-      const url = `http://localhost:3000/restore-password?token=${userAbout.token}`;
+      const url =
+        this.configService.get<string>('FRONTEND_RESTORE_PASSWORD_URL') +
+        userAbout.token;
 
       const transport = await this.mailService.sendMail({
         to: email,
@@ -113,7 +117,6 @@ export class AuthService {
         html: `<h1>Change password</h1><p>If you want to change password go to:</p><a href="${url}">${url}</a>`,
       });
 
-      console.log(`Email successfully dispatched to ${email}`);
       return transport;
     }
     return false;
@@ -128,7 +131,7 @@ export class AuthService {
         user: true,
       },
     });
-    const salt = genSaltSync(10);
+    const salt = genSaltSync(this.roundsForSalt);
     const updateUser = forgotPassword.user;
     updateUser.password = hashSync(password, salt);
     const createdUser = await this.authRepo.save(updateUser);
