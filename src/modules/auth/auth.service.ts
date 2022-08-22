@@ -96,7 +96,6 @@ export class AuthService {
 
   async forgotPassword({ email }: AuthForgotPasswordDto) {
     const user = await this.authRepo.findOneBy({ email });
-    console.log(user);
 
     if (user) {
       const userAbout = await this.signUser(user.id, user.email);
