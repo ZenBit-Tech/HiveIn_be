@@ -1,6 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
+import { Education } from '../education/entities/education.entity';
+import { Experience } from '../experience/entities/experience.entity';
 import { CreateFreelancerDto } from './dto/create-freelancer.dto';
 import { UpdateFreelancerDto } from './dto/update-freelancer.dto';
 import { Freelancer } from './entities/freelancer.entity';
@@ -10,6 +12,10 @@ export class FreelancerService {
   constructor(
     @InjectRepository(Freelancer)
     private freelancerRepository: Repository<Freelancer>,
+    @InjectRepository(Education)
+    private educationRepository: Repository<Education>,
+    @InjectRepository(Experience)
+    private experienceRepository: Repository<Experience>,
   ) {}
   async create(data: CreateFreelancerDto) {
     const skills = data.skillsIds.map((value) => ({
@@ -63,26 +69,46 @@ export class FreelancerService {
       .getOne();
   }
 
-  async update(id: number, data: UpdateFreelancerDto) {
-    const skills = (data?.skillsIds || []).map((value) => ({
-      id: value,
-    }));
-    if (skills.length < 3) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'Insert at least 3 Skills',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+  async update(id: number, data: UpdateFreelancerDto): Promise<Freelancer> {
+    try {
+      const { educations, experiences, skillsIds, ...rest } = data;
+      const skills = (skillsIds || []).map((value) => ({
+        id: value,
+      }));
+      const education = educations
+        ? educations.map((education) => ({
+            freelancerId: id,
+            ...education,
+          }))
+        : undefined;
+
+      const experience = experiences
+        ? experiences.map((experience) => ({
+            freelancerId: id,
+            ...experience,
+          }))
+        : undefined;
+
+      if (skills.length < 3) {
+        throw new HttpException(
+          {
+            status: HttpStatus.BAD_REQUEST,
+            error: 'Insert at least 3 Skills',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const response = await this.freelancerRepository.save({
+        ...rest,
+        id,
+        skills,
+      });
+      await this.educationRepository.save(education);
+      await this.experienceRepository.save(experience);
+      return response;
+    } catch (error) {
+      throw new HttpException(error.message, error.status);
     }
-    return this.freelancerRepository.save({
-      id,
-      skills,
-      education: data.educations,
-      experience: data.experiences,
-      ...data,
-    });
   }
 
   async remove(id: number) {

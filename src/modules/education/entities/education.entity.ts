@@ -38,6 +38,9 @@ export class Education {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @Column({ default: true })
+  active: boolean;
+
   @ManyToOne(() => Freelancer, (freelancer) => freelancer.education, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

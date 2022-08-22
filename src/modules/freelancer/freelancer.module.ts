@@ -3,9 +3,11 @@ import { FreelancerService } from './freelancer.service';
 import { FreelancerController } from './freelancer.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Freelancer } from './entities/freelancer.entity';
+import { Experience } from '../experience/entities/experience.entity';
+import { Education } from '../education/entities/education.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Freelancer])],
+  imports: [TypeOrmModule.forFeature([Freelancer, Experience, Education])],
   controllers: [FreelancerController],
   providers: [FreelancerService],
 })

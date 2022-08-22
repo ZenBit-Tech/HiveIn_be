@@ -1,4 +1,4 @@
-import { IsDate, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
 
 export class CreateEducationDto {
   @IsString()
@@ -18,6 +18,9 @@ export class CreateEducationDto {
 
   @IsDate()
   endDate: Date;
+
+  @IsBoolean()
+  isActive: boolean;
 
   @IsNumber()
   freelancerId: number;

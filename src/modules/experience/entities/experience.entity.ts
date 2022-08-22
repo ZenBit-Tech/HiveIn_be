@@ -32,6 +32,9 @@ export class Experience {
   @Column()
   endDate: Date;
 
+  @Column({ default: true })
+  active: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 
