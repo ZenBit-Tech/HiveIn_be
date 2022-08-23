@@ -109,14 +109,14 @@ export class AuthService {
         this.configService.get<string>('FRONTEND_RESTORE_PASSWORD_URL') +
         userAbout.token;
 
-      const transport = await this.mailService.sendMail({
+      await this.mailService.sendMail({
         to: email,
         subject: 'GetJob Forgot password',
         from: 'milkav06062003@gmail.com',
         html: `<h1>Change password</h1><p>If you want to change password go to:</p><a href="${url}">${url}</a>`,
       });
 
-      return transport;
+      return true;
     }
     return false;
   }
