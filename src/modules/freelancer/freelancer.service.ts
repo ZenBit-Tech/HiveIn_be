@@ -134,7 +134,7 @@ class FreelancerQueryBuilder {
     this._query = this._query.leftJoinAndSelect(
       'freelancer.education',
       'education',
-      'freelancer.id = education.freelancerId',
+      'freelancer.id = education.freelancerId AND education.active = true',
     );
     return this;
   }
@@ -143,7 +143,7 @@ class FreelancerQueryBuilder {
     this._query = this._query.leftJoinAndSelect(
       'freelancer.experience',
       'experience',
-      'freelancer.id = experience.freelancerId',
+      'freelancer.id = experience.freelancerId AND experience.active = true',
     );
     return this;
   }
