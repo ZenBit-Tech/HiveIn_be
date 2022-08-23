@@ -1,3 +1,4 @@
+import { ClientModule } from './modules/client/client.module';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -9,7 +10,7 @@ import { SettingsInfoModule } from './modules/settings-info/settings-info.module
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule, AuthModule],
+      imports: [ConfigModule, AuthModule, ClientModule],
       useFactory: (configService: ConfigService) => ({
         type: 'mysql',
         host: configService.get<string>('MYSQL_HOST'),
@@ -31,6 +32,7 @@ import { SettingsInfoModule } from './modules/settings-info/settings-info.module
     }),
     ConfigModule.forRoot(),
     AuthModule,
+    ClientModule,
     SettingsInfoModule,
   ],
   controllers: [AppController],

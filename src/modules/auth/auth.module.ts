@@ -1,3 +1,5 @@
+import { Clients } from './../entities/clients.entity';
+import { Freelancers } from './../entities/freelancers.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from '../entities/users.entity';
@@ -11,7 +13,7 @@ import { GoogleOauthModule } from 'src/modules/auth/google-oauth/google-oauth.mo
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forFeature([Users]),
+    TypeOrmModule.forFeature([Users, Freelancers, Clients]),
     JwtModule.register({
       secret: process.env.SECRET_KEY,
       signOptions: { expiresIn: '7200s' },
