@@ -21,7 +21,7 @@ export class Experience {
   description: string;
 
   @Column()
-  employeer: string;
+  employer: string;
 
   @Column()
   jobTitle: string;

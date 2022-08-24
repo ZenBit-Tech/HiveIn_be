@@ -31,6 +31,9 @@ export class Freelancer {
   @Column()
   rate: string;
 
+  @Column()
+  description: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
