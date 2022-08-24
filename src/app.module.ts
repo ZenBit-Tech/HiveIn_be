@@ -10,6 +10,9 @@ import { CategoryModule } from './modules/category/category.module';
 import { SkillModule } from './modules/skill/skill.module';
 import { EducationModule } from './modules/education/education.module';
 import { ExperienceModule } from './modules/experience/experience.module';
+import { AvatarModule } from './modules/avatar/avatar.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -34,7 +37,25 @@ import { ExperienceModule } from './modules/experience/experience.module';
       }),
       inject: [ConfigService],
     }),
-    ConfigModule.forRoot(),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        transport: {
+          host: 'smtp.sendgrid.net',
+          auth: {
+            user: 'apikey',
+            pass: configService.get<string>('SEND_GRID_KEY'),
+          },
+        },
+      }),
+      inject: [ConfigService],
+    }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    MulterModule.register({
+      dest: '/uploads',
+    }),
     AuthModule,
     SettingsInfoModule,
     FreelancerModule,
@@ -42,6 +63,7 @@ import { ExperienceModule } from './modules/experience/experience.module';
     SkillModule,
     EducationModule,
     ExperienceModule,
+    AvatarModule,
   ],
   controllers: [AppController],
   providers: [AppService],

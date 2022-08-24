@@ -1,6 +1,13 @@
 import { IsEmail, IsPhoneNumber, IsString, MaxLength } from 'class-validator';
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToOne,
+  OneToMany,
+} from 'typeorm';
 import { Freelancer } from '../freelancer/entities/freelancer.entity';
+import { ForgotPassword } from './forgot-password.entity';
 
 export enum UserRole {
   CLIENT = 'client',
@@ -49,4 +56,10 @@ export class Users {
 
   @OneToOne(() => Freelancer, (freelancer) => freelancer.user)
   user: Users;
+
+  @OneToMany(
+    () => ForgotPassword,
+    (forgotPassword: ForgotPassword) => forgotPassword.user,
+  )
+  forgotPassword: ForgotPassword[];
 }
