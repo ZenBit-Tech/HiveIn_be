@@ -8,7 +8,7 @@ export class CreateExperienceDto {
   description: string;
 
   @IsString()
-  employeer: string;
+  employer: string;
 
   @IsString()
   jobTitle: string;

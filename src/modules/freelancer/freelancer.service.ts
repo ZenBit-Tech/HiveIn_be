@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
-import { Education } from '../education/entities/education.entity';
-import { Experience } from '../experience/entities/experience.entity';
+import { Education } from './entities/education.entity';
+import { Experience } from './entities/experience.entity';
 import { CreateFreelancerDto } from './dto/create-freelancer.dto';
 import { UpdateFreelancerDto } from './dto/update-freelancer.dto';
 import { Freelancer } from './entities/freelancer.entity';
@@ -34,6 +34,7 @@ export class FreelancerService {
       categoryId: data.categoryId,
       englishLevel: data.englishLevel,
       position: data.position,
+      description: data.description,
       rate: data.rate,
       userId: data.userId,
       skills: skills,

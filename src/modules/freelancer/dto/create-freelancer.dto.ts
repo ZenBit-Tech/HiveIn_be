@@ -1,6 +1,6 @@
 import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
-import { UpdateEducationDto } from 'src/modules/education/dto/update-education.dto';
-import { UpdateExperienceDto } from 'src/modules/experience/dto/update-experience.dto';
+import { UpdateEducationDto } from './update-education.dto';
+import { UpdateExperienceDto } from './update-experience.dto';
 
 export class CreateFreelancerDto {
   @IsNumber()
@@ -12,6 +12,9 @@ export class CreateFreelancerDto {
 
   @IsString()
   position: string;
+
+  @IsString()
+  description: string;
 
   @IsString()
   rate: string;

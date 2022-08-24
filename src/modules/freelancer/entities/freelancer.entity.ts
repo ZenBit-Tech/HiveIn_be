@@ -1,7 +1,7 @@
 import { Users } from 'src/modules/entities/users.entity';
 import { Category } from 'src/modules/category/entities/category.entity';
-import { Education } from 'src/modules/education/entities/education.entity';
-import { Experience } from 'src/modules/experience/entities/experience.entity';
+import { Education } from './education.entity';
+import { Experience } from './experience.entity';
 import { Skill } from 'src/modules/skill/entities/skill.entity';
 import {
   Column,

@@ -1,4 +1,4 @@
-import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
+import { Freelancer } from './freelancer.entity';
 import {
   Column,
   CreateDateColumn,
