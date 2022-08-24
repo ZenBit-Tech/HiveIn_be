@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Education } from './entities/education.entity';
 import { Experience } from './entities/experience.entity';
 import { CreateFreelancerDto } from './dto/create-freelancer.dto';
@@ -17,7 +17,7 @@ export class FreelancerService {
     @InjectRepository(Experience)
     private experienceRepository: Repository<Experience>,
   ) {}
-  async create(data: CreateFreelancerDto) {
+  async create(data: CreateFreelancerDto): Promise<Freelancer> {
     const skills = data.skillsIds.map((value) => ({
       id: value,
     }));
@@ -43,30 +43,48 @@ export class FreelancerService {
     });
   }
 
-  async findAll() {
-    const freelancerQuery = new FreelancerQueryBuilder(
-      this.freelancerRepository,
-    );
-    return freelancerQuery
-      .init()
-      .getCategory()
-      .getEducation()
-      .getExperience()
-      .getSkills()
-      .query.getMany();
+  async findAll(): Promise<Freelancer[]> {
+    return this.freelancerRepository
+      .createQueryBuilder('freelancer')
+      .leftJoinAndSelect(
+        'freelancer.education',
+        'education',
+        'freelancer.id = education.freelancerId AND education.active = true',
+      )
+      .leftJoinAndSelect(
+        'freelancer.experience',
+        'experience',
+        'freelancer.id = experience.freelancerId AND experience.active = true',
+      )
+      .leftJoinAndSelect(
+        'freelancer.category',
+        'category',
+        'freelancer.categoryId = category.id',
+      )
+      .leftJoinAndSelect('freelancer.skills', 'skill')
+      .getMany();
   }
 
-  findOneByUserId(id: number) {
-    const freelancerQuery = new FreelancerQueryBuilder(
-      this.freelancerRepository,
-    );
-    return freelancerQuery
-      .init()
-      .getCategory()
-      .getEducation()
-      .getExperience()
-      .getSkills()
-      .query.where(`freelancer.userId = ${id}`)
+  findOneByUserId(id: number): Promise<Freelancer> {
+    return this.freelancerRepository
+      .createQueryBuilder('freelancer')
+      .leftJoinAndSelect(
+        'freelancer.education',
+        'education',
+        'freelancer.id = education.freelancerId AND education.active = true',
+      )
+      .leftJoinAndSelect(
+        'freelancer.experience',
+        'experience',
+        'freelancer.id = experience.freelancerId AND experience.active = true',
+      )
+      .leftJoinAndSelect(
+        'freelancer.category',
+        'category',
+        'freelancer.categoryId = category.id',
+      )
+      .leftJoinAndSelect('freelancer.skills', 'skill')
+      .where(`freelancer.userId = ${id}`)
       .getOne();
   }
 
@@ -112,54 +130,7 @@ export class FreelancerService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<void> {
     await this.freelancerRepository.delete(id);
-  }
-}
-
-class FreelancerQueryBuilder {
-  private _query: SelectQueryBuilder<Freelancer>;
-
-  constructor(private freelancerRepository: Repository<Freelancer>) {}
-
-  get query(): SelectQueryBuilder<Freelancer> {
-    return this._query;
-  }
-
-  init(): FreelancerQueryBuilder {
-    this._query = this.freelancerRepository.createQueryBuilder('freelancer');
-    return this;
-  }
-
-  getEducation(): FreelancerQueryBuilder {
-    this._query = this._query.leftJoinAndSelect(
-      'freelancer.education',
-      'education',
-      'freelancer.id = education.freelancerId AND education.active = true',
-    );
-    return this;
-  }
-
-  getExperience(): FreelancerQueryBuilder {
-    this._query = this._query.leftJoinAndSelect(
-      'freelancer.experience',
-      'experience',
-      'freelancer.id = experience.freelancerId AND experience.active = true',
-    );
-    return this;
-  }
-
-  getCategory(): FreelancerQueryBuilder {
-    this._query = this._query.leftJoinAndSelect(
-      'freelancer.category',
-      'category',
-      'freelancer.categoryId = category.id',
-    );
-    return this;
-  }
-
-  getSkills(): FreelancerQueryBuilder {
-    this._query = this._query.leftJoinAndSelect('freelancer.skills', 'skill');
-    return this;
   }
 }
