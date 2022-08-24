@@ -121,16 +121,16 @@ class FreelancerQueryBuilder {
 
   constructor(private freelancerRepository: Repository<Freelancer>) {}
 
-  get query() {
+  get query(): SelectQueryBuilder<Freelancer> {
     return this._query;
   }
 
-  init() {
+  init(): FreelancerQueryBuilder {
     this._query = this.freelancerRepository.createQueryBuilder('freelancer');
     return this;
   }
 
-  getEducation() {
+  getEducation(): FreelancerQueryBuilder {
     this._query = this._query.leftJoinAndSelect(
       'freelancer.education',
       'education',
@@ -139,7 +139,7 @@ class FreelancerQueryBuilder {
     return this;
   }
 
-  getExperience() {
+  getExperience(): FreelancerQueryBuilder {
     this._query = this._query.leftJoinAndSelect(
       'freelancer.experience',
       'experience',
@@ -148,7 +148,7 @@ class FreelancerQueryBuilder {
     return this;
   }
 
-  getCategory() {
+  getCategory(): FreelancerQueryBuilder {
     this._query = this._query.leftJoinAndSelect(
       'freelancer.category',
       'category',
@@ -157,7 +157,7 @@ class FreelancerQueryBuilder {
     return this;
   }
 
-  getSkills() {
+  getSkills(): FreelancerQueryBuilder {
     this._query = this._query.leftJoinAndSelect('freelancer.skills', 'skill');
     return this;
   }

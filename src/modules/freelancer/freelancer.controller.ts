@@ -17,7 +17,9 @@ export class FreelancerController {
   constructor(private readonly freelancerService: FreelancerService) {}
 
   @Post()
-  create(@Body() createFreelancerDto: CreateFreelancerDto) {
+  create(
+    @Body() createFreelancerDto: CreateFreelancerDto,
+  ): Promise<Freelancer> {
     return this.freelancerService.create(createFreelancerDto);
   }
 
@@ -35,12 +37,12 @@ export class FreelancerController {
   update(
     @Param('id') id: string,
     @Body() updateFreelancerDto: UpdateFreelancerDto,
-  ) {
+  ): Promise<Freelancer> {
     return this.freelancerService.update(+id, updateFreelancerDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string): Promise<void> {
     return this.freelancerService.remove(+id);
   }
 }
