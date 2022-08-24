@@ -8,8 +8,6 @@ import { SettingsInfoModule } from './modules/settings-info/settings-info.module
 import { FreelancerModule } from './modules/freelancer/freelancer.module';
 import { CategoryModule } from './modules/category/category.module';
 import { SkillModule } from './modules/skill/skill.module';
-import { EducationModule } from './modules/education/education.module';
-import { ExperienceModule } from './modules/experience/experience.module';
 import { AvatarModule } from './modules/avatar/avatar.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { MailerModule } from '@nestjs-modules/mailer';
@@ -61,8 +59,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
     FreelancerModule,
     CategoryModule,
     SkillModule,
-    EducationModule,
-    ExperienceModule,
     AvatarModule,
   ],
   controllers: [AppController],

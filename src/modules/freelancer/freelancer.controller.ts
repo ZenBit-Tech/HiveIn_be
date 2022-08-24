@@ -10,6 +10,7 @@ import {
 import { FreelancerService } from './freelancer.service';
 import { CreateFreelancerDto } from './dto/create-freelancer.dto';
 import { UpdateFreelancerDto } from './dto/update-freelancer.dto';
+import { Freelancer } from './entities/freelancer.entity';
 
 @Controller('freelancer')
 export class FreelancerController {
@@ -21,12 +22,12 @@ export class FreelancerController {
   }
 
   @Get()
-  findAll() {
+  findAll(): Promise<Freelancer[]> {
     return this.freelancerService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string): Promise<Freelancer> {
     return this.freelancerService.findOneByUserId(+id);
   }
 

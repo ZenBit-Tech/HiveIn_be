@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { Category } from './entities/category.entity';
 
 @Controller('category')
 export class CategoryController {
@@ -12,7 +13,7 @@ export class CategoryController {
   }
 
   @Get()
-  findAll() {
+  findAll(): Promise<Category[]> {
     return this.categoryService.findAll();
   }
 }
