@@ -81,7 +81,6 @@ export class AuthService {
         email,
       }),
       email,
-      id,
       role,
     };
   }

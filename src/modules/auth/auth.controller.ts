@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { AuthDto } from './dto/auth.dto';
 import { AuthService } from './auth.service';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { AuthForgotPasswordDto } from './dto/auth-forgot-password.dto';
 import { ConfigService } from '@nestjs/config';
 import * as SendGrid from '@sendgrid/mail';
@@ -25,7 +25,7 @@ export class AuthController {
     SendGrid.setApiKey(this.configService.get<string>('SEND_GRID_KEY'));
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @HttpCode(200)
   @Get('private')
   privateRoute(@Request() req) {

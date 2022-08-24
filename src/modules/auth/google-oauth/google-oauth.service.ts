@@ -46,7 +46,6 @@ export class GoogleOauthService {
         email,
       }),
       email,
-      id,
       role,
     };
   }
