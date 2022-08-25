@@ -5,6 +5,9 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { SettingsInfoModule } from './modules/settings-info/settings-info.module';
+import { FreelancerModule } from './modules/freelancer/freelancer.module';
+import { CategoryModule } from './modules/category/category.module';
+import { SkillModule } from './modules/skill/skill.module';
 import { AvatarModule } from './modules/avatar/avatar.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { MailerModule } from '@nestjs-modules/mailer';
@@ -53,6 +56,9 @@ import { MailerModule } from '@nestjs-modules/mailer';
     }),
     AuthModule,
     SettingsInfoModule,
+    FreelancerModule,
+    CategoryModule,
+    SkillModule,
     AvatarModule,
   ],
   controllers: [AppController],
