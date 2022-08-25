@@ -5,6 +5,9 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { SettingsInfoModule } from './modules/settings-info/settings-info.module';
+import { AvatarModule } from './modules/avatar/avatar.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { MailerModule } from '@nestjs-modules/mailer';
 import { JobPostModule } from './modules/job-post/job-post.module';
 
 @Module({
@@ -30,10 +33,29 @@ import { JobPostModule } from './modules/job-post/job-post.module';
       }),
       inject: [ConfigService],
     }),
-    ConfigModule.forRoot(),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        transport: {
+          host: 'smtp.sendgrid.net',
+          auth: {
+            user: 'apikey',
+            pass: configService.get<string>('SEND_GRID_KEY'),
+          },
+        },
+      }),
+      inject: [ConfigService],
+    }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    MulterModule.register({
+      dest: '/uploads',
+    }),
     AuthModule,
     SettingsInfoModule,
     JobPostModule,
+    AvatarModule,
   ],
   controllers: [AppController],
   providers: [AppService],
