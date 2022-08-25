@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { SettingsInfoModule } from './modules/settings-info/settings-info.module';
+import { JobPostModule } from './modules/job-post/job-post.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { SettingsInfoModule } from './modules/settings-info/settings-info.module
     ConfigModule.forRoot(),
     AuthModule,
     SettingsInfoModule,
+    JobPostModule,
   ],
   controllers: [AppController],
   providers: [AppService],
