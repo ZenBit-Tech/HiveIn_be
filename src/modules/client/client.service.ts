@@ -1,4 +1,3 @@
-import { Freelancers } from './../entities/freelancers.entity';
 import { Clients } from './../entities/clients.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
