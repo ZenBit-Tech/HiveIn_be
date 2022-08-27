@@ -22,10 +22,9 @@ export enum EnglishLevel {
 
 @Entity()
 export class JobPost {
-  @PrimaryGeneratedColumn({
-    name: 'id',
-  })
+  @PrimaryGeneratedColumn()
   id: number;
+
   @Column()
   title: string;
 
@@ -39,7 +38,7 @@ export class JobPost {
   })
   durationType: DurationType;
 
-  @ManyToOne(() => Category, { cascade: true })
+  @ManyToOne(() => Category, (category) => category.id, { cascade: true })
   @JoinColumn()
   category: Category;
 
@@ -49,7 +48,11 @@ export class JobPost {
   @ManyToMany(() => Skills, (skills) => skills.jobPost, {
     cascade: true,
   })
-  @JoinTable()
+  @JoinTable({
+    name: 'job_posts_skills',
+    joinColumn: { name: 'job_post_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'skill_id', referencedColumnName: 'id' },
+  })
   skills: Skills[];
 
   @Column({

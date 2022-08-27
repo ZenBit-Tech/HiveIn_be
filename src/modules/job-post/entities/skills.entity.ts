@@ -3,12 +3,10 @@ import { JobPost } from './job-post.entity';
 
 @Entity()
 export class Skills {
-  @PrimaryGeneratedColumn({
-    name: 'id',
-  })
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   name: string;
 
   @ManyToMany(() => JobPost)

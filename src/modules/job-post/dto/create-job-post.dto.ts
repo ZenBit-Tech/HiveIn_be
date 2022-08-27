@@ -1,6 +1,15 @@
 import { DurationType, EnglishLevel } from '../entities/job-post.entity';
 import { Skills } from '../entities/skills.entity';
-import { IsArray, IsEnum, IsNumber, IsString } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsNumber,
+  IsString,
+} from 'class-validator';
+import { Category } from '../entities/category.entity';
+import { Type } from 'class-transformer';
 
 export class CreateJobPostDto {
   @IsString()
@@ -12,14 +21,16 @@ export class CreateJobPostDto {
   @IsEnum(DurationType)
   readonly durationType: DurationType;
 
-  @IsString()
-  readonly categoryId: number;
+  @IsInt()
+  @Type(() => Number)
+  readonly categoryId: Category;
 
   @IsNumber()
   readonly rate: number;
 
   @IsArray()
-  readonly skills: Skills[];
+  @ArrayMinSize(3)
+  readonly skillsId: number[];
 
   @IsEnum(EnglishLevel)
   readonly englishLevel: EnglishLevel;

@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { JobPost } from './job-post.entity';
 
 @Entity()
@@ -14,10 +8,9 @@ export class Category {
   })
   id: number;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  @OneToMany(() => JobPost, (jobPost) => jobPost.category)
-  @JoinColumn()
-  jobPost: JobPost;
+  @OneToMany(() => JobPost, (jobPost) => jobPost.id)
+  jobPost: JobPost[];
 }
