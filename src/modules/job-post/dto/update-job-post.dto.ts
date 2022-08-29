@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class UpdateJobPostDto {
   @IsString()
@@ -6,6 +6,9 @@ export class UpdateJobPostDto {
 
   @IsNumber()
   readonly rate: number;
+
+  @IsBoolean()
+  isDraft: boolean;
 
   @IsNumber()
   userId: number;

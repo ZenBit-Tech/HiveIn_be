@@ -5,6 +5,7 @@ import {
 import {
   ArrayMinSize,
   IsArray,
+  IsBoolean,
   IsEnum,
   IsInt,
   IsNumber,
@@ -42,4 +43,7 @@ export class CreateJobPostDto {
 
   @IsNumber()
   userId: number;
+
+  @IsBoolean()
+  isDraft: boolean;
 }

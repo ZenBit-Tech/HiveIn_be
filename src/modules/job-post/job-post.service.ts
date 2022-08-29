@@ -20,6 +20,7 @@ export class JobPostService {
       jobDescription: createJobPostDto.jobDescription,
       rate: createJobPostDto.rate,
       englishLevel: createJobPostDto.englishLevel,
+      isDraft: createJobPostDto.isDraft,
       skills: createJobPostDto.skillsId.map((value) => ({
         id: value,
       })),
@@ -41,6 +42,7 @@ export class JobPostService {
       {
         jobDescription: updateJobPostDto.jobDescription,
         rate: updateJobPostDto.rate,
+        isDraft: updateJobPostDto.isDraft,
       },
     );
   }

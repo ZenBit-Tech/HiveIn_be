@@ -58,6 +58,9 @@ export class JobPost {
   @JoinTable()
   skills: Skill[];
 
+  @Column()
+  isDraft: boolean;
+
   @Column({
     type: 'enum',
     enum: EnglishLevel,
