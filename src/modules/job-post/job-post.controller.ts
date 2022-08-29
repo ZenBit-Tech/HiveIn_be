@@ -6,12 +6,16 @@ import {
   Param,
   Patch,
   Post,
+  Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { JobPostService } from './job-post.service';
 import { CreateJobPostDto } from './dto/create-job-post.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UpdateJobPostDto } from './dto/update-job-post.dto';
+import LocalFilesInterceptor from '../../interceptors/localFiles.interceptor';
 
 @Controller('job-post')
 export class JobPostController {
@@ -52,4 +56,20 @@ export class JobPostController {
   remove(@Param('id') id: string) {
     return this.jobPostService.remove(+id);
   }
+
+  /*@Post('avatar')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    LocalFilesInterceptor({
+      fieldName: 'file',
+      path: '/avatars',
+    }),
+  )
+  async addAvatar(@UploadedFile() file: Express.Multer.File) {
+    return this.jobPostService.addFile(request.user.id, {
+      path: file.path,
+      filename: file.originalname,
+      mimetype: file.mimetype,
+    });
+  }*/
 }
