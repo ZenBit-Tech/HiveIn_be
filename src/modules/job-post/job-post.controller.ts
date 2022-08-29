@@ -57,19 +57,23 @@ export class JobPostController {
     return this.jobPostService.remove(+id);
   }
 
-  /*@Post('avatar')
-  @UseGuards(JwtAuthGuard)
+  @Post('file/:id/:userId')
+  //@UseGuards(JwtAuthGuard)
   @UseInterceptors(
     LocalFilesInterceptor({
       fieldName: 'file',
-      path: '/avatars',
+      path: '/files',
     }),
   )
-  async addAvatar(@UploadedFile() file: Express.Multer.File) {
-    return this.jobPostService.addFile(request.user.id, {
+  async addFile(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.jobPostService.addFile(+userId, +id, {
       path: file.path,
       filename: file.originalname,
       mimetype: file.mimetype,
     });
-  }*/
+  }
 }

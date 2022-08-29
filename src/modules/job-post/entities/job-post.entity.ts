@@ -6,12 +6,14 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Category } from '../../category/entities/category.entity';
 import { Skill } from '../../skill/entities/skill.entity';
 import { Users } from '../../entities/users.entity';
+import { LocalFile } from '../../entities/localFile.entity';
 
 export enum DurationType {
   WEEK = 'week',
@@ -48,6 +50,15 @@ export class JobPost {
   @ManyToOne(() => Users, (user) => user.id, { cascade: true })
   @JoinColumn()
   user: Users;
+
+  @JoinColumn({ name: 'fileId' })
+  @OneToOne(() => LocalFile, {
+    nullable: true,
+  })
+  file?: LocalFile;
+
+  @Column({ nullable: true })
+  fileId?: number;
 
   @Column()
   rate: number;

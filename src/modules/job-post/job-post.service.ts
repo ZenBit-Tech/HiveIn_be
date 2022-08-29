@@ -4,12 +4,15 @@ import { JobPost } from './entities/job-post.entity';
 import { CreateJobPostDto } from './dto/create-job-post.dto';
 import { Repository } from 'typeorm';
 import { UpdateJobPostDto } from './dto/update-job-post.dto';
+import { LocalFilesService } from './localFiles.service';
+import { LocalFileDto } from './dto/localFile.dto';
 
 @Injectable()
 export class JobPostService {
   constructor(
     @InjectRepository(JobPost)
     private readonly jobPostRepository: Repository<JobPost>,
+    private localFilesService: LocalFilesService,
   ) {}
 
   async create(createJobPostDto: CreateJobPostDto) {
@@ -77,5 +80,15 @@ export class JobPostService {
 
   async remove(id: number) {
     return await this.jobPostRepository.delete(id);
+  }
+
+  async addFile(userId: number, id: number, fileData: LocalFileDto) {
+    const file = await this.localFilesService.saveLocalFileData(fileData);
+    await this.jobPostRepository.update(
+      { user: { id: userId }, id: id },
+      {
+        fileId: file.id,
+      },
+    );
   }
 }
