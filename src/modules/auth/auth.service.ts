@@ -79,7 +79,6 @@ export class AuthService {
       token: this.jwtService.sign({
         sub: id,
         email,
-        role,
       }),
       email,
       role,
