@@ -23,8 +23,8 @@ export class ClientController {
 
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
-  @Get('find')
-  find(@Body() candidateFilterDto: CandidateFilterDto) {
+  @Get('filter')
+  filter(@Body() candidateFilterDto: CandidateFilterDto) {
     return this.clientService.filterCandidate(candidateFilterDto);
   }
 }
