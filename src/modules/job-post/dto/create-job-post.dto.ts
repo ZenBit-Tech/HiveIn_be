@@ -1,5 +1,4 @@
 import { DurationType, EnglishLevel } from '../entities/job-post.entity';
-import { Skills } from '../entities/skills.entity';
 import {
   ArrayMinSize,
   IsArray,
@@ -8,8 +7,8 @@ import {
   IsNumber,
   IsString,
 } from 'class-validator';
-import { Category } from '../entities/category.entity';
 import { Type } from 'class-transformer';
+import { Category } from '../../category/entities/category.entity';
 
 export class CreateJobPostDto {
   @IsString()
@@ -37,4 +36,7 @@ export class CreateJobPostDto {
 
   @IsString()
   readonly jobDescription: string;
+
+  @IsNumber()
+  userId: number;
 }

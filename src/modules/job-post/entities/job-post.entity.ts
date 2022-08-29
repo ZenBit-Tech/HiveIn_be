@@ -1,14 +1,17 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { Category } from './category.entity';
-import { Skills } from './skills.entity';
+import { Category } from '../../category/entities/category.entity';
+import { Skill } from '../../skill/entities/skill.entity';
+import { Users } from '../../entities/users.entity';
 
 export enum DurationType {
   WEEK = 'week',
@@ -42,18 +45,18 @@ export class JobPost {
   @JoinColumn()
   category: Category;
 
+  @ManyToOne(() => Users, (user) => user.id, { cascade: true })
+  @JoinColumn()
+  user: Users;
+
   @Column()
   rate: number;
 
-  @ManyToMany(() => Skills, (skills) => skills.jobPost, {
+  @ManyToMany(() => Skill, (skills) => skills.jobPosts, {
     cascade: true,
   })
-  @JoinTable({
-    name: 'job_posts_skills',
-    joinColumn: { name: 'job_post_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'skill_id', referencedColumnName: 'id' },
-  })
-  skills: Skills[];
+  @JoinTable()
+  skills: Skill[];
 
   @Column({
     type: 'enum',
@@ -64,4 +67,10 @@ export class JobPost {
 
   @Column({ type: 'text' })
   jobDescription: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
