@@ -1,5 +1,5 @@
+import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { Clients } from './../entities/clients.entity';
-import { Freelancers } from './../entities/freelancers.entity';
 import { ForgotPassword } from '../entities/forgot-password.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -14,7 +14,7 @@ import { GoogleOauthModule } from 'src/modules/auth/google-oauth/google-oauth.mo
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forFeature([Users, ForgotPassword, Freelancers, Clients]),
+    TypeOrmModule.forFeature([Users, ForgotPassword, Freelancer, Clients]),
     JwtModule.register({
       secret: process.env.SECRET_KEY,
       signOptions: { expiresIn: '7200s' },

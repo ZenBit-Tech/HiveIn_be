@@ -9,7 +9,6 @@ import {
 import { Freelancer } from '../freelancer/entities/freelancer.entity';
 import { ForgotPassword } from './forgot-password.entity';
 import { Clients } from './clients.entity';
-import { Freelancers } from './freelancers.entity';
 
 export enum UserRole {
   CLIENT = 'client',
@@ -65,8 +64,8 @@ export class Users {
   )
   forgotPassword: ForgotPassword[];
 
-  @OneToOne(() => Freelancers, (freelancer) => freelancer.user)
-  freelancer: Freelancers;
+  @OneToOne(() => Freelancer, (freelancer) => freelancer.user)
+  freelancer: Freelancer;
 
   @OneToOne(() => Clients, (client) => client.user)
   client: Clients;

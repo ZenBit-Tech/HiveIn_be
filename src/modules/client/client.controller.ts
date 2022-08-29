@@ -1,6 +1,14 @@
 import { ClientService } from './client.service';
-import { Controller, Get, HttpCode, UseGuards, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  UseGuards,
+  Param,
+  Body,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { CandidateFilterDto } from './dto/candidate-filter.dto';
 
 @Controller('client')
 export class ClientController {
@@ -11,5 +19,12 @@ export class ClientController {
   @Get('recently-viewed/:id')
   recentlyViewed(@Param('id') id: string) {
     return this.clientService.recentlyViewed(+id);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(200)
+  @Get('find')
+  find(@Body() candidateFilterDto: CandidateFilterDto) {
+    return this.clientService.filterCandidate(candidateFilterDto);
   }
 }

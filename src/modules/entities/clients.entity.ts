@@ -6,7 +6,7 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import { Freelancers } from './freelancers.entity';
+import { Freelancer } from '../freelancer/entities/freelancer.entity';
 import { Users } from './users.entity';
 
 @Entity()
@@ -20,7 +20,7 @@ export class Clients {
   @JoinColumn({ name: 'userId' })
   user: Users;
 
-  @ManyToMany(() => Freelancers)
+  @ManyToMany(() => Freelancer)
   @JoinTable()
-  recentlyViewedFreelancers: Freelancers[];
+  recentlyViewedFreelancers: Freelancer[];
 }
