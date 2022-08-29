@@ -29,23 +29,20 @@ export class JobPostService {
   }
 
   async update(id: number, updateJobPostDto: UpdateJobPostDto) {
-    debugger;
     const jobPost = await this.jobPostRepository.findOne({
       where: { id: id, user: { id: updateJobPostDto.userId } },
       relations: ['category', 'skills', 'user'],
     });
     if (!jobPost) {
-      debugger;
       throw new HttpException('job post not found', 404);
-    } else {
-      return await this.jobPostRepository.update(
-        { user: { id: updateJobPostDto.userId }, id: id },
-        {
-          jobDescription: updateJobPostDto.jobDescription,
-          rate: updateJobPostDto.rate,
-        },
-      );
     }
+    return await this.jobPostRepository.update(
+      { user: { id: updateJobPostDto.userId }, id: id },
+      {
+        jobDescription: updateJobPostDto.jobDescription,
+        rate: updateJobPostDto.rate,
+      },
+    );
   }
 
   async findAll() {

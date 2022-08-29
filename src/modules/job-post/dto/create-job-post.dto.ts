@@ -1,4 +1,7 @@
-import { DurationType, EnglishLevel } from '../entities/job-post.entity';
+import {
+  DurationType,
+  EnglishLevel,
+} from 'src/modules/job-post/entities/job-post.entity';
 import {
   ArrayMinSize,
   IsArray,
@@ -8,7 +11,7 @@ import {
   IsString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Category } from '../../category/entities/category.entity';
+import { Category } from 'src/modules/category/entities/category.entity';
 
 export class CreateJobPostDto {
   @IsString()

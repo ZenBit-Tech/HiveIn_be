@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { JobPost } from '../../job-post/entities/job-post.entity';
+import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
 
 @Entity()
 export class Skill {
