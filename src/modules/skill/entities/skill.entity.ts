@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
 
 @Entity()
 export class Skill {
@@ -24,4 +25,7 @@ export class Skill {
 
   @ManyToMany(() => Freelancer)
   freelancers: Freelancer[];
+
+  @ManyToMany(() => Freelancer)
+  jobPosts: JobPost[];
 }

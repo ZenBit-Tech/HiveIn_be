@@ -18,6 +18,7 @@ export class AvatarController {
   @Post('upload')
   @UseInterceptors(FileInterceptor('avatar', multerOptions))
   photoUpload(@UploadedFile() file: Express.Multer.File) {
+    /*TODO replace with __dirname*/
     return `${avatarLink}/${file.filename}`;
   }
 
