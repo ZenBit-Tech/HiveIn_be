@@ -63,7 +63,7 @@ export class JobPostService {
   async findOne(id: number) {
     return await this.jobPostRepository.findOne({
       where: { id: id },
-      relations: ['category', 'skills', 'users'],
+      relations: ['category', 'skills', 'user'],
     });
   }
 
