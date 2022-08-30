@@ -38,7 +38,6 @@ export class FreelancerService {
       categoryId: data.categoryId,
       englishLevel: data.englishLevel,
       position: data.position,
-      description: data.description,
       rate: data.rate,
       userId: data.userId,
       skills: skills,
