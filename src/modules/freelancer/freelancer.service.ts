@@ -6,6 +6,7 @@ import { Experience } from './entities/experience.entity';
 import { CreateFreelancerDto } from './dto/create-freelancer.dto';
 import { UpdateFreelancerDto } from './dto/update-freelancer.dto';
 import { Freelancer } from './entities/freelancer.entity';
+import { Users } from '../entities/users.entity';
 
 @Injectable()
 export class FreelancerService {
@@ -16,7 +17,10 @@ export class FreelancerService {
     private educationRepository: Repository<Education>,
     @InjectRepository(Experience)
     private experienceRepository: Repository<Experience>,
+    @InjectRepository(Users)
+    private readonly usersRepository: Repository<Users>,
   ) {}
+
   async create(data: CreateFreelancerDto): Promise<Freelancer> {
     const skills = data.skillsIds.map((value) => ({
       id: value,
@@ -34,12 +38,12 @@ export class FreelancerService {
       categoryId: data.categoryId,
       englishLevel: data.englishLevel,
       position: data.position,
-      description: data.description,
       rate: data.rate,
       userId: data.userId,
       skills: skills,
       experience: data.experiences,
       education: data.educations,
+      user: data.user,
     });
   }
 
@@ -62,6 +66,7 @@ export class FreelancerService {
         'freelancer.categoryId = category.id',
       )
       .leftJoinAndSelect('freelancer.skills', 'skill')
+      .leftJoinAndSelect('freelancer.user', 'user')
       .getMany();
   }
 
@@ -84,13 +89,14 @@ export class FreelancerService {
         'freelancer.categoryId = category.id',
       )
       .leftJoinAndSelect('freelancer.skills', 'skill')
+      .leftJoinAndSelect('freelancer.user', 'user')
       .where(`freelancer.userId = ${id}`)
       .getOne();
   }
 
   async update(id: number, data: UpdateFreelancerDto): Promise<Freelancer> {
     try {
-      const { educations, experiences, skillsIds, ...rest } = data;
+      const { educations, experiences, skillsIds, user, ...rest } = data;
       const skills = (skillsIds || []).map((value) => ({
         id: value,
       }));
@@ -121,9 +127,11 @@ export class FreelancerService {
         ...rest,
         id,
         skills,
+        user,
       });
       await this.educationRepository.save(education);
       await this.experienceRepository.save(experience);
+      await this.usersRepository.save(user);
       return response;
     } catch (error) {
       throw new HttpException(error.message, error.status);
