@@ -128,6 +128,7 @@ export class FreelancerService {
         ...rest,
         id,
         skills,
+        user,
       });
       await this.educationRepository.save(education);
       await this.experienceRepository.save(experience);
