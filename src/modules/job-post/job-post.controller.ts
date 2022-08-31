@@ -52,4 +52,16 @@ export class JobPostController {
   remove(@Param('id') id: string) {
     return this.jobPostService.remove(+id);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('home/:id/:isDraft')
+  getClientHomePostsAndDrafts(
+    @Param('id') id: number,
+    @Param('isDraft') isDraft?: string,
+  ) {
+    return this.jobPostService.getClientHomePostAndDrafts(
+      id,
+      isDraft === 'true' ? true : false,
+    );
+  }
 }

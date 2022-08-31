@@ -74,6 +74,21 @@ export class JobPostService {
     });
   }
 
+  async getClientHomePostAndDrafts(userId: number, isDraft: boolean) {
+    return await this.jobPostRepository.find({
+      where: {
+        user: {
+          id: userId,
+        },
+        isDraft,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+      take: 2,
+    });
+  }
+
   async remove(id: number) {
     return await this.jobPostRepository.delete(id);
   }
