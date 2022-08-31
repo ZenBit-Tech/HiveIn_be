@@ -2,9 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRole, Users } from 'src/modules/entities/users.entity';
 import { Repository } from 'typeorm';
-import { CreateSettingsInfoDto } from './dto/create-settings-info.dto';
-import { UpdateSettingsInfoDto } from './dto/update-settings-info.dto';
-import { Freelancer } from '../freelancer/entities/freelancer.entity';
+import { CreateSettingsInfoDto } from 'src/modules/settings-info/dto/create-settings-info.dto';
+import { UpdateSettingsInfoDto } from 'src/modules/settings-info/dto/update-settings-info.dto';
+import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 
 @Injectable()
 export class SettingsInfoService {
