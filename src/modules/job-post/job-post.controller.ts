@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -6,7 +7,7 @@ import {
   Param,
   Patch,
   Post,
-  Req,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -15,11 +16,21 @@ import { JobPostService } from './job-post.service';
 import { CreateJobPostDto } from './dto/create-job-post.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UpdateJobPostDto } from './dto/update-job-post.dto';
-import LocalFilesInterceptor from '../../interceptors/localFiles.interceptor';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiFile } from 'src/common/decorators/swagger-api-file.decorator';
+import { LocalFilesService } from './localFiles.service';
+import type { Response } from 'express';
+import { JobPost } from './entities/job-post.entity';
 
+@ApiTags('JobPost')
 @Controller('job-post')
 export class JobPostController {
-  constructor(private readonly jobPostService: JobPostService) {}
+  constructor(
+    private readonly jobPostService: JobPostService,
+    private readonly localFilesService: LocalFilesService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -35,7 +46,7 @@ export class JobPostController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
+  findAll(): Promise<JobPost[]> {
     return this.jobPostService.findAll();
   }
 
@@ -57,23 +68,43 @@ export class JobPostController {
     return this.jobPostService.remove(+id);
   }
 
-  @Post('file/:id/:userId')
-  //@UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Upload file' })
+  @ApiConsumes('multipart/form-data')
+  @ApiFile()
+  @Post('file/:userId/:postId')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(
-    LocalFilesInterceptor({
-      fieldName: 'file',
-      path: '/files',
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploadedFiles/files',
+      }),
     }),
   )
   async addFile(
-    @Param('id') id: string,
     @Param('userId') userId: string,
+    @Param('postId') postId: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.jobPostService.addFile(+userId, +id, {
+    if (!file) {
+      throw new BadRequestException('Please provide file');
+    }
+    return this.jobPostService.addFile(+userId, +postId, {
       path: file.path,
       filename: file.originalname,
       mimetype: file.mimetype,
     });
+  }
+
+  @Get('/file/:id')
+  async getFile(
+    @Param('id') id: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { file, filename } = await this.localFilesService.sendFile(+id);
+    res.set({
+      'Content-Type': 'multipart/form-data',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+    });
+    return file;
   }
 }

@@ -10,10 +10,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Category } from '../../category/entities/category.entity';
-import { Skill } from '../../skill/entities/skill.entity';
-import { Users } from '../../entities/users.entity';
-import { LocalFile } from '../../entities/localFile.entity';
+import { Category } from 'src/modules/category/entities/category.entity';
+import { Skill } from 'src/modules/skill/entities/skill.entity';
+import { Users } from 'src/modules/entities/users.entity';
+import { LocalFile } from 'src/modules/entities/localFile.entity';
 
 export enum DurationType {
   WEEK = 'week',

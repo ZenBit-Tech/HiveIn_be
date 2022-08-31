@@ -67,7 +67,7 @@ export class JobPostService {
   async findOne(id: number) {
     return await this.jobPostRepository.findOne({
       where: { id: id },
-      relations: ['category', 'skills', 'users'],
+      relations: ['category', 'skills', 'user'],
     });
   }
 
@@ -79,12 +79,20 @@ export class JobPostService {
   }
 
   async remove(id: number) {
-    return await this.jobPostRepository.delete(id);
+    const jobPost = await this.findOne(id);
+    if (!jobPost) {
+      throw new HttpException('Job post not found', 404);
+    }
+    const status = await this.jobPostRepository.delete({ id: id });
+    if (jobPost.fileId) {
+      await this.localFilesService.deleteFile(jobPost.fileId);
+    }
+    return status;
   }
 
   async addFile(userId: number, id: number, fileData: LocalFileDto) {
     const file = await this.localFilesService.saveLocalFileData(fileData);
-    await this.jobPostRepository.update(
+    return await this.jobPostRepository.update(
       { user: { id: userId }, id: id },
       {
         fileId: file.id,
