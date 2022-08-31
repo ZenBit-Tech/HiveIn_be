@@ -77,4 +77,23 @@ export class ClientService {
 
     return result;
   }
+
+  async view(userId: number, freelancerId: number) {
+    const clientId = await this.getClientIdByUserId(userId);
+
+    const freelancer = await this.freelancersRepo.findOneBy({
+      id: freelancerId,
+    });
+
+    const client = await this.clientsRepo
+      .createQueryBuilder('client')
+      .leftJoinAndSelect('client.recentlyViewedFreelancers', 'freelancer')
+      .where({ id: clientId })
+      .getOne();
+
+    client.recentlyViewedFreelancers.push(freelancer);
+
+    this.clientsRepo.save(client);
+    return client.recentlyViewedFreelancers;
+  }
 }
