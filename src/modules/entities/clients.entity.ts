@@ -23,4 +23,8 @@ export class Clients {
   @ManyToMany(() => Freelancer)
   @JoinTable()
   recentlyViewedFreelancers: Freelancer[];
+
+  @ManyToMany(() => Freelancer)
+  @JoinTable()
+  savedFreelancers: Freelancer[];
 }

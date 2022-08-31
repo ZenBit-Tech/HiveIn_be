@@ -19,27 +19,45 @@ export class ClientController {
 
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
-  @Get('recently-viewed/:id')
-  recentlyViewed(@Param('id') userId: number): Promise<Freelancer[]> {
-    return this.clientService.recentlyViewed(userId);
+  @Get('filter/:id')
+  filter(
+    @Param('id') userId: number,
+    @Body() candidateFilterDto: CandidateFilterDto,
+  ): Promise<Freelancer[]> {
+    return this.clientService.filterCandidate(userId, candidateFilterDto);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
-  @Get('filter')
-  filter(
-    @Body() candidateFilterDto: CandidateFilterDto,
-  ): Promise<Freelancer[]> {
-    return this.clientService.filterCandidate(candidateFilterDto);
+  @Get('recently-viewed/:id')
+  getRecentlyViewedFreelancer(@Param('id') userId: number) {
+    return this.clientService.getRecentlyViewedFreelancer(userId);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
   @Post('view/:id')
-  view(
+  viewFreelancer(
     @Param('id') userId: number,
     @Body() { freelancerId }: ViewedFreelancerDto,
   ): Promise<Freelancer[]> {
-    return this.clientService.view(userId, freelancerId);
+    return this.clientService.viewFreelancer(userId, freelancerId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(200)
+  @Get('saved-freelancers/:id')
+  getSavedFreelancers(@Param('id') userId: number): Promise<Freelancer[]> {
+    return this.clientService.getSavedFreelancers(userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(200)
+  @Post('save/:id')
+  saveFreelancer(
+    @Param('id') userId: number,
+    @Body() { freelancerId }: ViewedFreelancerDto,
+  ): Promise<Freelancer[]> {
+    return this.clientService.saveFreelancer(userId, freelancerId);
   }
 }

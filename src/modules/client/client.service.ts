@@ -18,31 +18,7 @@ export class ClientService {
     private readonly freelancersRepo: Repository<Freelancer>,
   ) {}
 
-  async getClientIdByUserId(id: number) {
-    const {
-      client: { id: clientId },
-    } = await this.usersRepo
-      .createQueryBuilder('users')
-      .leftJoinAndSelect('users.client', 'client')
-      .where({ id })
-      .getOne();
-    return clientId;
-  }
-
-  async recentlyViewed(id: number) {
-    const clientId = await this.getClientIdByUserId(id);
-
-    const { recentlyViewedFreelancers } = await this.clientsRepo
-      .createQueryBuilder('client')
-      .leftJoinAndSelect('client.recentlyViewedFreelancers', 'freelancer')
-      .leftJoinAndSelect('freelancer.user', 'user')
-      .where({ id: clientId })
-      .getOne();
-
-    return recentlyViewedFreelancers;
-  }
-
-  async filterCandidate(filters: CandidateFilterDto) {
+  async filterCandidate(userId: number, filters: CandidateFilterDto) {
     const filterByCategory = await this.freelancersRepo
       .createQueryBuilder('freelancer')
       .leftJoinAndSelect('freelancer.category', 'category')
@@ -75,10 +51,23 @@ export class ClientService {
       return resultKeyWordsFilter && resultSkillsFilter;
     });
 
-    return result;
+    return await this.addSavesField(userId, result);
   }
 
-  async view(userId: number, freelancerId: number) {
+  async getRecentlyViewedFreelancer(userId: number) {
+    const clientId = await this.getClientIdByUserId(userId);
+
+    const { recentlyViewedFreelancers } = await this.clientsRepo
+      .createQueryBuilder('client')
+      .leftJoinAndSelect('client.recentlyViewedFreelancers', 'freelancer')
+      .leftJoinAndSelect('freelancer.user', 'user')
+      .where({ id: clientId })
+      .getOne();
+
+    return await this.addSavesField(userId, recentlyViewedFreelancers);
+  }
+
+  async viewFreelancer(userId: number, freelancerId: number) {
     const clientId = await this.getClientIdByUserId(userId);
 
     const freelancer = await this.freelancersRepo.findOneBy({
@@ -94,6 +83,68 @@ export class ClientService {
     client.recentlyViewedFreelancers.push(freelancer);
 
     this.clientsRepo.save(client);
-    return client.recentlyViewedFreelancers;
+    return await this.addSavesField(userId, client.recentlyViewedFreelancers);
+  }
+
+  async getSavedFreelancers(userId: number) {
+    const clientId = await this.getClientIdByUserId(userId);
+
+    const { savedFreelancers } = await this.clientsRepo
+      .createQueryBuilder('client')
+      .leftJoinAndSelect('client.savedFreelancers', 'freelancer')
+      .leftJoinAndSelect('freelancer.user', 'user')
+      .where({ id: clientId })
+      .getOne();
+
+    return savedFreelancers.map((freelancer) => {
+      return { saved: true, ...freelancer };
+    });
+  }
+
+  async saveFreelancer(userId: number, freelancerId: number) {
+    const clientId = await this.getClientIdByUserId(userId);
+
+    const freelancer = await this.freelancersRepo.findOneBy({
+      id: freelancerId,
+    });
+
+    const client = await this.clientsRepo
+      .createQueryBuilder('client')
+      .leftJoinAndSelect('client.savedFreelancers', 'freelancer')
+      .where({ id: clientId })
+      .getOne();
+
+    client.savedFreelancers.push(freelancer);
+
+    return (await this.clientsRepo.save(client)).savedFreelancers;
+  }
+
+  // helper functions
+
+  async getClientIdByUserId(userId: number) {
+    const {
+      client: { id: clientId },
+    } = await this.usersRepo
+      .createQueryBuilder('users')
+      .leftJoinAndSelect('users.client', 'client')
+      .where({ id: userId })
+      .getOne();
+    return clientId;
+  }
+
+  async getIdAllSavedFreelancers(userId: number) {
+    const freelancers = await this.getSavedFreelancers(userId);
+    return freelancers.map(({ id }: Freelancer) => id);
+  }
+
+  async addSavesField(userId: number, freelancers: Freelancer[]) {
+    const idSavedFreelancers = await this.getIdAllSavedFreelancers(userId);
+
+    return freelancers.map((freelancer: Freelancer) => {
+      return {
+        saved: idSavedFreelancers.includes(freelancer.id),
+        ...freelancer,
+      };
+    });
   }
 }
