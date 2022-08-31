@@ -23,6 +23,7 @@ export class ClientService {
       .createQueryBuilder('freelancer')
       .leftJoinAndSelect('freelancer.category', 'category')
       .leftJoinAndSelect('freelancer.skills', 'skills')
+      .leftJoinAndSelect('freelancer.user', 'user')
       .where({
         category: {
           name: filters.category,
@@ -77,6 +78,7 @@ export class ClientService {
     const client = await this.clientsRepo
       .createQueryBuilder('client')
       .leftJoinAndSelect('client.recentlyViewedFreelancers', 'freelancer')
+      .leftJoinAndSelect('freelancer.user', 'user')
       .where({ id: clientId })
       .getOne();
 
@@ -91,8 +93,8 @@ export class ClientService {
 
     const { savedFreelancers } = await this.clientsRepo
       .createQueryBuilder('client')
-      .leftJoinAndSelect('client.savedFreelancers', 'freelancer')
-      .leftJoinAndSelect('freelancer.user', 'user')
+      .leftJoinAndSelect('client.savedFreelancers', 'savedFreelancers')
+      .leftJoinAndSelect('savedFreelancers.user', 'user')
       .where({ id: clientId })
       .getOne();
 
@@ -110,13 +112,27 @@ export class ClientService {
 
     const client = await this.clientsRepo
       .createQueryBuilder('client')
-      .leftJoinAndSelect('client.savedFreelancers', 'freelancer')
+      .leftJoinAndSelect('client.savedFreelancers', 'savedFreelancers')
       .where({ id: clientId })
       .getOne();
 
     client.savedFreelancers.push(freelancer);
 
     return (await this.clientsRepo.save(client)).savedFreelancers;
+  }
+
+  async getHiredFreelancers(userId: number) {
+    const clientId = await this.getClientIdByUserId(userId);
+
+    const { hiredFreelancers } = await this.clientsRepo
+      .createQueryBuilder('client')
+      .leftJoinAndSelect('client.savedFreelancers', 'savedFreelancers')
+      .leftJoinAndSelect('client.hiredFreelancers', 'hiredFreelancers')
+      .leftJoinAndSelect('hiredFreelancers.user', 'user')
+      .where({ id: clientId })
+      .getOne();
+
+    return await this.addSavesField(userId, hiredFreelancers);
   }
 
   // helper functions

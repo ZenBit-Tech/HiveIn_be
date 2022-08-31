@@ -60,4 +60,11 @@ export class ClientController {
   ): Promise<Freelancer[]> {
     return this.clientService.saveFreelancer(userId, freelancerId);
   }
+
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(200)
+  @Get('hired-freelancers/:id')
+  getHiredFreelancers(@Param('id') userId: number): Promise<Freelancer[]> {
+    return this.clientService.getHiredFreelancers(userId);
+  }
 }
