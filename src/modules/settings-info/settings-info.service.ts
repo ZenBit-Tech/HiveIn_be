@@ -1,15 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Users } from 'src/modules/entities/users.entity';
+import { UserRole, Users } from 'src/modules/entities/users.entity';
 import { Repository } from 'typeorm';
 import { CreateSettingsInfoDto } from './dto/create-settings-info.dto';
 import { UpdateSettingsInfoDto } from './dto/update-settings-info.dto';
+import { Freelancer } from '../freelancer/entities/freelancer.entity';
 
 @Injectable()
 export class SettingsInfoService {
   constructor(
     @InjectRepository(Users)
     private readonly settingsInfoRepo: Repository<Users>,
+    @InjectRepository(Freelancer)
+    private freelancerRepository: Repository<Freelancer>,
   ) {}
 
   async create(createSettingsInfoDto: CreateSettingsInfoDto) {
@@ -38,7 +41,21 @@ export class SettingsInfoService {
 
     if (!currentSettings) throw new NotFoundException();
 
-    return await this.settingsInfoRepo.save({ id, ...updateSettingsInfoDto });
+    if (updateSettingsInfoDto.role === UserRole.FREELANCER) {
+      const currentFreelancer = await this.freelancerRepository.findOneBy({
+        userId: id,
+      });
+      if (!currentFreelancer)
+        await this.freelancerRepository.save({
+          userId: id,
+          englishLevel: '',
+          position: '',
+          rate: '',
+          category: { id: 1 },
+        });
+    }
+
+    await this.settingsInfoRepo.save({ id, ...updateSettingsInfoDto });
   }
 
   async remove(id: number) {
