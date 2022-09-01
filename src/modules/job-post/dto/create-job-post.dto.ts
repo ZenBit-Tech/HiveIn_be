@@ -1,7 +1,10 @@
-import { DurationType, EnglishLevel } from '../entities/job-post.entity';
+import {
+  DurationType,
+  EnglishLevel,
+} from 'src/modules/job-post/entities/job-post.entity';
 import {
   ArrayMinSize,
-  IsArray,
+  IsBoolean,
   IsEnum,
   IsInt,
   IsNumber,
@@ -14,9 +17,11 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateJobPostDto {
   @IsString()
   @ApiProperty()
+  @Type(() => String)
   readonly title: string;
 
   @IsNumber()
+  @Type(() => Number)
   @ApiProperty()
   readonly duration: number;
 
@@ -31,11 +36,14 @@ export class CreateJobPostDto {
 
   @IsNumber()
   @ApiProperty()
+  @Type(() => Number)
   readonly rate: number;
 
-  @IsArray()
+  //@IsArray({ each: true })
+  @IsNumber({}, { each: true })
   @ArrayMinSize(3)
   @ApiProperty()
+  @Type(() => Number)
   readonly skillsId: number[];
 
   @IsEnum(EnglishLevel)
@@ -44,9 +52,16 @@ export class CreateJobPostDto {
 
   @IsString()
   @ApiProperty()
+  @Type(() => String)
   readonly jobDescription: string;
 
   @IsNumber()
   @ApiProperty()
-  userId: number;
+  @Type(() => Number)
+  readonly userId: number;
+
+  @IsBoolean()
+  @ApiProperty()
+  @Type(() => Boolean)
+  readonly isDraft: boolean;
 }

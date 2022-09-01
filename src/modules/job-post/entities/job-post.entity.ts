@@ -58,7 +58,7 @@ export class JobPost {
   file?: LocalFile;
 
   @Column({ nullable: true })
-  fileId?: number;
+  fileId: number | null;
 
   @Column()
   rate: number;
@@ -68,6 +68,9 @@ export class JobPost {
   })
   @JoinTable()
   skills: Skill[];
+
+  @Column()
+  isDraft: boolean;
 
   @Column({
     type: 'enum',

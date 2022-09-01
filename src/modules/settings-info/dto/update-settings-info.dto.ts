@@ -28,4 +28,12 @@ export class UpdateSettingsInfoDto extends PartialType(CreateSettingsInfoDto) {
   @IsOptional()
   @IsPhoneNumber()
   readonly phone: string;
+
+  @IsString()
+  @IsOptional()
+  readonly description: string;
+
+  @IsString()
+  @IsOptional()
+  readonly avatarURL: string;
 }

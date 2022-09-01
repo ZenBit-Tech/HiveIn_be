@@ -1,6 +1,13 @@
-import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { UpdateEducationDto } from './update-education.dto';
 import { UpdateExperienceDto } from './update-experience.dto';
+import { Users } from '../../entities/users.entity';
 
 export class CreateFreelancerDto {
   @IsNumber()
@@ -27,6 +34,9 @@ export class CreateFreelancerDto {
 
   @IsArray()
   skillsIds: number[];
+
+  @IsObject()
+  user: Users;
 
   @IsOptional()
   @IsArray()

@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -14,12 +13,11 @@ import {
 } from '@nestjs/common';
 import { JobPostService } from './job-post.service';
 import { CreateJobPostDto } from './dto/create-job-post.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { UpdateJobPostDto } from './dto/update-job-post.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiFile } from 'src/common/decorators/swagger-api-file.decorator';
+import { ApiTags } from '@nestjs/swagger';
 import { LocalFilesService } from './localFiles.service';
 import type { Response } from 'express';
 import { JobPost } from './entities/job-post.entity';
@@ -34,8 +32,25 @@ export class JobPostController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createJobPostDto: CreateJobPostDto) {
-    return this.jobPostService.create(createJobPostDto);
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploadedFiles/files',
+      }),
+    }),
+  )
+  create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createJobPostDto: CreateJobPostDto,
+  ) {
+    if (file) {
+      return this.jobPostService.create(createJobPostDto, {
+        path: file.path,
+        filename: file.originalname,
+        mimetype: file.mimetype,
+      });
+    }
+    return this.jobPostService.create(createJobPostDto, null);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -68,34 +83,8 @@ export class JobPostController {
     return this.jobPostService.remove(+id);
   }
 
-  @ApiOperation({ summary: 'Upload file' })
-  @ApiConsumes('multipart/form-data')
-  @ApiFile()
-  @Post('file/:userId/:postId')
-  @UseGuards(JwtAuthGuard)
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploadedFiles/files',
-      }),
-    }),
-  )
-  async addFile(
-    @Param('userId') userId: string,
-    @Param('postId') postId: string,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    if (!file) {
-      throw new BadRequestException('Please provide file');
-    }
-    return this.jobPostService.addFile(+userId, +postId, {
-      path: file.path,
-      filename: file.originalname,
-      mimetype: file.mimetype,
-    });
-  }
-
   @Get('/file/:id')
+  @UseGuards(JwtAuthGuard)
   async getFile(
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,

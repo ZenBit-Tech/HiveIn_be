@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateJobPostDto {
@@ -9,6 +9,10 @@ export class UpdateJobPostDto {
   @IsNumber()
   @ApiProperty()
   readonly rate: number;
+
+  @IsBoolean()
+  @ApiProperty()
+  isDraft: boolean;
 
   @IsNumber()
   @ApiProperty()

@@ -14,6 +14,7 @@ export enum UserRole {
   FREELANCER = 'freelancer',
   UNDEFINED = '',
 }
+
 @Entity()
 export class Users {
   @PrimaryGeneratedColumn({
@@ -53,6 +54,14 @@ export class Users {
   @IsString()
   @IsPhoneNumber()
   phone: string;
+
+  @Column({ nullable: true })
+  @IsString()
+  description: string;
+
+  @Column({ nullable: true })
+  @IsString()
+  avatarURL: string;
 
   @OneToOne(() => Freelancer, (freelancer) => freelancer.user)
   user: Users;
