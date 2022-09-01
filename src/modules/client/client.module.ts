@@ -1,4 +1,3 @@
-import { Clients } from '../entities/clients.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from '../entities/users.entity';
@@ -11,7 +10,7 @@ import { Freelancer } from '../freelancer/entities/freelancer.entity';
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forFeature([Users, Freelancer, Clients]),
+    TypeOrmModule.forFeature([Users, Freelancer]),
     JwtModule.register({
       secret: process.env.SECRET_KEY,
       signOptions: { expiresIn: '7200s' },

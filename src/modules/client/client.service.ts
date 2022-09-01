@@ -1,6 +1,5 @@
 import { Skill } from './../skill/entities/skill.entity';
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
-import { Clients } from './../entities/clients.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Any, ArrayOverlap, In, Repository } from 'typeorm';
@@ -10,8 +9,6 @@ import { CandidateFilterDto } from './dto/candidate-filter.dto';
 @Injectable()
 export class ClientService {
   constructor(
-    @InjectRepository(Clients)
-    private readonly clientsRepo: Repository<Clients>,
     @InjectRepository(Users)
     private readonly usersRepo: Repository<Users>,
     @InjectRepository(Freelancer)
@@ -56,46 +53,40 @@ export class ClientService {
   }
 
   async getRecentlyViewedFreelancer(userId: number) {
-    const clientId = await this.getClientIdByUserId(userId);
-
-    const { recentlyViewedFreelancers } = await this.clientsRepo
-      .createQueryBuilder('client')
-      .leftJoinAndSelect('client.recentlyViewedFreelancers', 'freelancer')
-      .leftJoinAndSelect('freelancer.user', 'user')
-      .where({ id: clientId })
+    const { recentlyViewedFreelancers } = await this.usersRepo
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.recentlyViewedFreelancers', 'freelancer')
+      .leftJoinAndSelect('freelancer.user', 'freelancerUser')
+      .where({ id: userId })
       .getOne();
 
     return await this.addSavesField(userId, recentlyViewedFreelancers);
   }
 
   async viewFreelancer(userId: number, freelancerId: number) {
-    const clientId = await this.getClientIdByUserId(userId);
-
     const freelancer = await this.freelancersRepo.findOneBy({
       id: freelancerId,
     });
 
-    const client = await this.clientsRepo
-      .createQueryBuilder('client')
-      .leftJoinAndSelect('client.recentlyViewedFreelancers', 'freelancer')
-      .leftJoinAndSelect('freelancer.user', 'user')
-      .where({ id: clientId })
+    const user = await this.usersRepo
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.recentlyViewedFreelancers', 'freelancer')
+      .leftJoinAndSelect('freelancer.user', 'freelancerUser')
+      .where({ id: userId })
       .getOne();
 
-    client.recentlyViewedFreelancers.push(freelancer);
+    user.recentlyViewedFreelancers.push(freelancer);
 
-    this.clientsRepo.save(client);
-    return await this.addSavesField(userId, client.recentlyViewedFreelancers);
+    this.usersRepo.save(user);
+    return await this.addSavesField(userId, user.recentlyViewedFreelancers);
   }
 
   async getSavedFreelancers(userId: number) {
-    const clientId = await this.getClientIdByUserId(userId);
-
-    const { savedFreelancers } = await this.clientsRepo
-      .createQueryBuilder('client')
-      .leftJoinAndSelect('client.savedFreelancers', 'savedFreelancers')
-      .leftJoinAndSelect('savedFreelancers.user', 'user')
-      .where({ id: clientId })
+    const { savedFreelancers } = await this.usersRepo
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.savedFreelancers', 'savedFreelancers')
+      .leftJoinAndSelect('savedFreelancers.user', 'savedFreelancersUser')
+      .where({ id: userId })
       .getOne();
 
     return savedFreelancers.map((freelancer) => {
@@ -104,49 +95,34 @@ export class ClientService {
   }
 
   async saveFreelancer(userId: number, freelancerId: number) {
-    const clientId = await this.getClientIdByUserId(userId);
-
     const freelancer = await this.freelancersRepo.findOneBy({
       id: freelancerId,
     });
 
-    const client = await this.clientsRepo
-      .createQueryBuilder('client')
-      .leftJoinAndSelect('client.savedFreelancers', 'savedFreelancers')
-      .where({ id: clientId })
+    const user = await this.usersRepo
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.savedFreelancers', 'savedFreelancers')
+      .where({ id: userId })
       .getOne();
 
-    client.savedFreelancers.push(freelancer);
+    user.savedFreelancers.push(freelancer);
 
-    return (await this.clientsRepo.save(client)).savedFreelancers;
+    return (await this.usersRepo.save(user)).savedFreelancers;
   }
 
   async getHiredFreelancers(userId: number) {
-    const clientId = await this.getClientIdByUserId(userId);
-
-    const { hiredFreelancers } = await this.clientsRepo
-      .createQueryBuilder('client')
-      .leftJoinAndSelect('client.savedFreelancers', 'savedFreelancers')
-      .leftJoinAndSelect('client.hiredFreelancers', 'hiredFreelancers')
-      .leftJoinAndSelect('hiredFreelancers.user', 'user')
-      .where({ id: clientId })
+    const { hiredFreelancers } = await this.usersRepo
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.savedFreelancers', 'savedFreelancers')
+      .leftJoinAndSelect('user.hiredFreelancers', 'hiredFreelancers')
+      .leftJoinAndSelect('hiredFreelancers.user', 'hiredFreelancersUuser')
+      .where({ id: userId })
       .getOne();
 
     return await this.addSavesField(userId, hiredFreelancers);
   }
 
   // helper functions
-
-  async getClientIdByUserId(userId: number) {
-    const {
-      client: { id: clientId },
-    } = await this.usersRepo
-      .createQueryBuilder('users')
-      .leftJoinAndSelect('users.client', 'client')
-      .where({ id: userId })
-      .getOne();
-    return clientId;
-  }
 
   async getIdAllSavedFreelancers(userId: number) {
     const freelancers = await this.getSavedFreelancers(userId);
