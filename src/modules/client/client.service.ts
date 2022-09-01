@@ -33,7 +33,7 @@ export class ClientService {
     const filterSkills = filters.skills;
     const result = filterByCategory.filter((freelancer: Freelancer) => {
       const resultKeyWordsFilter =
-        freelancer.description
+        freelancer.user.description
           .toLowerCase()
           .split(' ')
           .concat(freelancer.position.toLowerCase().split(' '))
