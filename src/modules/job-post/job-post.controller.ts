@@ -83,6 +83,18 @@ export class JobPostController {
     return this.jobPostService.remove(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('home/:id/:isDraft')
+  getClientHomePostsAndDrafts(
+    @Param('id') id: number,
+    @Param('isDraft') isDraft?: string,
+  ) {
+    return this.jobPostService.getClientHomePostAndDrafts(
+      id,
+      isDraft === 'true' ? true : false,
+    );
+  }
+
   @Get('/file/:id')
   @UseGuards(JwtAuthGuard)
   async getFile(
