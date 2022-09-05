@@ -18,12 +18,18 @@ export class ClientController {
 
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
-  @Get('filter/:id')
+  @Get('filter/:id/:keyWords/:category/:skills')
   filter(
     @Param('id') clientId: number,
-    @Body() candidateFilterDto: CandidateFilterDto,
+    @Param('keyWords') keyWords: string,
+    @Param('category') category: string,
+    @Param('skills') skills: string,
   ): Promise<Freelancer[]> {
-    return this.clientService.filterCandidate(clientId, candidateFilterDto);
+    return this.clientService.filterCandidate(clientId, {
+      keyWords,
+      category,
+      skills,
+    });
   }
 
   @UseGuards(AuthGuard('jwt'))

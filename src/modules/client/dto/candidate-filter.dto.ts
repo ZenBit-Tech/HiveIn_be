@@ -7,6 +7,6 @@ export class CandidateFilterDto {
   @IsString()
   category: string;
 
-  @IsArray()
-  skills: string[];
+  @IsString()
+  skills: string;
 }

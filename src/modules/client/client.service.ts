@@ -23,14 +23,17 @@ export class ClientService {
       .leftJoinAndSelect('freelancer.user', 'user')
       .where({
         category: {
-          name: filters.category,
+          id: +filters.category,
         },
       })
       .getMany();
 
     const filterKeyWords = filters.keyWords.toLowerCase().split(' ');
 
-    const filterSkills = filters.skills;
+    const filterSkills: number[] = filters.skills
+      .split(',')
+      .map((skill) => +skill);
+
     const result = filterByCategory.filter((freelancer: Freelancer) => {
       const resultKeyWordsFilter =
         freelancer.user.description
@@ -43,7 +46,7 @@ export class ClientService {
 
       const resultSkillsFilter =
         freelancer.skills.filter((skill: Skill) =>
-          filterSkills.includes(skill.name),
+          filterSkills.includes(skill.id),
         ).length !== 0;
 
       return resultKeyWordsFilter && resultSkillsFilter;
@@ -94,9 +97,9 @@ export class ClientService {
     });
   }
 
-  async saveFreelancer(userId: number, freelancerId: number) {
+  async saveFreelancer(userId: number, freelancerUserId: number) {
     const freelancer = await this.freelancersRepo.findOneBy({
-      id: freelancerId,
+      userId: freelancerUserId,
     });
 
     const user = await this.usersRepo
@@ -104,9 +107,17 @@ export class ClientService {
       .leftJoinAndSelect('user.savedFreelancers', 'savedFreelancers')
       .where({ id: userId })
       .getOne();
-
-    user.savedFreelancers.push(freelancer);
-
+    if (
+      user.savedFreelancers.filter(
+        (freelancer) => freelancer.userId == freelancerUserId,
+      ).length !== 0
+    ) {
+      user.savedFreelancers = user.savedFreelancers.filter(
+        (freelancer) => freelancer.userId != freelancerUserId,
+      );
+    } else {
+      user.savedFreelancers.push(freelancer);
+    }
     return (await this.usersRepo.save(user)).savedFreelancers;
   }
 
