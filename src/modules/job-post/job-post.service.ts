@@ -7,6 +7,7 @@ import { UpdateJobPostDto } from './dto/update-job-post.dto';
 import { LocalFilesService } from './localFiles.service';
 import { LocalFileDto } from './dto/localFile.dto';
 import { LocalFile } from '../entities/localFile.entity';
+import { JobPostQuestionService } from './job-post-question.service';
 
 @Injectable()
 export class JobPostService {
@@ -14,6 +15,7 @@ export class JobPostService {
     @InjectRepository(JobPost)
     private readonly jobPostRepository: Repository<JobPost>,
     private localFilesService: LocalFilesService,
+    private jobPostQuestionService: JobPostQuestionService,
   ) {}
 
   async create(
@@ -25,23 +27,32 @@ export class JobPostService {
     if (fileData) {
       file = await this.localFilesService.saveLocalFileData(fileData);
     }
+
     const skills = createJobPostDto.skillsId.map((value) => ({
       id: +value,
     }));
-    /*TODO type validation*/
-    return await this.jobPostRepository.save({
+
+    const jobPost = await this.jobPostRepository.save({
       title: createJobPostDto.title,
-      duration: +createJobPostDto.duration,
+      duration: createJobPostDto.duration,
       durationType: createJobPostDto.durationType,
       jobDescription: createJobPostDto.jobDescription,
-      rate: +createJobPostDto.rate,
+      rate: createJobPostDto.rate,
       englishLevel: createJobPostDto.englishLevel,
       isDraft: createJobPostDto.isDraft,
       skills: skills,
       category: createJobPostDto.categoryId,
-      user: { id: +createJobPostDto.userId },
+      user: { id: createJobPostDto.userId },
       fileId: file?.id || null,
     });
+
+    if (createJobPostDto.questions) {
+      createJobPostDto.questions.map((q) => {
+        return this.jobPostQuestionService.save(q, jobPost.id);
+      });
+    }
+
+    return jobPost;
   }
 
   async update(id: number, updateJobPostDto: UpdateJobPostDto) {
@@ -52,6 +63,16 @@ export class JobPostService {
     if (!jobPost) {
       throw new HttpException('job post not found', 404);
     }
+    if (updateJobPostDto.questions) {
+      try {
+        updateJobPostDto.questions.forEach((q) => {
+          this.jobPostQuestionService.update(q);
+        });
+      } catch (e) {
+        throw new HttpException('no valid questions found', 400);
+      }
+    }
+
     return await this.jobPostRepository.update(
       { user: { id: updateJobPostDto.userId }, id: id },
       {
@@ -78,7 +99,7 @@ export class JobPostService {
   async findOne(id: number) {
     const jobPost = await this.jobPostRepository.findOne({
       where: { id: id },
-      relations: ['category', 'skills', 'user', 'file'],
+      relations: ['category', 'skills', 'user', 'file', 'questions'],
     });
     if (!jobPost) {
       throw new HttpException('Job post not found', 404);

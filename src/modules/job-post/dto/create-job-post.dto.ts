@@ -3,11 +3,14 @@ import {
   EnglishLevel,
 } from 'src/modules/job-post/entities/job-post.entity';
 import {
+  ArrayMaxSize,
   ArrayMinSize,
+  IsArray,
   IsBoolean,
   IsEnum,
   IsInt,
   IsNumber,
+  IsOptional,
   IsString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -15,53 +18,60 @@ import { Category } from 'src/modules/category/entities/category.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateJobPostDto {
-  @IsString()
   @ApiProperty()
   @Type(() => String)
+  @IsString()
   readonly title: string;
 
-  @IsNumber()
-  @Type(() => Number)
   @ApiProperty()
+  @Type(() => Number)
+  @IsNumber()
   readonly duration: number;
 
-  @IsEnum(DurationType)
   @ApiProperty()
+  @IsEnum(DurationType)
   readonly durationType: DurationType;
 
-  @IsInt()
   @ApiProperty()
   @Type(() => Number)
+  @IsInt()
   readonly categoryId: Category;
 
-  @IsNumber()
   @ApiProperty()
   @Type(() => Number)
+  @IsNumber()
   readonly rate: number;
 
   //@IsArray({ each: true })
+  @ApiProperty()
+  @Type(() => Number)
   @IsNumber({}, { each: true })
   @ArrayMinSize(3)
-  @ApiProperty()
-  @Type(() => Number)
   readonly skillsId: number[];
 
-  @IsEnum(EnglishLevel)
   @ApiProperty()
+  @IsEnum(EnglishLevel)
   readonly englishLevel: EnglishLevel;
 
-  @IsString()
   @ApiProperty()
   @Type(() => String)
+  @IsString()
   readonly jobDescription: string;
 
-  @IsNumber()
   @ApiProperty()
   @Type(() => Number)
+  @IsNumber()
   readonly userId: number;
 
-  @IsBoolean()
   @ApiProperty()
   @Type(() => Boolean)
+  @IsBoolean()
   readonly isDraft: boolean;
+
+  @ApiProperty()
+  @Type(() => String)
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(3)
+  questions?: string[];
 }

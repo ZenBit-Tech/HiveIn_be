@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { Request } from 'express';
 import { existsSync, promises } from 'fs';
@@ -37,4 +37,37 @@ export const multerOptions: MulterOptions = {
       done(null, fileName);
     },
   }),
+};
+
+export const multerFileOptions: MulterOptions = {
+  storage: diskStorage({
+    destination: './uploadedFiles/files',
+  }),
+  limits: { files: 1 },
+  fileFilter: (req, { mimetype, size }, cb) => {
+    const _mimeTypes: string[] = [
+      'application/pdf',
+      'image/jpeg',
+      'image/jpg',
+      'application/msword',
+      'text/plain',
+    ];
+    if (!_mimeTypes.includes(mimetype)) {
+      cb(
+        new BadRequestException(
+          `Only the following file types are accepted: ${_mimeTypes}`,
+        ),
+        null,
+      );
+    }
+    if (size > 5e6) {
+      cb(
+        new BadRequestException(
+          `The maximum file size has been exceeded. Please select a file smaller than 5MB`,
+        ),
+        null,
+      );
+    }
+    cb(null, true);
+  },
 };

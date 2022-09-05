@@ -10,17 +10,19 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  ValidationPipe,
 } from '@nestjs/common';
 import { JobPostService } from './job-post.service';
 import { CreateJobPostDto } from './dto/create-job-post.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { UpdateJobPostDto } from './dto/update-job-post.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
 import { ApiTags } from '@nestjs/swagger';
 import { LocalFilesService } from './localFiles.service';
 import type { Response } from 'express';
 import { JobPost } from './entities/job-post.entity';
+import { ParseFormDataJsonPipe } from 'src/common/pipes/parse-form-data-json.pipe';
+import { multerFileOptions } from 'src/config/multer.config';
 
 @ApiTags('JobPost')
 @Controller('job-post')
@@ -30,18 +32,16 @@ export class JobPostController {
     private readonly localFilesService: LocalFilesService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @Post()
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploadedFiles/files',
-      }),
-    }),
-  )
+  @UseInterceptors(FileInterceptor('file', multerFileOptions))
   create(
     @UploadedFile() file: Express.Multer.File,
-    @Body() createJobPostDto: CreateJobPostDto,
+    @Body(
+      new ParseFormDataJsonPipe({ except: ['file'] }),
+      new ValidationPipe({ transform: true }),
+    )
+    createJobPostDto: CreateJobPostDto,
   ) {
     if (file) {
       return this.jobPostService.create(createJobPostDto, {
@@ -53,7 +53,7 @@ export class JobPostController {
     return this.jobPostService.create(createJobPostDto, null);
   }
 
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateJobPostDto: UpdateJobPostDto) {
     return this.jobPostService.update(+id, updateJobPostDto);
@@ -65,7 +65,7 @@ export class JobPostController {
     return this.jobPostService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.jobPostService.findOne(+id);
@@ -77,7 +77,7 @@ export class JobPostController {
     return this.jobPostService.findByUser(+id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.jobPostService.remove(+id);
