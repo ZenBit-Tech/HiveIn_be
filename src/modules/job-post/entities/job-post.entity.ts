@@ -22,9 +22,9 @@ export enum DurationType {
   MONTH = 'month',
 }
 export enum EnglishLevel {
-  PRE_INTERMEDIATE = 'Pre-intermediate',
-  INTERMEDIATE = 'Intermediate',
-  UPPER_INTERMEDIATE = 'Upper-intermediate',
+  PRE_INTERMEDIATE = 'pre-intermediate',
+  INTERMEDIATE = 'intermediate',
+  UPPER_INTERMEDIATE = 'upper-intermediate',
 }
 
 @Entity()
