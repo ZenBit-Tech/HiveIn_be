@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   Res,
   UploadedFile,
   UseGuards,
@@ -19,8 +20,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { ApiTags } from '@nestjs/swagger';
 import { LocalFilesService } from './localFiles.service';
-import type { Response } from 'express';
+import { Response } from 'express';
 import { JobPost } from './entities/job-post.entity';
+import { PassportReq } from 'src/modules/settings-info/settings-info.controller';
 
 @ApiTags('JobPost')
 @Controller('job-post')
@@ -66,15 +68,16 @@ export class JobPostController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.jobPostService.findOne(+id);
+  @Get('self')
+  findByUser(@Req() req: PassportReq) {
+    const { id } = req.user;
+    return this.jobPostService.findByUser(+id);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('user/:id')
-  findByUser(@Param('id') id: string) {
-    return this.jobPostService.findByUser(+id);
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.jobPostService.findOne(+id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -84,11 +87,12 @@ export class JobPostController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('home/:id/:isDraft')
+  @Get('home/self/:isDraft')
   getClientHomePostsAndDrafts(
-    @Param('id') id: number,
+    @Req() req: PassportReq,
     @Param('isDraft') isDraft?: string,
   ) {
+    const { id } = req.user;
     return this.jobPostService.getClientHomePostAndDrafts(
       id,
       isDraft === 'true' ? true : false,

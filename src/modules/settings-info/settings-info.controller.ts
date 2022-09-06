@@ -7,11 +7,20 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { SettingsInfoService } from './settings-info.service';
 import { CreateSettingsInfoDto } from './dto/create-settings-info.dto';
 import { UpdateSettingsInfoDto } from './dto/update-settings-info.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
+import { Request } from 'express';
+
+export interface PassportReq extends Request {
+  user: {
+    id: number;
+    email: string;
+  };
+}
 
 @Controller('settings-info')
 export class SettingsInfoController {
@@ -30,23 +39,32 @@ export class SettingsInfoController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('self')
+  findOwnUser(@Req() req: PassportReq) {
+    const { id } = req.user;
+    return this.settingsInfoService.findOne(+id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.settingsInfoService.findOne(+id);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
+  @Patch('self')
   update(
-    @Param('id') id: string,
+    @Req() req: PassportReq,
     @Body() updateSettingsInfoDto: UpdateSettingsInfoDto,
   ) {
+    const { id } = req.user;
     return this.settingsInfoService.update(+id, updateSettingsInfoDto);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Delete('self')
+  remove(@Req() req: PassportReq) {
+    const { id } = req.user;
     return this.settingsInfoService.remove(+id);
   }
 }
