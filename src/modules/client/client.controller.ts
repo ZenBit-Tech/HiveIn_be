@@ -1,3 +1,4 @@
+import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { ClientService } from './client.service';
 import {
   Controller,
@@ -5,12 +6,17 @@ import {
   HttpCode,
   UseGuards,
   Param,
-  Body,
   Post,
+  Request,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { CandidateFilterDto } from './dto/candidate-filter.dto';
-import { Freelancer } from '../freelancer/entities/freelancer.entity';
+import { Request as HttpRequest } from 'express';
+
+interface UserJwtPayload {
+  sub: number;
+}
+
+type AuthRequest = HttpRequest & { user: UserJwtPayload };
 
 @Controller('client')
 export class ClientController {
@@ -18,14 +24,14 @@ export class ClientController {
 
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
-  @Get('filter/:id/:keyWords/:category/:skills')
+  @Get('filter/:keyWords/:category/:skills')
   filter(
-    @Param('id') clientId: number,
+    @Request() req: AuthRequest,
     @Param('keyWords') keyWords: string,
     @Param('category') category: string,
     @Param('skills') skills: string,
   ): Promise<Freelancer[]> {
-    return this.clientService.filterCandidate(clientId, {
+    return this.clientService.filterCandidate(req.user.sub, {
       keyWords,
       category,
       skills,
@@ -34,42 +40,42 @@ export class ClientController {
 
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
-  @Get('recently-viewed/:id')
-  getRecentlyViewedFreelancer(@Param('id') clientId: number) {
-    return this.clientService.getRecentlyViewedFreelancer(clientId);
+  @Get('recently-viewed')
+  getRecentlyViewedFreelancer(@Request() req: AuthRequest) {
+    return this.clientService.getRecentlyViewedFreelancer(req.user.sub);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
-  @Post('view/:clientId/:freelancerId')
+  @Post('view/:freelancerId')
   viewFreelancer(
-    @Param('clientId') clientId: number,
+    @Request() req: any,
     @Param('freelancerId') freelancerId: number,
   ): Promise<Freelancer[]> {
-    return this.clientService.viewFreelancer(clientId, freelancerId);
+    return this.clientService.viewFreelancer(req.user.sub, freelancerId);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
-  @Get('saved-freelancers/:id')
-  getSavedFreelancers(@Param('id') clientId: number): Promise<Freelancer[]> {
-    return this.clientService.getSavedFreelancers(clientId);
+  @Get('saved-freelancers')
+  getSavedFreelancers(@Request() req: any): Promise<Freelancer[]> {
+    return this.clientService.getSavedFreelancers(req.user.sub);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
-  @Post('save/:clientId/:freelancerId')
+  @Post('save/:freelancerId')
   saveFreelancer(
-    @Param('clientId') clientId: number,
+    @Request() req: any,
     @Param('freelancerId') freelancerId: number,
   ): Promise<Freelancer[]> {
-    return this.clientService.saveFreelancer(clientId, freelancerId);
+    return this.clientService.saveFreelancer(req.user.sub, freelancerId);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
-  @Get('hired-freelancers/:id')
-  getHiredFreelancers(@Param('id') clientId: number): Promise<Freelancer[]> {
-    return this.clientService.getHiredFreelancers(clientId);
+  @Get('hired-freelancers')
+  getHiredFreelancers(@Request() req: any): Promise<Freelancer[]> {
+    return this.clientService.getHiredFreelancers(req.user.sub);
   }
 }
