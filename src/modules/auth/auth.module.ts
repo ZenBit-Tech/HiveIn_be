@@ -1,8 +1,8 @@
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
-import { ForgotPassword } from '../entities/forgot-password.entity';
+import { ForgotPassword } from 'src/modules/entities/forgot-password.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Users } from '../entities/users.entity';
+import { Users } from 'src/modules/entities/users.entity';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';

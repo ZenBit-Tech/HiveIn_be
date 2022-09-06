@@ -1,9 +1,9 @@
-import { Skill } from './../skill/entities/skill.entity';
+import { Skill } from 'src/modules/skill/entities/skill.entity';
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Any, ArrayOverlap, In, Repository } from 'typeorm';
-import { Users } from '../entities/users.entity';
+import { Repository } from 'typeorm';
+import { Users } from 'src/modules/entities/users.entity';
 import { CandidateFilterDto } from './dto/candidate-filter.dto';
 
 @Injectable()

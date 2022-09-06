@@ -5,12 +5,10 @@ import {
   HttpCode,
   UseGuards,
   Param,
-  Body,
   Post,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { CandidateFilterDto } from './dto/candidate-filter.dto';
-import { Freelancer } from '../freelancer/entities/freelancer.entity';
+import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 
 @Controller('client')
 export class ClientController {

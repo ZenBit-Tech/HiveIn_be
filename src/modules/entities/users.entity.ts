@@ -8,7 +8,7 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-import { Freelancer } from '../freelancer/entities/freelancer.entity';
+import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { ForgotPassword } from './forgot-password.entity';
 export enum UserRole {
   CLIENT = 'client',

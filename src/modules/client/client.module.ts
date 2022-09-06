@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Users } from '../entities/users.entity';
+import { Users } from 'src/modules/entities/users.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { ClientController } from './client.controller';
 import { ClientService } from './client.service';
-import { Freelancer } from '../freelancer/entities/freelancer.entity';
+import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 
 @Module({
   imports: [
