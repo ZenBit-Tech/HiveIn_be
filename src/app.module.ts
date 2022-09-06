@@ -13,6 +13,7 @@ import { AvatarModule } from './modules/avatar/avatar.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { JobPostModule } from './modules/job-post/job-post.module';
+import { ProposalModule } from './modules/proposal/proposal.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { JobPostModule } from './modules/job-post/job-post.module';
     SkillModule,
     JobPostModule,
     AvatarModule,
+    ProposalModule,
   ],
   controllers: [AppController],
   providers: [AppService],
