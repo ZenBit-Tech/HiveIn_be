@@ -5,10 +5,11 @@ import {
   PrimaryGeneratedColumn,
   OneToOne,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
-import { Freelancer } from '../freelancer/entities/freelancer.entity';
+import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { ForgotPassword } from './forgot-password.entity';
-
 export enum UserRole {
   CLIENT = 'client',
   FREELANCER = 'freelancer',
@@ -71,4 +72,16 @@ export class Users {
     (forgotPassword: ForgotPassword) => forgotPassword.user,
   )
   forgotPassword: ForgotPassword[];
+
+  @ManyToMany(() => Freelancer)
+  @JoinTable()
+  recentlyViewedFreelancers: Freelancer[];
+
+  @ManyToMany(() => Freelancer)
+  @JoinTable()
+  savedFreelancers: Freelancer[];
+
+  @ManyToMany(() => Freelancer)
+  @JoinTable()
+  hiredFreelancers: Freelancer[];
 }
