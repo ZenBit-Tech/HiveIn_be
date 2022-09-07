@@ -49,7 +49,7 @@ export class ClientController {
   @HttpCode(200)
   @Post('view/:freelancerId')
   viewFreelancer(
-    @Request() req: any,
+    @Request() req: AuthRequest,
     @Param('freelancerId') freelancerId: number,
   ): Promise<Freelancer[]> {
     return this.clientService.viewFreelancer(req.user.sub, freelancerId);
@@ -58,7 +58,7 @@ export class ClientController {
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
   @Get('saved-freelancers')
-  getSavedFreelancers(@Request() req: any): Promise<Freelancer[]> {
+  getSavedFreelancers(@Request() req: AuthRequest): Promise<Freelancer[]> {
     return this.clientService.getSavedFreelancers(req.user.sub);
   }
 
@@ -66,7 +66,7 @@ export class ClientController {
   @HttpCode(200)
   @Post('save/:freelancerId')
   saveFreelancer(
-    @Request() req: any,
+    @Request() req: AuthRequest,
     @Param('freelancerId') freelancerId: number,
   ): Promise<Freelancer[]> {
     return this.clientService.saveFreelancer(req.user.sub, freelancerId);
@@ -75,7 +75,7 @@ export class ClientController {
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
   @Get('hired-freelancers')
-  getHiredFreelancers(@Request() req: any): Promise<Freelancer[]> {
+  getHiredFreelancers(@Request() req: AuthRequest): Promise<Freelancer[]> {
     return this.clientService.getHiredFreelancers(req.user.sub);
   }
 }
