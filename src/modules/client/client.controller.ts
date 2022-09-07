@@ -13,7 +13,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request as HttpRequest } from 'express';
 
 interface UserJwtPayload {
-  sub: number;
+  id: number;
 }
 
 type AuthRequest = HttpRequest & { user: UserJwtPayload };
@@ -31,7 +31,7 @@ export class ClientController {
     @Param('category') category: string,
     @Param('skills') skills: string,
   ): Promise<Freelancer[]> {
-    return this.clientService.filterCandidate(req.user.sub, {
+    return this.clientService.filterCandidate(req.user.id, {
       keyWords,
       category,
       skills,
@@ -42,7 +42,7 @@ export class ClientController {
   @HttpCode(200)
   @Get('recently-viewed')
   getRecentlyViewedFreelancer(@Request() req: AuthRequest) {
-    return this.clientService.getRecentlyViewedFreelancer(req.user.sub);
+    return this.clientService.getRecentlyViewedFreelancer(req.user.id);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -52,14 +52,14 @@ export class ClientController {
     @Request() req: AuthRequest,
     @Param('freelancerId') freelancerId: number,
   ): Promise<Freelancer[]> {
-    return this.clientService.viewFreelancer(req.user.sub, freelancerId);
+    return this.clientService.viewFreelancer(req.user.id, freelancerId);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
   @Get('saved-freelancers')
   getSavedFreelancers(@Request() req: AuthRequest): Promise<Freelancer[]> {
-    return this.clientService.getSavedFreelancers(req.user.sub);
+    return this.clientService.getSavedFreelancers(req.user.id);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -69,13 +69,13 @@ export class ClientController {
     @Request() req: AuthRequest,
     @Param('freelancerId') freelancerId: number,
   ): Promise<Freelancer[]> {
-    return this.clientService.saveFreelancer(req.user.sub, freelancerId);
+    return this.clientService.saveFreelancer(req.user.id, freelancerId);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
   @Get('hired-freelancers')
   getHiredFreelancers(@Request() req: AuthRequest): Promise<Freelancer[]> {
-    return this.clientService.getHiredFreelancers(req.user.sub);
+    return this.clientService.getHiredFreelancers(req.user.id);
   }
 }
