@@ -7,6 +7,7 @@ import {
   IsBoolean,
   IsEnum,
   IsInt,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -17,6 +18,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateJobPostDto {
   @ApiProperty()
+  @IsNotEmpty()
   @Type(() => String)
   @IsString()
   readonly title: string;
@@ -52,6 +54,7 @@ export class CreateJobPostDto {
 
   @ApiProperty()
   @Type(() => String)
+  @IsNotEmpty()
   @IsString()
   readonly jobDescription: string;
 
