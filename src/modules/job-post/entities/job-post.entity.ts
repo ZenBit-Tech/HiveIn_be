@@ -6,7 +6,6 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
-  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -15,7 +14,6 @@ import { Category } from 'src/modules/category/entities/category.entity';
 import { Skill } from 'src/modules/skill/entities/skill.entity';
 import { Users } from 'src/modules/entities/users.entity';
 import { LocalFile } from 'src/modules/entities/localFile.entity';
-import { JobPostQuestion } from './job-post-question.entity';
 
 export enum DurationType {
   WEEK = 'week',
@@ -89,9 +87,4 @@ export class JobPost {
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @OneToMany(() => JobPostQuestion, (question) => question.jobPost, {
-    nullable: true,
-  })
-  questions: JobPostQuestion[];
 }

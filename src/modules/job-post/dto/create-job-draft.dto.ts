@@ -1,20 +1,21 @@
-import {
-  DurationType,
-  EnglishLevel,
-} from 'src/modules/job-post/entities/job-post.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsBoolean,
   IsEnum,
   IsInt,
   IsNumber,
+  IsOptional,
   IsString,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import {
+  DurationType,
+  EnglishLevel,
+} from 'src/modules/job-post/entities/job-post.entity';
 import { Category } from 'src/modules/category/entities/category.entity';
-import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateJobPostDto {
+export class CreateJobDraftDto {
   @ApiProperty()
   @Type(() => String)
   @IsString()
@@ -22,37 +23,44 @@ export class CreateJobPostDto {
 
   @ApiProperty()
   @Type(() => Number)
+  @IsOptional()
   @IsNumber()
-  readonly duration: number;
+  readonly duration?: number;
 
   @ApiProperty()
+  @IsOptional()
   @IsEnum(DurationType)
-  readonly durationType: DurationType;
+  readonly durationType?: DurationType;
 
   @ApiProperty()
   @Type(() => Number)
+  @IsOptional()
   @IsInt()
-  readonly categoryId: Category;
+  readonly categoryId?: Category;
 
   @ApiProperty()
   @Type(() => Number)
+  @IsOptional()
   @IsNumber()
-  readonly rate: number;
+  readonly rate?: number;
 
   @ApiProperty()
   @Type(() => Number)
+  @IsOptional()
   @IsNumber({}, { each: true })
   @ArrayMinSize(3)
-  readonly skillsId: number[];
+  readonly skillsId?: number[];
 
   @ApiProperty()
   @IsEnum(EnglishLevel)
-  readonly englishLevel: EnglishLevel;
+  @IsOptional()
+  readonly englishLevel?: EnglishLevel;
 
   @ApiProperty()
   @Type(() => String)
+  @IsOptional()
   @IsString()
-  readonly jobDescription: string;
+  readonly jobDescription?: string;
 
   @ApiProperty()
   @Type(() => Number)

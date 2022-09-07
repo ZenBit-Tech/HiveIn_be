@@ -5,20 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JobPost } from './entities/job-post.entity';
 import { LocalFilesService } from './localFiles.service';
 import { LocalFile } from '../entities/localFile.entity';
-import { JobPostQuestion } from './entities/job-post-question.entity';
-import { FreelancerAnswer } from './entities/freelancer-answer.entity';
-import { JobPostQuestionService } from './job-post-question.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      JobPost,
-      JobPostQuestion,
-      LocalFile,
-      FreelancerAnswer,
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([JobPost, LocalFile])],
   controllers: [JobPostController],
-  providers: [JobPostService, LocalFilesService, JobPostQuestionService],
+  providers: [JobPostService, LocalFilesService],
 })
 export class JobPostModule {}
