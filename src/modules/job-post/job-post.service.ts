@@ -6,7 +6,8 @@ import { Repository } from 'typeorm';
 import { UpdateJobPostDto } from './dto/update-job-post.dto';
 import { LocalFilesService } from './localFiles.service';
 import { LocalFileDto } from './dto/localFile.dto';
-import { LocalFile } from '../entities/localFile.entity';
+import { LocalFile } from 'src/modules/entities/localFile.entity';
+import { SaveJobDraftDto } from './dto/save-job-draft.dto';
 
 @Injectable()
 export class JobPostService {
@@ -16,7 +17,7 @@ export class JobPostService {
     private localFilesService: LocalFilesService,
   ) {}
 
-  async create(
+  async save(
     createJobPostDto: CreateJobPostDto,
     fileData: LocalFileDto | null,
   ) {
@@ -26,11 +27,11 @@ export class JobPostService {
       file = await this.localFilesService.saveLocalFileData(fileData);
     }
 
-    const skills = createJobPostDto.skillsId.map((value) => ({
+    const skills = createJobPostDto.skillsId?.map((value) => ({
       id: +value,
     }));
-
     return await this.jobPostRepository.save({
+      id: createJobPostDto.id,
       title: createJobPostDto.title,
       duration: createJobPostDto.duration,
       durationType: createJobPostDto.durationType,
@@ -42,6 +43,24 @@ export class JobPostService {
       category: createJobPostDto.categoryId,
       user: { id: createJobPostDto.userId },
       fileId: file?.id || null,
+    });
+  }
+
+  async saveDraft(saveJobDraftDto: SaveJobDraftDto) {
+    return await this.jobPostRepository.save({
+      id: saveJobDraftDto.id,
+      title: saveJobDraftDto.title,
+      duration: saveJobDraftDto.duration,
+      durationType: saveJobDraftDto.durationType,
+      jobDescription: saveJobDraftDto.jobDescription,
+      rate: saveJobDraftDto.rate,
+      englishLevel: saveJobDraftDto.englishLevel,
+      isDraft: saveJobDraftDto.isDraft,
+      skills: saveJobDraftDto.skillsId?.map((value) => ({
+        id: +value,
+      })),
+      category: saveJobDraftDto.categoryId,
+      user: { id: saveJobDraftDto.userId },
     });
   }
 
@@ -79,7 +98,7 @@ export class JobPostService {
   async findOne(id: number) {
     const jobPost = await this.jobPostRepository.findOne({
       where: { id: id },
-      relations: ['category', 'skills', 'user', 'file', 'questions'],
+      relations: ['category', 'skills', 'user', 'file'],
     });
     if (!jobPost) {
       throw new HttpException('Job post not found', 404);

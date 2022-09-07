@@ -8,6 +8,7 @@ import {
   IsEnum,
   IsInt,
   IsNumber,
+  IsOptional,
   IsString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -58,6 +59,12 @@ export class CreateJobPostDto {
   @Type(() => Number)
   @IsNumber()
   readonly userId: number;
+
+  @ApiProperty()
+  @Type(() => Number)
+  @IsOptional()
+  @IsNumber()
+  readonly id?: number;
 
   @ApiProperty()
   @Type(() => Boolean)

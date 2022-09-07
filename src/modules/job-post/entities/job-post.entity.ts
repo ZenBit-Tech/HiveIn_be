@@ -33,7 +33,7 @@ export class JobPost {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ default: 0 })
   duration: number;
 
   @Column({
@@ -43,7 +43,10 @@ export class JobPost {
   })
   durationType: DurationType;
 
-  @ManyToOne(() => Category, (category) => category.id, { cascade: true })
+  @ManyToOne(() => Category, (category) => category.id, {
+    cascade: true,
+    nullable: true,
+  })
   @JoinColumn()
   category: Category;
 
@@ -60,11 +63,12 @@ export class JobPost {
   @Column({ nullable: true })
   fileId: number | null;
 
-  @Column()
+  @Column({ nullable: true })
   rate: number;
 
   @ManyToMany(() => Skill, (skills) => skills.jobPosts, {
     cascade: true,
+    nullable: true,
   })
   @JoinTable()
   skills: Skill[];
@@ -79,7 +83,7 @@ export class JobPost {
   })
   englishLevel: EnglishLevel;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   jobDescription: string;
 
   @CreateDateColumn()

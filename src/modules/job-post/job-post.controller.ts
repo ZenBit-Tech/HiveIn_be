@@ -23,6 +23,7 @@ import type { Response } from 'express';
 import { JobPost } from './entities/job-post.entity';
 import { ParseFormDataJsonPipe } from 'src/common/pipes/parse-form-data-json.pipe';
 import { multerFileOptions } from 'src/config/multer.config';
+import { SaveJobDraftDto } from './dto/save-job-draft.dto';
 
 @ApiTags('JobPost')
 @Controller('job-post')
@@ -32,7 +33,7 @@ export class JobPostController {
     private readonly localFilesService: LocalFilesService,
   ) {}
 
-  //@UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post()
   @UseInterceptors(FileInterceptor('file', multerFileOptions))
   create(
@@ -44,16 +45,21 @@ export class JobPostController {
     createJobPostDto: CreateJobPostDto,
   ) {
     if (file) {
-      return this.jobPostService.create(createJobPostDto, {
+      return this.jobPostService.save(createJobPostDto, {
         path: file.path,
         filename: file.originalname,
         mimetype: file.mimetype,
       });
     }
-    return this.jobPostService.create(createJobPostDto, null);
+    return this.jobPostService.save(createJobPostDto, null);
   }
 
-  //@UseGuards(JwtAuthGuard)
+  @Post('draft')
+  saveDraft(@Body() saveJobDraftDto: SaveJobDraftDto) {
+    return this.jobPostService.saveDraft(saveJobDraftDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateJobPostDto: UpdateJobPostDto) {
     return this.jobPostService.update(+id, updateJobPostDto);
@@ -65,7 +71,7 @@ export class JobPostController {
     return this.jobPostService.findAll();
   }
 
-  //@UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.jobPostService.findOne(+id);
@@ -77,7 +83,7 @@ export class JobPostController {
     return this.jobPostService.findByUser(+id);
   }
 
-  //@UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.jobPostService.remove(+id);
