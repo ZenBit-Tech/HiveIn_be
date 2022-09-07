@@ -24,6 +24,7 @@ export class CreateJobPostDto {
   readonly title: string;
 
   @ApiProperty()
+  @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
   readonly duration: number;
@@ -33,11 +34,13 @@ export class CreateJobPostDto {
   readonly durationType: DurationType;
 
   @ApiProperty()
+  @IsNotEmpty()
   @Type(() => Number)
   @IsInt()
   readonly categoryId: Category;
 
   @ApiProperty()
+  @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
   readonly rate: number;
@@ -59,6 +62,7 @@ export class CreateJobPostDto {
   readonly jobDescription: string;
 
   @ApiProperty()
+  @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
   readonly userId: number;
@@ -70,6 +74,7 @@ export class CreateJobPostDto {
   readonly id?: number;
 
   @ApiProperty()
+  @IsNotEmpty()
   @Type(() => Boolean)
   @IsBoolean()
   readonly isDraft: boolean;
