@@ -56,7 +56,6 @@ export class ClientService {
   }
 
   async getRecentlyViewedFreelancer(userId: any) {
-    console.log(userId);
     const { recentlyViewedFreelancers } = await this.usersRepo
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.recentlyViewedFreelancers', 'freelancer')
@@ -110,11 +109,11 @@ export class ClientService {
       .getOne();
     if (
       user.savedFreelancers.filter(
-        (freelancer) => freelancer.userId === freelancerUserId,
+        (freelancer) => freelancer.userId === +freelancerUserId,
       ).length !== 0
     ) {
       user.savedFreelancers = user.savedFreelancers.filter(
-        (freelancer) => freelancer.userId !== freelancerUserId,
+        (freelancer) => freelancer.userId !== +freelancerUserId,
       );
     } else {
       user.savedFreelancers.push(freelancer);

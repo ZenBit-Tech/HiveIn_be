@@ -6,16 +6,21 @@ import {
   Patch,
   Param,
   Delete,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { FreelancerService } from './freelancer.service';
 import { CreateFreelancerDto } from './dto/create-freelancer.dto';
 import { UpdateFreelancerDto } from './dto/update-freelancer.dto';
 import { Freelancer } from './entities/freelancer.entity';
+import { PassportReq } from 'src/modules/settings-info/settings-info.controller';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 
 @Controller('freelancer')
 export class FreelancerController {
   constructor(private readonly freelancerService: FreelancerService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   create(
     @Body() createFreelancerDto: CreateFreelancerDto,
@@ -23,16 +28,26 @@ export class FreelancerController {
     return this.freelancerService.create(createFreelancerDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   findAll(): Promise<Freelancer[]> {
     return this.freelancerService.findAll();
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('self')
+  findOwn(@Req() req: PassportReq): Promise<Freelancer> {
+    const { id } = req.user;
+    return this.freelancerService.findOneByUserId(+id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Freelancer> {
     return this.freelancerService.findOneByUserId(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -41,6 +56,7 @@ export class FreelancerController {
     return this.freelancerService.update(+id, updateFreelancerDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string): Promise<void> {
     return this.freelancerService.remove(+id);
