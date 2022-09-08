@@ -49,6 +49,7 @@ export const multerFileOptions: MulterOptions = {
       'application/pdf',
       'image/jpeg',
       'image/jpg',
+      'image/png',
       'application/msword',
       'text/plain',
     ];
