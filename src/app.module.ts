@@ -14,6 +14,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { JobPostModule } from './modules/job-post/job-post.module';
 import { ProposalModule } from './modules/proposal/proposal.module';
+import { ContractModule } from './modules/contract/contract.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { ProposalModule } from './modules/proposal/proposal.module';
     JobPostModule,
     AvatarModule,
     ProposalModule,
+    ContractModule,
   ],
   controllers: [AppController],
   providers: [AppService],
