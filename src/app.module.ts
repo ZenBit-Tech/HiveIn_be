@@ -1,3 +1,4 @@
+import { ClientModule } from './modules/client/client.module';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -16,7 +17,7 @@ import { JobPostModule } from './modules/job-post/job-post.module';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule, AuthModule],
+      imports: [ConfigModule, AuthModule, ClientModule],
       useFactory: (configService: ConfigService) => ({
         type: 'mysql',
         host: configService.get<string>('MYSQL_HOST'),
@@ -56,6 +57,7 @@ import { JobPostModule } from './modules/job-post/job-post.module';
       dest: '/uploads',
     }),
     AuthModule,
+    ClientModule,
     SettingsInfoModule,
     FreelancerModule,
     CategoryModule,
