@@ -1,4 +1,3 @@
-import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import {
   Column,
   Entity,
@@ -6,25 +5,13 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Skill } from 'src/modules/skill/entities/skill.entity';
-import { Users } from 'src/modules/entities/users.entity';
-
-export enum DurationType {
-  WEEK = 'week',
-  MONTH = 'month',
-}
-export enum EnglishLevel {
-  PRE_INTERMEDIATE = 'Pre-intermediate',
-  INTERMEDIATE = 'Intermediate',
-  UPPER_INTERMEDIATE = 'Upper-intermediate',
-}
+import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
+import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
 
 @Entity()
 export class Proposal {
   @PrimaryGeneratedColumn()
   id: number;
-
-  // add questions and attachments
 
   @Column()
   coverLetter: string;
@@ -32,9 +19,9 @@ export class Proposal {
   @Column()
   rate: number;
 
-  @ManyToOne(() => Users, (user) => user.id, { cascade: true })
+  @ManyToOne(() => JobPost, (jobPost) => jobPost.id, { cascade: true })
   @JoinColumn()
-  user: Users;
+  jobPost: JobPost;
 
   @ManyToOne(() => Freelancer, (freelancer) => freelancer.id, { cascade: true })
   @JoinColumn()

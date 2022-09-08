@@ -1,4 +1,5 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { AuthRequest } from 'src/utils/types';
+import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
 
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { CreateProposalDto } from './dto/create-proposal.dto';
@@ -10,19 +11,10 @@ export class ProposalController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createProposalDto: CreateProposalDto) {
-    return this.proposalService.create(createProposalDto);
+  create(
+    @Body() createProposalDto: CreateProposalDto,
+    @Request() req: AuthRequest,
+  ) {
+    return this.proposalService.create(createProposalDto, req.user.id);
   }
-
-  // @UseGuards(JwtAuthGuard)
-  // @Get(':id')
-  // findOne(@Param('id') id: number) {
-  //   return this.proposalService.findOne(id);
-  // }
-
-  // @UseGuards(JwtAuthGuard)
-  // @Delete(':id')
-  // remove(@Param('id') id: number) {
-  //   return this.proposalService.remove(id);
-  // }
 }
