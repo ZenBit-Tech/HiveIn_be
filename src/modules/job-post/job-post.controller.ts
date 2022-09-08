@@ -10,6 +10,7 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { JobPostService } from './job-post.service';
@@ -21,7 +22,6 @@ import { ApiTags } from '@nestjs/swagger';
 import { LocalFilesService } from './localFiles.service';
 import type { Response } from 'express';
 import { JobPost } from './entities/job-post.entity';
-import { ParseFormDataJsonPipe } from 'src/common/pipes/parse-form-data-json.pipe';
 import { multerFileOptions } from 'src/config/multer.config';
 import { SaveJobDraftDto } from './dto/save-job-draft.dto';
 
@@ -36,12 +36,10 @@ export class JobPostController {
   @UseGuards(JwtAuthGuard)
   @Post()
   @UseInterceptors(FileInterceptor('file', multerFileOptions))
+  @UsePipes(new ValidationPipe({ transform: true }))
   create(
     @UploadedFile() file: Express.Multer.File,
-    @Body(
-      new ParseFormDataJsonPipe({ except: ['file'] }),
-      new ValidationPipe({ transform: true }),
-    )
+    @Body()
     createJobPostDto: CreateJobPostDto,
   ) {
     if (file) {
