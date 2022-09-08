@@ -6,7 +6,8 @@ import { Repository } from 'typeorm';
 import { UpdateJobPostDto } from './dto/update-job-post.dto';
 import { LocalFilesService } from './localFiles.service';
 import { LocalFileDto } from './dto/localFile.dto';
-import { LocalFile } from '../entities/localFile.entity';
+import { LocalFile } from 'src/modules/entities/localFile.entity';
+import { SaveJobDraftDto } from './dto/save-job-draft.dto';
 
 @Injectable()
 export class JobPostService {
@@ -16,7 +17,7 @@ export class JobPostService {
     private localFilesService: LocalFilesService,
   ) {}
 
-  async create(
+  async save(
     createJobPostDto: CreateJobPostDto,
     fileData: LocalFileDto | null,
   ) {
@@ -25,22 +26,41 @@ export class JobPostService {
     if (fileData) {
       file = await this.localFilesService.saveLocalFileData(fileData);
     }
-    const skills = createJobPostDto.skillsId.map((value) => ({
+
+    const skills = createJobPostDto.skillsId?.map((value) => ({
       id: +value,
     }));
-    /*TODO type validation*/
     return await this.jobPostRepository.save({
+      id: createJobPostDto.id,
       title: createJobPostDto.title,
-      duration: +createJobPostDto.duration,
+      duration: createJobPostDto.duration,
       durationType: createJobPostDto.durationType,
       jobDescription: createJobPostDto.jobDescription,
-      rate: +createJobPostDto.rate,
+      rate: createJobPostDto.rate,
       englishLevel: createJobPostDto.englishLevel,
       isDraft: createJobPostDto.isDraft,
       skills: skills,
       category: createJobPostDto.categoryId,
-      user: { id: +createJobPostDto.userId },
+      user: { id: createJobPostDto.userId },
       fileId: file?.id || null,
+    });
+  }
+
+  async saveDraft(saveJobDraftDto: SaveJobDraftDto) {
+    return await this.jobPostRepository.save({
+      id: saveJobDraftDto.id,
+      title: saveJobDraftDto.title,
+      duration: saveJobDraftDto.duration,
+      durationType: saveJobDraftDto.durationType,
+      jobDescription: saveJobDraftDto.jobDescription,
+      rate: saveJobDraftDto.rate,
+      englishLevel: saveJobDraftDto.englishLevel,
+      isDraft: saveJobDraftDto.isDraft,
+      skills: saveJobDraftDto.skillsId?.map((value) => ({
+        id: +value,
+      })),
+      category: saveJobDraftDto.categoryId,
+      user: { id: saveJobDraftDto.userId },
     });
   }
 
@@ -52,12 +72,12 @@ export class JobPostService {
     if (!jobPost) {
       throw new HttpException('job post not found', 404);
     }
+
     return await this.jobPostRepository.update(
       { user: { id: updateJobPostDto.userId }, id: id },
       {
         jobDescription: updateJobPostDto.jobDescription,
         rate: updateJobPostDto.rate,
-        isDraft: updateJobPostDto.isDraft,
       },
     );
   }
