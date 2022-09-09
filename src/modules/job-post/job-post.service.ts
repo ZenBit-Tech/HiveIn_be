@@ -41,13 +41,14 @@ export class JobPostService {
       category: createJobPostDto.categoryId,
       user: { id: +createJobPostDto.userId },
       fileId: file?.id || null,
+      contract: {},
     });
   }
 
   async update(id: number, updateJobPostDto: UpdateJobPostDto) {
     const jobPost = await this.jobPostRepository.findOne({
       where: { id: id, user: { id: updateJobPostDto.userId } },
-      relations: ['category', 'skills', 'user'],
+      relations: ['category', 'skills', 'user', 'contract'],
     });
     if (!jobPost) {
       throw new HttpException('job post not found', 404);
@@ -72,6 +73,7 @@ export class JobPostService {
       )
       .leftJoinAndSelect('job_post.skills', 'skills')
       .leftJoinAndSelect('job_post.user', 'users')
+      .leftJoinAndSelect('job_post.contract', 'contracts')
       .getMany();
   }
 
@@ -89,7 +91,10 @@ export class JobPostService {
   async findByUser(userId: number) {
     const jobPosts = await this.jobPostRepository.find({
       where: { user: { id: userId } },
-      relations: ['category', 'skills', 'user'],
+      relations: ['category', 'skills', 'user', 'contract'],
+      order: {
+        createdAt: 'DESC',
+      },
     });
     if (!jobPosts) {
       throw new HttpException('Posts for this user not found', 404);
@@ -105,6 +110,7 @@ export class JobPostService {
         },
         isDraft,
       },
+      relations: ['contract'],
       order: {
         createdAt: 'DESC',
       },
