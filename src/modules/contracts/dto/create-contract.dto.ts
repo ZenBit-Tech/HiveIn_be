@@ -1,4 +1,4 @@
-import { IsDate, IsEnum, IsNumber } from 'class-validator';
+import { IsDateString, IsEnum, IsNumber } from 'class-validator';
 import { ContractStatus } from 'src/modules/contracts/entities/contracts.entity';
 
 export class CreateContractDto {
@@ -8,6 +8,9 @@ export class CreateContractDto {
   @IsEnum(ContractStatus)
   readonly contractStatus: ContractStatus;
 
-  @IsDate()
+  @IsDateString()
+  readonly startDate: Date;
+
+  @IsDateString()
   readonly endDate: Date;
 }

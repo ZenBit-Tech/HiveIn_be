@@ -2,7 +2,6 @@ import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
 import {
   Column,
-  CreateDateColumn,
   Entity,
   ManyToOne,
   OneToOne,
@@ -36,7 +35,7 @@ export class Contracts {
   })
   contractStatus: ContractStatus;
 
-  @CreateDateColumn()
+  @Column({ nullable: true })
   startDate: Date;
 
   @Column({ nullable: true })
