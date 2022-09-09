@@ -1,8 +1,8 @@
 import { PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNumber, IsEnum, IsOptional, IsDate } from 'class-validator';
+import { CreateContractDto } from 'src/modules/contracts/dto/create-contract.dto';
 import { ContractStatus } from 'src/modules/contracts/entities/contracts.entity';
-import { CreateContractDto } from './create-contract.dto';
 
 export class UpdateContractDto extends PartialType(CreateContractDto) {
   @IsOptional()

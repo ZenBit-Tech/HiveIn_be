@@ -1,9 +1,8 @@
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
 import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
-
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
-import { CreateProposalDto } from './dto/create-proposal.dto';
-import { ProposalService } from './proposal.service';
+import { CreateProposalDto } from 'src/modules/proposal/dto/create-proposal.dto';
+import { ProposalService } from 'src/modules/proposal/proposal.service';
 
 @Controller('proposal')
 export class ProposalController {

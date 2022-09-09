@@ -3,8 +3,8 @@ import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateProposalDto } from './dto/create-proposal.dto';
-import { Proposal } from './entities/proposal.entity';
+import { CreateProposalDto } from 'src/modules/proposal/dto/create-proposal.dto';
+import { Proposal } from 'src/modules/proposal/entities/proposal.entity';
 
 @Injectable()
 export class ProposalService {

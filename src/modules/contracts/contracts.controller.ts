@@ -9,10 +9,10 @@ import {
   Req,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
+import { ContractsService } from 'src/modules/contracts/contracts.service';
+import { CreateContractDto } from 'src/modules/contracts/dto/create-contract.dto';
+import { UpdateContractDto } from 'src/modules/contracts/dto/update-contract.dto';
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
-import { ContractsService } from './contracts.service';
-import { CreateContractDto } from './dto/create-contract.dto';
-import { UpdateContractDto } from './dto/update-contract.dto';
 
 @Controller('contracts')
 export class ContractsController {
