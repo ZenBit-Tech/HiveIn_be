@@ -1,6 +1,5 @@
-import { Users } from 'src/modules/entities/users.entity';
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
-import { Proposal } from 'src/modules/proposal/entities/proposal.entity';
+import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
 import {
   Column,
   CreateDateColumn,
@@ -17,18 +16,18 @@ export enum ContractStatus {
 }
 
 @Entity()
-export class Contract {
+export class Contracts {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => Proposal, (proposal) => proposal.id)
-  proposalID: Proposal;
+  @OneToOne(() => JobPost, (jobPost) => jobPost.contract)
+  jobPost: JobPost;
 
-  @ManyToOne(() => Users, (user) => user.id)
-  hiringManagerId: Users;
-
-  @ManyToOne(() => Freelancer, (freelancer) => freelancer.id)
-  freelancerId: Freelancer;
+  @ManyToOne(() => Freelancer, (freelancer) => freelancer.id, {
+    cascade: true,
+    nullable: true,
+  })
+  freelancer: Freelancer;
 
   @Column({
     type: 'enum',
@@ -38,8 +37,8 @@ export class Contract {
   contractStatus: ContractStatus;
 
   @CreateDateColumn()
-  startTime: Date;
+  startDate: Date;
 
-  @Column()
-  endTime: Date;
+  @Column({ nullable: true })
+  endDate: Date;
 }
