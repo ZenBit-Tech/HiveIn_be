@@ -22,7 +22,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { LocalFilesService } from './localFiles.service';
 import { Response } from 'express';
 import { JobPost } from './entities/job-post.entity';
-import { PassportReq } from 'src/modules/settings-info/settings-info.controller';
+import { AuthRequest } from 'src/utils/@types/AuthRequest';
 
 @ApiTags('JobPost')
 @Controller('job-post')
@@ -69,7 +69,7 @@ export class JobPostController {
 
   @UseGuards(JwtAuthGuard)
   @Get('self')
-  findByUser(@Req() req: PassportReq) {
+  findByUser(@Req() req: AuthRequest) {
     const { id } = req.user;
     return this.jobPostService.findByUser(+id);
   }
@@ -89,7 +89,7 @@ export class JobPostController {
   @UseGuards(JwtAuthGuard)
   @Get('home/self/:isDraft')
   getClientHomePostsAndDrafts(
-    @Req() req: PassportReq,
+    @Req() req: AuthRequest,
     @Param('isDraft') isDraft?: string,
   ) {
     const { id } = req.user;

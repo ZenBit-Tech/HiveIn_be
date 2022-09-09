@@ -1,4 +1,4 @@
-import { AuthRequest } from 'src/utils/types';
+import { AuthRequest } from 'src/utils/@types/AuthRequest';
 import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
 
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
