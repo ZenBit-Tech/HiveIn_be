@@ -11,18 +11,21 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { JobPostService } from './job-post.service';
 import { CreateJobPostDto } from './dto/create-job-post.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { UpdateJobPostDto } from './dto/update-job-post.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
 import { ApiTags } from '@nestjs/swagger';
 import { LocalFilesService } from './localFiles.service';
 import { Response } from 'express';
 import { JobPost } from './entities/job-post.entity';
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
+import { multerFileOptions } from 'src/config/multer.config';
+import { SaveJobDraftDto } from './dto/save-job-draft.dto';
 
 @ApiTags('JobPost')
 @Controller('job-post')
@@ -34,25 +37,25 @@ export class JobPostController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploadedFiles/files',
-      }),
-    }),
-  )
+  @UseInterceptors(FileInterceptor('file', multerFileOptions))
+  @UsePipes(new ValidationPipe({ transform: true }))
   create(
     @UploadedFile() file: Express.Multer.File,
     @Body() createJobPostDto: CreateJobPostDto,
   ) {
     if (file) {
-      return this.jobPostService.create(createJobPostDto, {
+      return this.jobPostService.save(createJobPostDto, {
         path: file.path,
         filename: file.originalname,
         mimetype: file.mimetype,
       });
     }
-    return this.jobPostService.create(createJobPostDto, null);
+    return this.jobPostService.save(createJobPostDto, null);
+  }
+
+  @Post('draft')
+  saveDraft(@Body() saveJobDraftDto: SaveJobDraftDto) {
+    return this.jobPostService.saveDraft(saveJobDraftDto);
   }
 
   @UseGuards(JwtAuthGuard)

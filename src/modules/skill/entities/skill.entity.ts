@@ -26,6 +26,6 @@ export class Skill {
   @ManyToMany(() => Freelancer)
   freelancers: Freelancer[];
 
-  @ManyToMany(() => Freelancer)
+  @ManyToMany(() => JobPost)
   jobPosts: JobPost[];
 }
