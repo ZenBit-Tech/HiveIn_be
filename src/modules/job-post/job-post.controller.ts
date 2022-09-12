@@ -60,13 +60,13 @@ export class JobPostController {
     return this.jobPostService.saveDraft(saveJobDraftDto);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateJobPostDto: UpdateJobPostDto) {
     return this.jobPostService.update(+id, updateJobPostDto);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get()
   findAll(): Promise<JobPost[]> {
     return this.jobPostService.findAll();
@@ -77,26 +77,26 @@ export class JobPostController {
     return this.jobPostService.findAndFilterAll(queryParams);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('self')
   findByUser(@Req() req: PassportReq) {
     const { id } = req.user;
     return this.jobPostService.findByUser(+id);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.jobPostService.findOne(+id);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.jobPostService.remove(+id);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('home/self/:isDraft')
   getClientHomePostsAndDrafts(
     @Req() req: PassportReq,
@@ -110,7 +110,7 @@ export class JobPostController {
   }
 
   @Get('/file/:id')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async getFile(
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,
