@@ -14,6 +14,7 @@ import { Category } from 'src/modules/category/entities/category.entity';
 import { Skill } from 'src/modules/skill/entities/skill.entity';
 import { Users } from 'src/modules/entities/users.entity';
 import { LocalFile } from 'src/modules/entities/localFile.entity';
+import { Contracts } from 'src/modules/contracts/entities/contracts.entity';
 
 export enum DurationType {
   WEEK = 'week',
@@ -53,6 +54,10 @@ export class JobPost {
   @ManyToOne(() => Users, (user) => user.id, { cascade: true })
   @JoinColumn()
   user: Users;
+
+  @OneToOne(() => Contracts, (contract) => contract.jobPost, { cascade: true })
+  @JoinColumn()
+  contract: Contracts;
 
   @JoinColumn({ name: 'fileId' })
   @OneToOne(() => LocalFile, {

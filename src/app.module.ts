@@ -13,6 +13,8 @@ import { AvatarModule } from './modules/avatar/avatar.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { JobPostModule } from './modules/job-post/job-post.module';
+import { ProposalModule } from './modules/proposal/proposal.module';
+import { ContractsModule } from './modules/contracts/contracts.module';
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { JobPostModule } from './modules/job-post/job-post.module';
         database: configService.get<string>('MYSQL_DB_NAME'),
         entities: [__dirname + '/entities/**/*.entity{.ts, .js}'],
         migrations: [__dirname + '/migrations/*{.ts, .js}'],
+        timezone: 'Z',
         logging: true,
         migrationsRun: false,
         autoLoadEntities: true,
@@ -64,6 +67,8 @@ import { JobPostModule } from './modules/job-post/job-post.module';
     SkillModule,
     JobPostModule,
     AvatarModule,
+    ProposalModule,
+    ContractsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -25,7 +25,7 @@ import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { UpdateJobPostDto } from 'src/modules/job-post/dto/update-job-post.dto';
 import { LocalFilesService } from 'src/modules/job-post/localFiles.service';
 import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
-import { PassportReq } from 'src/modules/settings-info/settings-info.controller';
+import { AuthRequest } from 'src/utils/@types/AuthRequest';
 import { multerFileOptions } from 'src/config/multer.config';
 import { SaveJobDraftDto } from 'src/modules/job-post/dto/save-job-draft.dto';
 import { searchJobFiltersDto } from 'src/modules/job-post/dto/search-job-filters.dto';
@@ -86,7 +86,7 @@ export class JobPostController {
 
   @UseGuards(JwtAuthGuard)
   @Get('self')
-  findByUser(@Req() req: PassportReq): Promise<JobPost[]> {
+  findByUser(@Req() req: AuthRequest): Promise<JobPost[]> {
     const { id } = req.user;
     return this.jobPostService.findByUser(+id);
   }
@@ -106,7 +106,7 @@ export class JobPostController {
   @UseGuards(JwtAuthGuard)
   @Get('home/self/:isDraft')
   getClientHomePostsAndDrafts(
-    @Req() req: PassportReq,
+    @Req() req: AuthRequest,
     @Param('isDraft') isDraft?: string,
   ): Promise<JobPost[]> {
     const { id } = req.user;
