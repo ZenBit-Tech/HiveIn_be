@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateContractDto } from 'src/modules/contracts/dto/create-contract.dto';
 import { UpdateContractDto } from 'src/modules/contracts/dto/update-contract.dto';
 import { Contracts } from 'src/modules/contracts/entities/contracts.entity';
-import { Repository } from 'typeorm';
+import { DeleteResult, InsertResult, Repository } from 'typeorm';
 
 @Injectable()
 export class ContractsService {
@@ -12,7 +12,7 @@ export class ContractsService {
     private readonly contractRepo: Repository<Contracts>,
   ) {}
 
-  async create(createContractDto: CreateContractDto) {
+  async create(createContractDto: CreateContractDto): Promise<InsertResult> {
     const { freelancer } = createContractDto;
 
     return await this.contractRepo
@@ -28,7 +28,7 @@ export class ContractsService {
       .execute();
   }
 
-  async findAll() {
+  async findAll(): Promise<Contracts[]> {
     return await this.contractRepo
       .createQueryBuilder('contracts')
       .leftJoinAndSelect('contracts.jobPost', 'jobPost')
@@ -37,7 +37,7 @@ export class ContractsService {
       .getMany();
   }
 
-  async findOwnAsClient(userId: number) {
+  async findOwnAsClient(userId: number): Promise<Contracts[]> {
     const contract = await this.contractRepo
       .createQueryBuilder('contracts')
       .leftJoinAndSelect('contracts.jobPost', 'jobPost')
@@ -51,7 +51,7 @@ export class ContractsService {
     return contract;
   }
 
-  async findOwnAsFreelancer(freelancerId: number) {
+  async findOwnAsFreelancer(freelancerId: number): Promise<Contracts[]> {
     const contract = await this.contractRepo
       .createQueryBuilder('contracts')
       .leftJoinAndSelect('contracts.jobPost', 'jobPost')
@@ -65,7 +65,7 @@ export class ContractsService {
     return contract;
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Contracts[]> {
     const contract = await this.contractRepo
       .createQueryBuilder('contracts')
       .leftJoinAndSelect('contracts.jobPost', 'jobPost')
@@ -79,7 +79,10 @@ export class ContractsService {
     return contract;
   }
 
-  async update(id: number, updateContractDto: UpdateContractDto) {
+  async update(
+    id: number,
+    updateContractDto: UpdateContractDto,
+  ): Promise<void> {
     await this.findOne(id);
 
     const { freelancer } = updateContractDto;
@@ -95,7 +98,7 @@ export class ContractsService {
       .execute();
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<DeleteResult> {
     return await this.contractRepo
       .createQueryBuilder('contracts')
       .delete()
