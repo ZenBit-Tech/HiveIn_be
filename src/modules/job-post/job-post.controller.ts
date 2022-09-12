@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   Res,
   UploadedFile,
@@ -14,18 +15,19 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { JobPostService } from './job-post.service';
-import { CreateJobPostDto } from './dto/create-job-post.dto';
-import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
-import { UpdateJobPostDto } from './dto/update-job-post.dto';
+import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
-import { LocalFilesService } from './localFiles.service';
-import { Response } from 'express';
-import { JobPost } from './entities/job-post.entity';
+import { JobPostService } from 'src/modules/job-post/job-post.service';
+import { CreateJobPostDto } from 'src/modules/job-post/dto/create-job-post.dto';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
+import { UpdateJobPostDto } from 'src/modules/job-post/dto/update-job-post.dto';
+import { LocalFilesService } from 'src/modules/job-post/localFiles.service';
+import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
 import { PassportReq } from 'src/modules/settings-info/settings-info.controller';
 import { multerFileOptions } from 'src/config/multer.config';
-import { SaveJobDraftDto } from './dto/save-job-draft.dto';
+import { SaveJobDraftDto } from 'src/modules/job-post/dto/save-job-draft.dto';
+import { searchJobFiltersDto } from 'src/modules/job-post/dto/search-job-filters.dto';
 
 @ApiTags('JobPost')
 @Controller('job-post')
@@ -58,38 +60,43 @@ export class JobPostController {
     return this.jobPostService.saveDraft(saveJobDraftDto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateJobPostDto: UpdateJobPostDto) {
     return this.jobPostService.update(+id, updateJobPostDto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get()
   findAll(): Promise<JobPost[]> {
     return this.jobPostService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Get('search-job')
+  findAndFilterJobs(@Query() queryParams: searchJobFiltersDto) {
+    return this.jobPostService.findAndFilterAll(queryParams);
+  }
+
+  // @UseGuards(JwtAuthGuard)
   @Get('self')
   findByUser(@Req() req: PassportReq) {
     const { id } = req.user;
     return this.jobPostService.findByUser(+id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.jobPostService.findOne(+id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.jobPostService.remove(+id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('home/self/:isDraft')
   getClientHomePostsAndDrafts(
     @Req() req: PassportReq,
@@ -98,12 +105,12 @@ export class JobPostController {
     const { id } = req.user;
     return this.jobPostService.getClientHomePostAndDrafts(
       id,
-      isDraft === 'true' ? true : false,
+      isDraft === 'true',
     );
   }
 
   @Get('/file/:id')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async getFile(
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,

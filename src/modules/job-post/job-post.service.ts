@@ -1,13 +1,14 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { JobPost } from './entities/job-post.entity';
-import { CreateJobPostDto } from './dto/create-job-post.dto';
 import { Repository } from 'typeorm';
-import { UpdateJobPostDto } from './dto/update-job-post.dto';
-import { LocalFilesService } from './localFiles.service';
-import { LocalFileDto } from './dto/localFile.dto';
+import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
+import { CreateJobPostDto } from 'src/modules/job-post/dto/create-job-post.dto';
+import { UpdateJobPostDto } from 'src/modules/job-post/dto/update-job-post.dto';
+import { LocalFilesService } from 'src/modules/job-post/localFiles.service';
+import { LocalFileDto } from 'src/modules/job-post/dto/localFile.dto';
 import { LocalFile } from 'src/modules/entities/localFile.entity';
-import { SaveJobDraftDto } from './dto/save-job-draft.dto';
+import { SaveJobDraftDto } from 'src/modules/job-post/dto/save-job-draft.dto';
+import { searchJobFiltersDto } from 'src/modules/job-post/dto/search-job-filters.dto';
 
 @Injectable()
 export class JobPostService {
@@ -93,6 +94,47 @@ export class JobPostService {
       .leftJoinAndSelect('job_post.skills', 'skills')
       .leftJoinAndSelect('job_post.user', 'users')
       .getMany();
+  }
+
+  async findAndFilterAll(queryParams: searchJobFiltersDto) {
+    const { category, skills, englishLevel, duration, durationType, rate } =
+      queryParams;
+    const take = queryParams.take || 100;
+    const skip = queryParams.skip || 0;
+
+    const filterSkillsParams =
+      skills &&
+      skills.split('_').map((skillId) => {
+        if (!Number.isInteger(+skillId))
+          throw new HttpException('Unacceptable skill query parameter', 400);
+        return +skillId;
+      });
+
+    const [data, totalCount] = await this.jobPostRepository
+      .createQueryBuilder('job_post')
+      .leftJoinAndSelect(
+        'job_post.category',
+        'category',
+        'job_post.categoryId = category.id',
+      )
+      .leftJoinAndSelect('job_post.skills', 'skills')
+      .leftJoinAndSelect('job_post.user', 'users')
+      .where('isDraft = 0')
+      .andWhere(category ? `job_post.categoryId = ${category}` : '1 = 1')
+      .andWhere(englishLevel ? `englishLevel = '${englishLevel}'` : '1 = 1')
+      .andWhere(duration ? `duration <= ${duration}` : '1 = 1')
+      .andWhere(durationType ? `durationType = '${durationType}'` : '1 = 1')
+      .andWhere(rate ? `rate >= ${rate}` : '1 = 1')
+      .andWhere(skills ? `skills.id IN (${filterSkillsParams})` : '1 = 1')
+      .orderBy(`job_post.createdAt`, 'DESC')
+      .skip(skip)
+      .take(take)
+      .getManyAndCount();
+
+    return {
+      data,
+      totalCount,
+    };
   }
 
   async findOne(id: number) {
