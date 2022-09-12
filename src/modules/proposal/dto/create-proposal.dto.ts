@@ -5,7 +5,7 @@ export class CreateProposalDto {
   readonly coverLetter: string;
 
   @IsNumber()
-  readonly rate: number;
+  readonly bid: number;
 
   @IsNumber()
   readonly idJobPost: number;

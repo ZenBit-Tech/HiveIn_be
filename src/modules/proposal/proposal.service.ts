@@ -18,7 +18,7 @@ export class ProposalService {
   ) {}
 
   async create(
-    { coverLetter, rate, idJobPost }: CreateProposalDto,
+    { coverLetter, bid, idJobPost }: CreateProposalDto,
     freelancerUserId: number,
   ) {
     const freelancer = await this.freelancersRepo
@@ -39,7 +39,7 @@ export class ProposalService {
 
     return await this.proposalRepo.save({
       coverLetter,
-      rate,
+      bid,
       jobPost,
       freelancer,
     });

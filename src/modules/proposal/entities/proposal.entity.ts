@@ -17,7 +17,7 @@ export class Proposal {
   coverLetter: string;
 
   @Column()
-  rate: number;
+  bid: number;
 
   @ManyToOne(() => JobPost, (jobPost) => jobPost.id, { cascade: true })
   @JoinColumn()
