@@ -28,10 +28,10 @@ export class Notification {
   type: string;
 
   @ManyToOne(() => Users)
-  @JoinColumn({ name: 'fromId' })
+  @JoinColumn({ name: 'fromUserId' })
   fromUser: Users;
 
   @ManyToOne(() => Users)
-  @JoinColumn({ name: 'toId' })
+  @JoinColumn({ name: 'toUserId' })
   toUser: Users;
 }

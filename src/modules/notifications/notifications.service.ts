@@ -16,7 +16,11 @@ export class NotificationsService {
   }
 
   findAll() {
-    return this.notificationRepository.find();
+    return this.notificationRepository
+      .createQueryBuilder('notification')
+      .leftJoinAndSelect('notification.fromUser', 'fromUser')
+      .leftJoinAndSelect('notification.toUser', 'toUser')
+      .getMany();
   }
 
   read(id: number) {
