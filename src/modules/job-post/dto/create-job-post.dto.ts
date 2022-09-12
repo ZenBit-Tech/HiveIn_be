@@ -12,7 +12,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { Category } from 'src/modules/category/entities/category.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -74,8 +74,10 @@ export class CreateJobPostDto {
   readonly id?: number;
 
   @ApiProperty()
+  @Transform(({ value }) => {
+    return [true, 'enabled', 'true'].indexOf(value) > -1;
+  })
   @IsNotEmpty()
-  @Type(() => Boolean)
   @IsBoolean()
   readonly isDraft: boolean;
 }

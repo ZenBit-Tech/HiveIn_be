@@ -1,13 +1,18 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { JobPost } from './entities/job-post.entity';
-import { CreateJobPostDto } from './dto/create-job-post.dto';
-import { Repository } from 'typeorm';
-import { UpdateJobPostDto } from './dto/update-job-post.dto';
-import { LocalFilesService } from './localFiles.service';
-import { LocalFileDto } from './dto/localFile.dto';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
+import { CreateJobPostDto } from 'src/modules/job-post/dto/create-job-post.dto';
+import { UpdateJobPostDto } from 'src/modules/job-post/dto/update-job-post.dto';
+import { LocalFilesService } from 'src/modules/job-post/localFiles.service';
+import { LocalFileDto } from 'src/modules/job-post/dto/localFile.dto';
 import { LocalFile } from 'src/modules/entities/localFile.entity';
-import { SaveJobDraftDto } from './dto/save-job-draft.dto';
+import { SaveJobDraftDto } from 'src/modules/job-post/dto/save-job-draft.dto';
+import { searchJobFiltersDto } from 'src/modules/job-post/dto/search-job-filters.dto';
+import {
+  DEFAULT_AMOUNT_OF_QUERIED_POSTS,
+  DEFAULT_SKIP_OF_QUERIED_POSTS,
+} from 'src/utils/job-post.consts';
 
 @Injectable()
 export class JobPostService {
@@ -20,7 +25,7 @@ export class JobPostService {
   async save(
     createJobPostDto: CreateJobPostDto,
     fileData: LocalFileDto | null,
-  ) {
+  ): Promise<JobPost> {
     let file: LocalFile | null = null;
 
     if (fileData) {
@@ -47,7 +52,7 @@ export class JobPostService {
     });
   }
 
-  async saveDraft(saveJobDraftDto: SaveJobDraftDto) {
+  async saveDraft(saveJobDraftDto: SaveJobDraftDto): Promise<JobPost> {
     return await this.jobPostRepository.save({
       id: saveJobDraftDto.id,
       title: saveJobDraftDto.title,
@@ -65,7 +70,10 @@ export class JobPostService {
     });
   }
 
-  async update(id: number, updateJobPostDto: UpdateJobPostDto) {
+  async update(
+    id: number,
+    updateJobPostDto: UpdateJobPostDto,
+  ): Promise<UpdateResult> {
     const jobPost = await this.jobPostRepository.findOne({
       where: { id: id, user: { id: updateJobPostDto.userId } },
       relations: ['category', 'skills', 'user', 'contract'],
@@ -83,7 +91,7 @@ export class JobPostService {
     );
   }
 
-  async findAll() {
+  async findAll(): Promise<JobPost[]> {
     return await this.jobPostRepository
       .createQueryBuilder('job_post')
       .leftJoinAndSelect(
@@ -97,7 +105,50 @@ export class JobPostService {
       .getMany();
   }
 
-  async findOne(id: number) {
+  async findAndFilterAll(
+    queryParams: searchJobFiltersDto,
+  ): Promise<{ data: JobPost[]; totalCount: number }> {
+    const { category, skills, englishLevel, duration, durationType, rate } =
+      queryParams;
+    const take = queryParams.take || DEFAULT_AMOUNT_OF_QUERIED_POSTS;
+    const skip = queryParams.skip || DEFAULT_SKIP_OF_QUERIED_POSTS;
+
+    const filterSkillsParams =
+      skills &&
+      skills.split('_').map((skillId) => {
+        if (!Number.isInteger(+skillId))
+          throw new HttpException('Unacceptable skill query parameter', 400);
+        return +skillId;
+      });
+
+    const [data, totalCount] = await this.jobPostRepository
+      .createQueryBuilder('job_post')
+      .leftJoinAndSelect(
+        'job_post.category',
+        'category',
+        'job_post.categoryId = category.id',
+      )
+      .leftJoinAndSelect('job_post.skills', 'skills')
+      .leftJoinAndSelect('job_post.user', 'users')
+      .where('isDraft = 0')
+      .andWhere(category ? `job_post.categoryId = ${category}` : '1 = 1')
+      .andWhere(englishLevel ? `englishLevel = '${englishLevel}'` : '1 = 1')
+      .andWhere(duration ? `duration <= ${duration}` : '1 = 1')
+      .andWhere(durationType ? `durationType = '${durationType}'` : '1 = 1')
+      .andWhere(rate ? `rate >= ${rate}` : '1 = 1')
+      .andWhere(skills ? `skills.id IN (${filterSkillsParams})` : '1 = 1')
+      .orderBy(`job_post.createdAt`, 'DESC')
+      .skip(skip)
+      .take(take)
+      .getManyAndCount();
+
+    return {
+      data,
+      totalCount,
+    };
+  }
+
+  async findOne(id: number): Promise<JobPost> {
     const jobPost = await this.jobPostRepository.findOne({
       where: { id: id },
       relations: ['category', 'skills', 'user', 'file'],
@@ -108,7 +159,7 @@ export class JobPostService {
     return jobPost;
   }
 
-  async findByUser(userId: number) {
+  async findByUser(userId: number): Promise<JobPost[]> {
     const jobPosts = await this.jobPostRepository.find({
       where: { user: { id: userId } },
       relations: ['category', 'skills', 'user', 'contract'],
@@ -122,7 +173,10 @@ export class JobPostService {
     return jobPosts;
   }
 
-  async getClientHomePostAndDrafts(userId: number, isDraft: boolean) {
+  async getClientHomePostAndDrafts(
+    userId: number,
+    isDraft: boolean,
+  ): Promise<JobPost[]> {
     return await this.jobPostRepository.find({
       where: {
         user: {
@@ -138,7 +192,7 @@ export class JobPostService {
     });
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<DeleteResult> {
     const jobPost = await this.findOne(id);
     if (!jobPost) {
       throw new HttpException('Job post not found', 404);
