@@ -1,47 +1,33 @@
-import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
-import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateProposalDto } from 'src/modules/proposal/dto/create-proposal.dto';
 import { Proposal } from 'src/modules/proposal/entities/proposal.entity';
+import { FreelancerService } from 'src/modules/freelancer/freelancer.service';
 
 @Injectable()
 export class ProposalService {
   constructor(
     @InjectRepository(Proposal)
     private readonly proposalRepo: Repository<Proposal>,
-    @InjectRepository(Freelancer)
-    private readonly freelancersRepo: Repository<Freelancer>,
-    @InjectRepository(JobPost)
-    private readonly jobPostRepo: Repository<JobPost>,
+    private readonly freelancerService: FreelancerService,
   ) {}
 
-  async create(
-    { coverLetter, bid, idJobPost }: CreateProposalDto,
-    freelancerUserId: number,
-  ) {
-    const freelancer = await this.freelancersRepo
-      .createQueryBuilder('freelancer')
-      .leftJoinAndSelect('freelancer.user', 'user')
-      .where({
-        user: {
-          id: freelancerUserId,
+  async create(createProposalDto: CreateProposalDto, userId: number) {
+    const { idJobPost } = createProposalDto;
+    const freelancer = await this.freelancerService.findOneByUserId(userId);
+
+    return await this.proposalRepo
+      .createQueryBuilder('proposal')
+      .insert()
+      .into(Proposal)
+      .values([
+        {
+          ...createProposalDto,
+          jobPost: { id: idJobPost },
+          freelancer: freelancer,
         },
-      })
-      .getOne();
-
-    const jobPost = await this.jobPostRepo.findOne({
-      where: {
-        id: idJobPost,
-      },
-    });
-
-    return await this.proposalRepo.save({
-      coverLetter,
-      bid,
-      jobPost,
-      freelancer,
-    });
+      ])
+      .execute();
   }
 }
