@@ -1,6 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
 import { CreateJobPostDto } from 'src/modules/job-post/dto/create-job-post.dto';
 import { UpdateJobPostDto } from 'src/modules/job-post/dto/update-job-post.dto';
@@ -25,7 +25,7 @@ export class JobPostService {
   async save(
     createJobPostDto: CreateJobPostDto,
     fileData: LocalFileDto | null,
-  ) {
+  ): Promise<JobPost> {
     let file: LocalFile | null = null;
 
     if (fileData) {
@@ -51,7 +51,7 @@ export class JobPostService {
     });
   }
 
-  async saveDraft(saveJobDraftDto: SaveJobDraftDto) {
+  async saveDraft(saveJobDraftDto: SaveJobDraftDto): Promise<JobPost> {
     return await this.jobPostRepository.save({
       id: saveJobDraftDto.id,
       title: saveJobDraftDto.title,
@@ -69,7 +69,10 @@ export class JobPostService {
     });
   }
 
-  async update(id: number, updateJobPostDto: UpdateJobPostDto) {
+  async update(
+    id: number,
+    updateJobPostDto: UpdateJobPostDto,
+  ): Promise<UpdateResult> {
     const jobPost = await this.jobPostRepository.findOne({
       where: { id: id, user: { id: updateJobPostDto.userId } },
       relations: ['category', 'skills', 'user'],
@@ -87,7 +90,7 @@ export class JobPostService {
     );
   }
 
-  async findAll() {
+  async findAll(): Promise<JobPost[]> {
     return await this.jobPostRepository
       .createQueryBuilder('job_post')
       .leftJoinAndSelect(
@@ -100,7 +103,9 @@ export class JobPostService {
       .getMany();
   }
 
-  async findAndFilterAll(queryParams: searchJobFiltersDto) {
+  async findAndFilterAll(
+    queryParams: searchJobFiltersDto,
+  ): Promise<{ data: JobPost[]; totalCount: number }> {
     const { category, skills, englishLevel, duration, durationType, rate } =
       queryParams;
     const take = queryParams.take || DEFAULT_AMOUNT_OF_QUERIED_POSTS;
@@ -141,7 +146,7 @@ export class JobPostService {
     };
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<JobPost> {
     const jobPost = await this.jobPostRepository.findOne({
       where: { id: id },
       relations: ['category', 'skills', 'user', 'file'],
@@ -152,7 +157,7 @@ export class JobPostService {
     return jobPost;
   }
 
-  async findByUser(userId: number) {
+  async findByUser(userId: number): Promise<JobPost[]> {
     const jobPosts = await this.jobPostRepository.find({
       where: { user: { id: userId } },
       relations: ['category', 'skills', 'user'],
@@ -163,7 +168,10 @@ export class JobPostService {
     return jobPosts;
   }
 
-  async getClientHomePostAndDrafts(userId: number, isDraft: boolean) {
+  async getClientHomePostAndDrafts(
+    userId: number,
+    isDraft: boolean,
+  ): Promise<JobPost[]> {
     return await this.jobPostRepository.find({
       where: {
         user: {
@@ -178,7 +186,7 @@ export class JobPostService {
     });
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<DeleteResult> {
     const jobPost = await this.findOne(id);
     if (!jobPost) {
       throw new HttpException('Job post not found', 404);
