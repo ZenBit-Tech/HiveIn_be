@@ -12,7 +12,7 @@ import { searchJobFiltersDto } from 'src/modules/job-post/dto/search-job-filters
 import {
   DEFAULT_AMOUNT_OF_QUERIED_POSTS,
   DEFAULT_SKIP_OF_QUERIED_POSTS,
-} from '../../utils/job-post.consts';
+} from 'src/utils/job-post.consts';
 
 @Injectable()
 export class JobPostService {
