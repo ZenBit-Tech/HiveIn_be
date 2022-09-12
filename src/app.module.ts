@@ -14,6 +14,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { JobPostModule } from './modules/job-post/job-post.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { WebsocketService } from './services/websocket/websocket.service';
 
 @Module({
   imports: [
@@ -68,6 +69,6 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     NotificationsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, WebsocketService],
 })
 export class AppModule {}
