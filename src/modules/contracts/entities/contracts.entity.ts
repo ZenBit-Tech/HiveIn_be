@@ -8,12 +8,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-export enum ContractStatus {
-  PENDING = 'pending',
-  ACTIVE = 'active',
-  CLOSED = 'closed',
-}
-
 @Entity()
 export class Contracts {
   @PrimaryGeneratedColumn()
@@ -27,13 +21,6 @@ export class Contracts {
     nullable: true,
   })
   freelancer: Freelancer;
-
-  @Column({
-    type: 'enum',
-    enum: ContractStatus,
-    default: ContractStatus.PENDING,
-  })
-  contractStatus: ContractStatus;
 
   @Column({ nullable: true })
   startDate: Date;

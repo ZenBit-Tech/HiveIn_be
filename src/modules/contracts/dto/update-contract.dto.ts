@@ -1,14 +1,9 @@
-import { IsNumber, IsEnum, IsOptional, IsDateString } from 'class-validator';
-import { ContractStatus } from 'src/modules/contracts/entities/contracts.entity';
+import { IsNumber, IsOptional, IsDateString } from 'class-validator';
 
 export class UpdateContractDto {
   @IsOptional()
   @IsNumber()
   readonly freelancer: number;
-
-  @IsOptional()
-  @IsEnum(ContractStatus)
-  readonly contractStatus: ContractStatus;
 
   @IsOptional()
   @IsDateString()
