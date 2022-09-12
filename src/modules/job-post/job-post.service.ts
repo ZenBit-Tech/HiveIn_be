@@ -9,6 +9,10 @@ import { LocalFileDto } from 'src/modules/job-post/dto/localFile.dto';
 import { LocalFile } from 'src/modules/entities/localFile.entity';
 import { SaveJobDraftDto } from 'src/modules/job-post/dto/save-job-draft.dto';
 import { searchJobFiltersDto } from 'src/modules/job-post/dto/search-job-filters.dto';
+import {
+  DEFAULT_AMOUNT_OF_QUERIED_POSTS,
+  DEFAULT_SKIP_OF_QUERIED_POSTS,
+} from '../../utils/job-post.consts';
 
 @Injectable()
 export class JobPostService {
@@ -99,8 +103,8 @@ export class JobPostService {
   async findAndFilterAll(queryParams: searchJobFiltersDto) {
     const { category, skills, englishLevel, duration, durationType, rate } =
       queryParams;
-    const take = queryParams.take || 100;
-    const skip = queryParams.skip || 0;
+    const take = queryParams.take || DEFAULT_AMOUNT_OF_QUERIED_POSTS;
+    const skip = queryParams.skip || DEFAULT_SKIP_OF_QUERIED_POSTS;
 
     const filterSkillsParams =
       skills &&
