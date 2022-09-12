@@ -3,7 +3,7 @@ import { ContractStatus } from 'src/modules/contracts/entities/contracts.entity'
 
 export class CreateContractDto {
   @IsNumber()
-  readonly freelancerId: number;
+  readonly freelancer: number;
 
   @IsEnum(ContractStatus)
   readonly contractStatus: ContractStatus;

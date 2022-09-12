@@ -13,23 +13,38 @@ export class ContractsService {
   ) {}
 
   async create(createContractDto: CreateContractDto) {
-    return await this.contractRepo.save({
-      freelancer: { id: +createContractDto.freelancerId },
-      ...createContractDto,
-    });
+    const { freelancer } = createContractDto;
+
+    return await this.contractRepo
+      .createQueryBuilder('contracts')
+      .insert()
+      .into(Contracts)
+      .values([
+        {
+          ...createContractDto,
+          ...(freelancer && { freelancer: { id: +freelancer } }),
+        },
+      ])
+      .execute();
   }
 
   async findAll() {
-    return await this.contractRepo.find({
-      relations: ['jobPost', 'freelancer', 'jobPost.user'],
-    });
+    return await this.contractRepo
+      .createQueryBuilder('contracts')
+      .leftJoinAndSelect('contracts.jobPost', 'jobPost')
+      .leftJoinAndSelect('jobPost.user', 'user')
+      .leftJoinAndSelect('contracts.freelancer', 'freelancer')
+      .getMany();
   }
 
   async findOwnAsClient(userId: number) {
-    const contract = await this.contractRepo.find({
-      where: { jobPost: { user: { id: userId } } },
-      relations: ['jobPost', 'freelancer', 'jobPost.user'],
-    });
+    const contract = await this.contractRepo
+      .createQueryBuilder('contracts')
+      .leftJoinAndSelect('contracts.jobPost', 'jobPost')
+      .leftJoinAndSelect('jobPost.user', 'user')
+      .leftJoinAndSelect('contracts.freelancer', 'freelancer')
+      .where({ jobPost: { user: { id: userId } } })
+      .getMany();
 
     if (!contract) throw new NotFoundException();
 
@@ -37,10 +52,13 @@ export class ContractsService {
   }
 
   async findOwnAsFreelancer(freelancerId: number) {
-    const contract = await this.contractRepo.find({
-      where: { freelancer: { user: { id: freelancerId } } },
-      relations: ['jobPost', 'freelancer', 'jobPost.user'],
-    });
+    const contract = await this.contractRepo
+      .createQueryBuilder('contracts')
+      .leftJoinAndSelect('contracts.jobPost', 'jobPost')
+      .leftJoinAndSelect('jobPost.user', 'user')
+      .leftJoinAndSelect('contracts.freelancer', 'freelancer')
+      .where({ freelancer: { user: { id: freelancerId } } })
+      .getMany();
 
     if (!contract) throw new NotFoundException();
 
@@ -48,10 +66,13 @@ export class ContractsService {
   }
 
   async findOne(id: number) {
-    const contract = await this.contractRepo.findOne({
-      where: { id: id },
-      relations: ['jobPost', 'freelancer'],
-    });
+    const contract = await this.contractRepo
+      .createQueryBuilder('contracts')
+      .leftJoinAndSelect('contracts.jobPost', 'jobPost')
+      .leftJoinAndSelect('jobPost.user', 'user')
+      .leftJoinAndSelect('contracts.freelancer', 'freelancer')
+      .where({ id: id })
+      .getMany();
 
     if (!contract) throw new NotFoundException();
 
@@ -61,16 +82,25 @@ export class ContractsService {
   async update(id: number, updateContractDto: UpdateContractDto) {
     await this.findOne(id);
 
-    const { freelancerId } = updateContractDto;
+    const { freelancer } = updateContractDto;
 
-    await this.contractRepo.save({
-      id,
-      ...updateContractDto,
-      ...(freelancerId && { freelancer: { id: +freelancerId } }),
-    });
+    await this.contractRepo
+      .createQueryBuilder('contracts')
+      .update(Contracts)
+      .set({
+        ...updateContractDto,
+        ...(freelancer && { freelancer: { id: +freelancer } }),
+      })
+      .where('id = :id', { id: id })
+      .execute();
   }
 
   async remove(id: number) {
-    return await this.contractRepo.delete(id);
+    return await this.contractRepo
+      .createQueryBuilder('contracts')
+      .delete()
+      .from(Contracts)
+      .where('id = :id', { id: id })
+      .execute();
   }
 }

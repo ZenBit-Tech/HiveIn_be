@@ -4,7 +4,7 @@ import { ContractStatus } from 'src/modules/contracts/entities/contracts.entity'
 export class UpdateContractDto {
   @IsOptional()
   @IsNumber()
-  readonly freelancerId: number;
+  readonly freelancer: number;
 
   @IsOptional()
   @IsEnum(ContractStatus)
