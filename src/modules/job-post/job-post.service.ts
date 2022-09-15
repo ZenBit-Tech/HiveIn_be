@@ -151,7 +151,7 @@ export class JobPostService {
   async findOne(id: number): Promise<JobPost> {
     const jobPost = await this.jobPostRepository.findOne({
       where: { id: id },
-      relations: ['category', 'skills', 'user', 'file'],
+      relations: ['category', 'skills', 'user', 'file', 'contract'],
     });
     if (!jobPost) {
       throw new HttpException('Job post not found', 404);
