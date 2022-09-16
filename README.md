@@ -15,9 +15,9 @@ Get-Job is a freelancer platform created as an internship project at Zenbit Tech
 
 Before starting, make sure you have at least those components on your workstation:
 - An up-to-date release of NodeJS and NPM
-- A MySQL database. You may use the provided docker-compose file.
+- A MySQL database installed locally. Or you may use the provided docker-compose file.
 
-[Docker](https://www.docker.com/) and docker-compose may also be useful for advanced testing and image building, although it is not required for development.
+[Docker](https://www.docker.com/) may also be useful for advanced testing and image building, although it is not required for development.
 
 ### 1.2 Install instructions
 Clone the project and install its dependencies:
@@ -98,15 +98,15 @@ Proceed with auth first and paste the accessToken to the field, by pressing the 
 
 [https://prnt.sc/zytafk](https://prnt.sc/zytafk)
 
-## 6. DB Migrations
+## 5. DB Migrations
 
-### What is going to be migrated
+### 5.1. What is going to be migrated
 
 To check what SQL queries `schema:sync` (next command) is going to run use:
 
 `npm run typeorm:schema:log`
 
-### First time only
+### 5.2. First time only
 
 To synchronize a new database with the current schema use:
 
@@ -114,7 +114,7 @@ To synchronize a new database with the current schema use:
 
 Be careful running this command in production - schema sync may cause data loss if you don't use it wisely. Check which SQL queries it will run before running on production.
 
-### Check if any migrations exist to run
+### 5.4. Check if any migrations exist to run
 
 `npx typeorm migration:show`
 
@@ -124,7 +124,7 @@ Be careful running this command in production - schema sync may cause data loss 
 
 This command also **returns an error** code if there are **unapplied migrations**.
 
-### Generate migration
+### 5.5. Generate migration
 
 Once you change the database schema, it's important to generate a new migration with either through TypeORM CLI or manually
 
@@ -132,7 +132,7 @@ Once you change the database schema, it's important to generate a new migration 
 `npm run typeorm:generate-migration --name=TableRefactor`
 `npm run typeorm:create-migration --name=TableRefactor`
 
-### Run migrations
+### 5.6. Run migrations
 
 To execute all pending migrations use following command:
 
@@ -140,7 +140,7 @@ To execute all pending migrations use following command:
 
 This command will undo only the last executed migration. You can execute this command multiple times to revert multiple migrations. Learn more about [migrations](https://github.com/typeorm/typeorm/blob/master/docs/migrations.md)
 
-### Revert migrations
+### 5.7. Revert migrations
 
 To revert the most recently executed migration use the following command:
 
