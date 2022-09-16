@@ -15,6 +15,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { JobPostModule } from './modules/job-post/job-post.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { WebsocketService } from './services/websocket/websocket.service';
+import { NotificationsService } from './modules/notifications/notifications.service';
 
 @Module({
   imports: [

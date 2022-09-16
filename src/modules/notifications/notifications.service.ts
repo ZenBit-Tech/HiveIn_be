@@ -11,8 +11,18 @@ export class NotificationsService {
     private notificationRepository: Repository<Notification>,
   ) {}
 
-  create(createNotificationDto: CreateNotificationDto): Promise<Notification> {
-    return this.notificationRepository.save(createNotificationDto);
+  async create(
+    createNotificationDto: CreateNotificationDto,
+  ): Promise<Notification> {
+    const newNotification = await this.notificationRepository.save(
+      createNotificationDto,
+    );
+    return this.notificationRepository
+      .createQueryBuilder('notification')
+      .leftJoinAndSelect('notification.fromUser', 'fromUser')
+      .leftJoinAndSelect('notification.toUser', 'toUser')
+      .where(`notification.id = ${newNotification.id}`)
+      .getOne();
   }
 
   findAll() {

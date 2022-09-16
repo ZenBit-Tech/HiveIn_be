@@ -1,10 +1,12 @@
 import { Users } from 'src/modules/entities/users.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -34,4 +36,10 @@ export class Notification {
   @ManyToOne(() => Users)
   @JoinColumn({ name: 'toUserId' })
   toUser: Users;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
