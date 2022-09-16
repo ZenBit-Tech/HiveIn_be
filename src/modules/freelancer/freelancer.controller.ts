@@ -13,8 +13,8 @@ import { FreelancerService } from './freelancer.service';
 import { CreateFreelancerDto } from './dto/create-freelancer.dto';
 import { UpdateFreelancerDto } from './dto/update-freelancer.dto';
 import { Freelancer } from './entities/freelancer.entity';
-import { PassportReq } from 'src/modules/settings-info/settings-info.controller';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
+import { AuthRequest } from 'src/utils/@types/AuthRequest';
 
 @Controller('freelancer')
 export class FreelancerController {
@@ -36,7 +36,7 @@ export class FreelancerController {
 
   @UseGuards(JwtAuthGuard)
   @Get('self')
-  findOwn(@Req() req: PassportReq): Promise<Freelancer> {
+  findOwn(@Req() req: AuthRequest): Promise<Freelancer> {
     const { id } = req.user;
     return this.freelancerService.findOneByUserId(+id);
   }

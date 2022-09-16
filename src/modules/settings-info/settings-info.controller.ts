@@ -13,14 +13,7 @@ import { SettingsInfoService } from './settings-info.service';
 import { CreateSettingsInfoDto } from './dto/create-settings-info.dto';
 import { UpdateSettingsInfoDto } from './dto/update-settings-info.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
-import { Request } from 'express';
-
-export interface PassportReq extends Request {
-  user: {
-    id: number;
-    email: string;
-  };
-}
+import { AuthRequest } from 'src/utils/@types/AuthRequest';
 
 @Controller('settings-info')
 export class SettingsInfoController {
@@ -40,7 +33,7 @@ export class SettingsInfoController {
 
   @UseGuards(JwtAuthGuard)
   @Get('self')
-  findOwnUser(@Req() req: PassportReq) {
+  findOwnUser(@Req() req: AuthRequest) {
     const { id } = req.user;
     return this.settingsInfoService.findOne(+id);
   }
@@ -54,7 +47,7 @@ export class SettingsInfoController {
   @UseGuards(JwtAuthGuard)
   @Patch('self')
   update(
-    @Req() req: PassportReq,
+    @Req() req: AuthRequest,
     @Body() updateSettingsInfoDto: UpdateSettingsInfoDto,
   ) {
     const { id } = req.user;
@@ -63,7 +56,7 @@ export class SettingsInfoController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('self')
-  remove(@Req() req: PassportReq) {
+  remove(@Req() req: AuthRequest) {
     const { id } = req.user;
     return this.settingsInfoService.remove(+id);
   }

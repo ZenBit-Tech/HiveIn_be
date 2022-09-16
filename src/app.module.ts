@@ -13,6 +13,8 @@ import { AvatarModule } from './modules/avatar/avatar.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { JobPostModule } from './modules/job-post/job-post.module';
+import { ProposalModule } from './modules/proposal/proposal.module';
+import { ContractsModule } from './modules/contracts/contracts.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { WebsocketService } from './services/websocket/websocket.service';
 import { NotificationsService } from './modules/notifications/notifications.service';
@@ -30,6 +32,7 @@ import { NotificationsService } from './modules/notifications/notifications.serv
         database: configService.get<string>('MYSQL_DB_NAME'),
         entities: [__dirname + '/entities/**/*.entity{.ts, .js}'],
         migrations: [__dirname + '/migrations/*{.ts, .js}'],
+        timezone: 'Z',
         logging: true,
         migrationsRun: false,
         autoLoadEntities: true,
@@ -67,6 +70,8 @@ import { NotificationsService } from './modules/notifications/notifications.serv
     SkillModule,
     JobPostModule,
     AvatarModule,
+    ProposalModule,
+    ContractsModule,
     NotificationsModule,
   ],
   controllers: [AppController],
