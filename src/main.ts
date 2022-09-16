@@ -9,7 +9,7 @@ import expressBasicAuth = require('express-basic-auth');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
-  app.enableCors({ credentials: true, origin: 'http://localhost:3000' });
+  app.enableCors({ credentials: true, origin: process.env.FRONTEND_URL });
   app.use(
     session({
       name: 'GoogleOAuth',
@@ -42,6 +42,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('/docs', app, document);
 
-  await app.listen(4000);
+  await app.listen(process.env.API_PORT || 4000);
 }
 bootstrap();
