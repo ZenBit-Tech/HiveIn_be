@@ -134,7 +134,9 @@ export class JobPostService {
       .andWhere(category ? `job_post.categoryId = ${category}` : '1 = 1')
       .andWhere(englishLevel ? `englishLevel = '${englishLevel}'` : '1 = 1')
       .andWhere(duration ? `duration <= ${duration}` : '1 = 1')
-      .andWhere(durationType ? `durationType = '${durationType}'` : '1 = 1')
+      .andWhere(
+        durationType && duration ? `durationType = '${durationType}'` : '1 = 1',
+      )
       .andWhere(rate ? `rate >= ${rate}` : '1 = 1')
       .andWhere(skills ? `skills.id IN (${filterSkillsParams})` : '1 = 1')
       .orderBy(`job_post.createdAt`, 'DESC')
