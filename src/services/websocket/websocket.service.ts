@@ -14,7 +14,7 @@ import { NotificationsService } from 'src/modules/notifications/notifications.se
 
 @WebSocketGateway({
   cors: {
-    origin: process.env.REACT_APP_LOCAL_URL,
+    origin: process.env.FRONTEND_URL,
   },
 })
 export class WebsocketService implements OnGatewayInit, OnGatewayDisconnect {
