@@ -7,8 +7,8 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { NotificationsService } from './notifications.service';
-import { CreateNotificationDto } from './dto/create-notification.dto';
+import { NotificationsService } from 'src/modules/notifications/notifications.service';
+import { CreateNotificationDto } from 'src/modules/notifications/dto/create-notification.dto';
 
 @Controller('notifications')
 export class NotificationsController {

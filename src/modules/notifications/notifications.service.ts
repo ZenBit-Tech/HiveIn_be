@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateNotificationDto } from './dto/create-notification.dto';
-import { Notification } from './entities/notification.entity';
+import { CreateNotificationDto } from 'src/modules/notifications/dto/create-notification.dto';
+import { Notification } from 'src/modules/notifications/entities/notification.entity';
 
 @Injectable()
 export class NotificationsService {
