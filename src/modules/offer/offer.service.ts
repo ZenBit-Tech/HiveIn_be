@@ -10,22 +10,22 @@ import { Status } from 'src/modules/offer/typesDef';
 export class OfferService {
   constructor(
     @InjectRepository(Offer)
-    private readonly offerRepo: Repository<Offer>,
+    private readonly offerRepository: Repository<Offer>,
   ) {}
 
   async create(data: createOfferDto): Promise<Offer> {
-    return this.offerRepo.save({
+    return this.offerRepository.save({
       status: Status.IN_CONSIDERATION,
-      freelancerId: data.freelancerId,
-      jobPostId: data.jobPostId,
+      freelancer: { id: data.freelancerId },
+      jobPostId: { id: data.jobPostId },
       initiator: data.initiator,
     });
   }
 
   async update(data: updateOfferDto): Promise<Offer> {
-    const currentOffer = await this.offerRepo.findOneBy({ id: data.id });
+    const currentOffer = await this.offerRepository.findOneBy({ id: data.id });
 
     if (!currentOffer) throw new NotFoundException();
-    return this.offerRepo.save({ ...currentOffer, status: data.status });
+    return this.offerRepository.save({ ...currentOffer, status: data.status });
   }
 }

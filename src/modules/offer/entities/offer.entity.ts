@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
 import { Initiator, Status } from 'src/modules/offer/typesDef';
-import { Freelancer } from '../../freelancer/entities/freelancer.entity';
+import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 
 @Entity()
 export class Offer {
@@ -22,11 +22,11 @@ export class Offer {
 
   @ManyToOne(() => JobPost)
   @JoinColumn({ name: 'jobPostId' })
-  jobPostId: number;
+  jobPost: JobPost;
 
   @ManyToOne(() => Freelancer)
   @JoinColumn({ name: 'freelancerId' })
-  freelancerId: number;
+  freelancer: Freelancer;
 
   @Column({
     type: 'enum',
