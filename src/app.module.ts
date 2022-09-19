@@ -1,6 +1,5 @@
 import { ClientModule } from './modules/client/client.module';
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -17,31 +16,10 @@ import { ProposalModule } from './modules/proposal/proposal.module';
 import { ContractsModule } from './modules/contracts/contracts.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { WebsocketService } from 'src/services/websocket/websocket.service';
+import { DatabaseModule } from 'src/modules/database/database.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule, AuthModule, ClientModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.get<string>('MYSQL_HOST'),
-        port: configService.get<number>('MYSQL_PORT'),
-        username: configService.get<string>('MYSQL_USER'),
-        password: configService.get<string>('MYSQL_PASSWORD'),
-        database: configService.get<string>('MYSQL_DB_NAME'),
-        entities: [__dirname + '/entities/**/*.entity{.ts, .js}'],
-        migrations: [__dirname + '/migrations/*{.ts, .js}'],
-        timezone: 'Z',
-        logging: true,
-        migrationsRun: false,
-        autoLoadEntities: true,
-        synchronize: true,
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      }),
-      inject: [ConfigService],
-    }),
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -61,6 +39,7 @@ import { WebsocketService } from 'src/services/websocket/websocket.service';
     MulterModule.register({
       dest: '/uploads',
     }),
+    DatabaseModule,
     AuthModule,
     ClientModule,
     SettingsInfoModule,
