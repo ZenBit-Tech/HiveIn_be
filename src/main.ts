@@ -9,7 +9,10 @@ import expressBasicAuth = require('express-basic-auth');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
-  app.enableCors({ credentials: true, origin: process.env.FRONTEND_URL });
+  app.enableCors({
+    credentials: true,
+    origin: [process.env.FRONTEND_URL, process.env.DNS_URL],
+  });
   app.use(
     session({
       name: 'GoogleOAuth',
