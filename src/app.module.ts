@@ -17,6 +17,7 @@ import { ProposalModule } from 'src/modules/proposal/proposal.module';
 import { ContractsModule } from 'src/modules/contracts/contracts.module';
 import { OfferModule } from 'src/modules/offer/offer.module';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
+import { MessageModule } from './modules/message/message.module';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
     ContractsModule,
     OfferModule,
     ChatRoomModule,
+    MessageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,7 +1,6 @@
 import {
   ForbiddenException,
   Injectable,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -57,7 +56,7 @@ export class ChatRoomService {
 
     if (!user) throw new NotFoundException();
     if (user.role === UserRole.UNDEFINED) throw new ForbiddenException();
-    Logger.warn('here:', JSON.stringify(user));
+
     return await this.get({
       rowName:
         user.role === UserRole.CLIENT ? RowNames.CLIENT : RowNames.FREELANCER,
