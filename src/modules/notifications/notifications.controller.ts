@@ -9,28 +9,31 @@ import {
 } from '@nestjs/common';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { CreateNotificationDto } from 'src/modules/notifications/dto/create-notification.dto';
+import { Notification } from 'src/modules/notifications/entities/notification.entity';
 
 @Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Post()
-  create(@Body() createNotificationDto: CreateNotificationDto) {
+  create(
+    @Body() createNotificationDto: CreateNotificationDto,
+  ): Promise<Notification> {
     return this.notificationsService.create(createNotificationDto);
   }
 
   @Get()
-  findAll() {
+  findAll(): Promise<Notification[]> {
     return this.notificationsService.findAll();
   }
 
   @Patch(':id')
-  read(@Param('id') id: string) {
+  read(@Param('id') id: string): Promise<boolean> {
     return this.notificationsService.read(+id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string): Promise<boolean> {
     return this.notificationsService.remove(+id);
   }
 }

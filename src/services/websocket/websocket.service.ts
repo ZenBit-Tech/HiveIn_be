@@ -37,7 +37,7 @@ export class WebsocketService implements OnGatewayInit, OnGatewayDisconnect {
   async sendFirstNotification(
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: CreateNotificationDto,
-  ) {
+  ): Promise<void> {
     const { toUserId, fromUserId, type, id, read, fromUser } =
       await this.notificationService.create(payload);
 

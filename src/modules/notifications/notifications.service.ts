@@ -25,7 +25,7 @@ export class NotificationsService {
       .getOne();
   }
 
-  findAll() {
+  findAll(): Promise<Notification[]> {
     return this.notificationRepository
       .createQueryBuilder('notification')
       .leftJoinAndSelect('notification.fromUser', 'fromUser')
@@ -33,11 +33,13 @@ export class NotificationsService {
       .getMany();
   }
 
-  read(id: number) {
-    return this.notificationRepository.update(id, { read: true });
+  async read(id: number): Promise<boolean> {
+    await this.notificationRepository.update(id, { read: true });
+    return true;
   }
 
-  remove(id: number) {
-    return this.notificationRepository.update(id, { deleted: true });
+  async remove(id: number): Promise<boolean> {
+    await this.notificationRepository.update(id, { deleted: true });
+    return true;
   }
 }
