@@ -1,5 +1,4 @@
-import { IsEnum, IsString } from 'class-validator';
-import { Initiator } from 'src/modules/offer/typesDef';
+import { IsString } from 'class-validator';
 
 export class createOfferDto {
   @IsString()
@@ -7,7 +6,4 @@ export class createOfferDto {
 
   @IsString()
   freelancerId: number;
-
-  @IsEnum(Initiator)
-  initiator: Initiator;
 }

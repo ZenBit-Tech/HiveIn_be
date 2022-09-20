@@ -9,7 +9,7 @@ import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { createChatRoomDto } from 'src/modules/chat-room/dto/create-chat-room.dto';
 import { UserRole, Users } from 'src/modules/entities/users.entity';
 
-enum RowNames {
+enum ColumnNames {
   CLIENT = 'client_user_profile',
   FREELANCER = 'freelancer_user_profile',
   CHAT_ROOM = 'chat_room',
@@ -17,7 +17,7 @@ enum RowNames {
 }
 
 type TArgs = {
-  rowName: RowNames;
+  columnName: ColumnNames;
   id: number;
 };
 
@@ -31,14 +31,16 @@ export class ChatRoomService {
   ) {}
 
   async create(data: createChatRoomDto): Promise<ChatRoom> {
-    return this.chatRoomRepository.save({
-      offer: { id: data.offerId },
+    return await this.chatRoomRepository.save({
+      jobPost: { id: data.jobPostId },
+      freelancer: { id: data.freelancerId },
+      status: data.status,
     });
   }
 
   async getOneById(id: number): Promise<ChatRoom> {
     const chatRoom = await this.get({
-      rowName: RowNames.CHAT_ROOM,
+      columnName: ColumnNames.CHAT_ROOM,
       id,
     }).getOne();
 
@@ -48,7 +50,7 @@ export class ChatRoomService {
   }
 
   async getAllByJobPostId(id: number): Promise<ChatRoom[]> {
-    return await this.get({ rowName: RowNames.JOB_POST, id }).getMany();
+    return await this.get({ columnName: ColumnNames.JOB_POST, id }).getMany();
   }
 
   async getAllByUserId(id: number): Promise<ChatRoom[]> {
@@ -58,40 +60,22 @@ export class ChatRoomService {
     if (user.role === UserRole.UNDEFINED) throw new ForbiddenException();
 
     return await this.get({
-      rowName:
-        user.role === UserRole.CLIENT ? RowNames.CLIENT : RowNames.FREELANCER,
+      columnName:
+        user.role === UserRole.CLIENT
+          ? ColumnNames.CLIENT
+          : ColumnNames.FREELANCER,
       id,
     }).getMany();
   }
 
-  get({ rowName, id }: TArgs): SelectQueryBuilder<ChatRoom> {
+  private get({ columnName, id }: TArgs): SelectQueryBuilder<ChatRoom> {
     return this.chatRoomRepository
       .createQueryBuilder('chat_room')
-      .leftJoinAndSelect(
-        'chat_room.offer',
-        'offer',
-        'chat_room.offer = offer.id',
-      )
-      .leftJoinAndSelect(
-        'offer.jobPost',
-        'job_post',
-        'offer.jobPostId = job_post.id',
-      )
-      .leftJoinAndSelect(
-        'offer.freelancer',
-        'freelancer',
-        'offer.freelancerId = freelancer.id',
-      )
-      .leftJoinAndSelect(
-        'job_post.user',
-        'client_user_profile',
-        'job_post.userId = client_user_profile.id',
-      )
-      .leftJoinAndSelect(
-        'freelancer.user',
-        'freelancer_user_profile',
-        'freelancer.user = freelancer_user_profile.id',
-      )
-      .where(`${rowName}.id = ${id}`);
+      .leftJoinAndSelect('chat_room.message', 'message')
+      .leftJoinAndSelect('chat_room.jobPost', 'job_post')
+      .leftJoinAndSelect('chat_room.freelancer', 'freelancer')
+      .leftJoinAndSelect('job_post.user', 'client_user_profile')
+      .leftJoinAndSelect('freelancer.user', 'freelancer_user_profile')
+      .where(`${columnName}.id = ${id}`);
   }
 }

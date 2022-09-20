@@ -10,7 +10,7 @@ import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { Users } from 'src/modules/entities/users.entity';
 
 @Entity()
-export class MessageEntity {
+export class Message {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -18,12 +18,12 @@ export class MessageEntity {
   text: string;
 
   @ManyToOne(() => Users)
-  @JoinColumn()
+  @JoinColumn({ name: 'senderId' })
   user: Users;
 
-  @ManyToOne(() => ChatRoom)
-  @JoinColumn()
-  room: ChatRoom;
+  @ManyToOne(() => ChatRoom, (chatRoom) => chatRoom.message)
+  @JoinColumn({ name: 'chatRoomId' })
+  chatRoom: ChatRoom;
 
   @CreateDateColumn()
   created_at: Date;

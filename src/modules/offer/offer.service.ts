@@ -15,10 +15,9 @@ export class OfferService {
 
   async create(data: createOfferDto): Promise<Offer> {
     return this.offerRepository.save({
-      status: Status.IN_CONSIDERATION,
+      status: Status.PENDING,
       freelancer: { id: data.freelancerId },
       jobPostId: { id: data.jobPostId },
-      initiator: data.initiator,
     });
   }
 
@@ -27,5 +26,18 @@ export class OfferService {
 
     if (!currentOffer) throw new NotFoundException();
     return this.offerRepository.save({ ...currentOffer, status: data.status });
+  }
+
+  async getAllOwn(userId: number): Promise<Offer[]> {
+    return await this.offerRepository
+      .createQueryBuilder('offer')
+      .leftJoin('offer.freelancer', 'freelancer')
+      .leftJoin('freelancer.user', 'user')
+      .where(`user.id = ${userId}`)
+      .getMany();
+  }
+
+  async getOneById(id: number): Promise<Offer> {
+    return await this.offerRepository.findOneBy({ id });
   }
 }
