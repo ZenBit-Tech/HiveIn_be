@@ -14,6 +14,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { JobPostModule } from './modules/job-post/job-post.module';
 import { ProposalModule } from './modules/proposal/proposal.module';
 import { ContractsModule } from './modules/contracts/contracts.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { WebsocketService } from 'src/services/websocket/websocket.service';
 import { DatabaseModule } from 'src/modules/database/database.module';
 
 @Module({
@@ -48,8 +50,9 @@ import { DatabaseModule } from 'src/modules/database/database.module';
     AvatarModule,
     ProposalModule,
     ContractsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, WebsocketService],
 })
 export class AppModule {}
