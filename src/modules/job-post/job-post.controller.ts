@@ -128,7 +128,6 @@ export class JobPostController {
   }
 
   @Get('/file/:id')
-  @UseGuards(JwtAuthGuard)
   async getFile(
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,
