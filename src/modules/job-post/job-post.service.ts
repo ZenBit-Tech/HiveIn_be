@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
@@ -161,17 +161,19 @@ export class JobPostService {
     return jobPost;
   }
 
-  async findByUser(userId: number): Promise<JobPost[]> {
-    const jobPosts = await this.jobPostRepository.find({
-      where: { user: { id: userId } },
-      relations: ['category', 'skills', 'user', 'contract'],
-      order: {
-        createdAt: 'DESC',
-      },
-    });
-    if (!jobPosts) {
-      throw new HttpException('Posts for this user not found', 404);
-    }
+  async findByUser(userId: number, isDraft: boolean): Promise<JobPost[]> {
+    const jobPosts = await this.jobPostRepository
+      .createQueryBuilder('jobPost')
+      .leftJoinAndSelect('jobPost.category', 'category')
+      .leftJoinAndSelect('jobPost.user', 'user')
+      .leftJoinAndSelect('jobPost.skills', 'skills')
+      .leftJoinAndSelect('jobPost.contract', 'contract')
+      .where({ user: { id: userId }, isDraft })
+      .orderBy('jobPost.createdAt', 'DESC')
+      .getMany();
+
+    if (!jobPosts) throw new NotFoundException();
+
     return jobPosts;
   }
 
