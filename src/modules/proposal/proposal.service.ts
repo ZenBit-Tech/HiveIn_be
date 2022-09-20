@@ -29,6 +29,19 @@ export class ProposalService {
     const freelancer = await this.freelancerService.findOneByUserId(userId);
     const user = await this.settingsInfoService.findOne(userId);
 
+    const proposal = await this.proposalRepo
+      .createQueryBuilder('proposal')
+      .insert()
+      .into(Proposal)
+      .values([
+        {
+          ...createProposalDto,
+          jobPost: { id: idJobPost },
+          freelancer: freelancer,
+        },
+      ])
+      .execute();
+
     const chatRoom = await this.chatRoomService.create({
       jobPostId: idJobPost,
       freelancerId: freelancer.id,
@@ -55,17 +68,6 @@ export class ProposalService {
       .values(values)
       .execute();
 
-    return await this.proposalRepo
-      .createQueryBuilder('proposal')
-      .insert()
-      .into(Proposal)
-      .values([
-        {
-          ...createProposalDto,
-          jobPost: { id: idJobPost },
-          freelancer: freelancer,
-        },
-      ])
-      .execute();
+    return proposal;
   }
 }

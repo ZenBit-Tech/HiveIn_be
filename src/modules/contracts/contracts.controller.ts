@@ -36,14 +36,14 @@ export class ContractsController {
   @Get('/freelancer/my-contracts')
   findOwnContractsAsFreelancer(@Req() req: AuthRequest): Promise<Contracts[]> {
     const { id } = req.user;
-    return this.contractsService.findOwnAsFreelancer(+id);
+    return this.contractsService.findOwnAsFreelancer(id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('/client/my-contracts')
   findOwnContractsAsClient(@Req() req: AuthRequest): Promise<Contracts[]> {
     const { id } = req.user;
-    return this.contractsService.findOwnAsClient(+id);
+    return this.contractsService.findOwnAsClient(id);
   }
 
   @UseGuards(JwtAuthGuard)

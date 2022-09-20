@@ -34,6 +34,8 @@ export class ContractsService {
       .leftJoinAndSelect('contracts.offer', 'offer')
       .leftJoinAndSelect('offer.jobPost', 'jobPost')
       .leftJoinAndSelect('jobPost.user', 'user')
+      .leftJoinAndSelect('jobPost.category', 'category')
+      .leftJoinAndSelect('jobPost.skills', 'skills')
       .leftJoinAndSelect('offer.freelancer', 'freelancer')
       .getMany();
   }
@@ -43,8 +45,9 @@ export class ContractsService {
       .createQueryBuilder('contracts')
       .leftJoinAndSelect('contracts.offer', 'offer')
       .leftJoinAndSelect('offer.jobPost', 'jobPost')
-      .leftJoin('jobPost.user', 'user')
-      .leftJoin('offer.freelancer', 'freelancer')
+      .leftJoinAndSelect('jobPost.user', 'user')
+      .leftJoinAndSelect('jobPost.category', 'category')
+      .leftJoinAndSelect('jobPost.skills', 'skills')
       .where(`user.id = ${userId}`)
       .getMany();
 
@@ -58,7 +61,9 @@ export class ContractsService {
       .createQueryBuilder('contracts')
       .leftJoinAndSelect('contracts.offer', 'offer')
       .leftJoinAndSelect('offer.jobPost', 'jobPost')
-      .leftJoin('jobPost.user', 'user')
+      .leftJoinAndSelect('jobPost.user', 'user')
+      .leftJoinAndSelect('jobPost.category', 'category')
+      .leftJoinAndSelect('jobPost.skills', 'skills')
       .leftJoin('offer.freelancer', 'freelancer')
       .where(`freelancer.userId = ${freelancerId}`)
       .getMany();
@@ -71,10 +76,13 @@ export class ContractsService {
   async findOne(id: number): Promise<Contracts[]> {
     const contract = await this.contractRepo
       .createQueryBuilder('contracts')
-      .leftJoinAndSelect('contracts.jobPost', 'jobPost')
+      .leftJoinAndSelect('contracts.offer', 'offer')
+      .leftJoinAndSelect('offer.jobPost', 'jobPost')
       .leftJoinAndSelect('jobPost.user', 'user')
-      .leftJoinAndSelect('contracts.freelancer', 'freelancer')
-      .where({ id: id })
+      .leftJoinAndSelect('jobPost.category', 'category')
+      .leftJoinAndSelect('jobPost.skills', 'skills')
+      .leftJoinAndSelect('offer.freelancer', 'freelancer')
+      .where(`contracts.id = ${id}`)
       .getMany();
 
     if (!contract) throw new NotFoundException();
