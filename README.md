@@ -2,24 +2,25 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
-
-![CICD](https://github.com/jphinning/HiveIn_be_test/actions/workflows/build-and-deploy.yml/badge.svg)
-
+![CICD](https://github.com/ZenBit-Tech/HiveIn_be/actions/workflows/build-and-deploy.yml/badge.svg)
 
 ## Description
 
 Get-Job is a freelancer platform created as an internship project at Zenbit Tech
+
 ## 1. Getting Started
 
 ### 1.1 Requirements
 
 Before starting, make sure you have at least those components on your workstation:
+
 - An up-to-date release of NodeJS and NPM
 - A MySQL database installed locally. Or you may use the provided docker-compose file.
 
 [Docker](https://www.docker.com/) may also be useful for advanced testing and image building, although it is not required for development.
 
 ### 1.2 Install instructions
+
 Clone the project and install its dependencies:
 
 ```bash
@@ -49,7 +50,7 @@ $ docker-compose up
 
 Now you can access your database information with phpMyAdmin, which is also running in the same container by accessing localhost using port 8080
 
-Last but not least, define a JWT_SECRET to sign the JWT tokens or leave the default value in a development environment. 
+Last but not least, define a JWT_SECRET to sign the JWT tokens or leave the default value in a development environment.
 
 ## 2. Launch and discover
 
@@ -127,7 +128,6 @@ This command also **returns an error** code if there are **unapplied migrations*
 ### 5.5. Generate migration
 
 Once you change the database schema, it's important to generate a new migration with either through TypeORM CLI or manually
-
 
 `npm run typeorm:generate-migration --name=TableRefactor`
 `npm run typeorm:create-migration --name=TableRefactor`

@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
   Patch,
   Post,
   Query,
@@ -86,9 +87,22 @@ export class JobPostController {
 
   @UseGuards(JwtAuthGuard)
   @Get('self')
-  findByUser(@Req() req: AuthRequest): Promise<JobPost[]> {
+  findByUser(
+    @Req() req: AuthRequest,
+    @Param('isDraft', ParseBoolPipe) isDraft?: boolean,
+  ): Promise<JobPost[]> {
     const { id } = req.user;
-    return this.jobPostService.findByUser(+id);
+    return this.jobPostService.findByUser(+id, isDraft);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('self/:isDraft')
+  findByUserDraft(
+    @Req() req: AuthRequest,
+    @Param('isDraft', ParseBoolPipe) isDraft?: boolean,
+  ): Promise<JobPost[]> {
+    const { id } = req.user;
+    return this.jobPostService.findByUser(+id, isDraft);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -107,17 +121,13 @@ export class JobPostController {
   @Get('home/self/:isDraft')
   getClientHomePostsAndDrafts(
     @Req() req: AuthRequest,
-    @Param('isDraft') isDraft?: string,
+    @Param('isDraft', ParseBoolPipe) isDraft?: boolean,
   ): Promise<JobPost[]> {
     const { id } = req.user;
-    return this.jobPostService.getClientHomePostAndDrafts(
-      id,
-      isDraft === 'true',
-    );
+    return this.jobPostService.getClientHomePostAndDrafts(id, isDraft);
   }
 
   @Get('/file/:id')
-  @UseGuards(JwtAuthGuard)
   async getFile(
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,
