@@ -48,7 +48,7 @@ export class ContractsController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Contracts[]> {
+  findOne(@Param('id') id: string): Promise<Contracts> {
     return this.contractsService.findOne(+id);
   }
 
