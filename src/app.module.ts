@@ -1,22 +1,25 @@
-import { ClientModule } from './modules/client/client.module';
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthModule } from './modules/auth/auth.module';
-import { SettingsInfoModule } from './modules/settings-info/settings-info.module';
-import { FreelancerModule } from './modules/freelancer/freelancer.module';
-import { CategoryModule } from './modules/category/category.module';
-import { SkillModule } from './modules/skill/skill.module';
-import { AvatarModule } from './modules/avatar/avatar.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { JobPostModule } from './modules/job-post/job-post.module';
-import { ProposalModule } from './modules/proposal/proposal.module';
-import { ContractsModule } from './modules/contracts/contracts.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { WebsocketService } from 'src/services/websocket/websocket.service';
 import { DatabaseModule } from 'src/modules/database/database.module';
+import { ClientModule } from 'src/modules/client/client.module';
+import { AppController } from 'src/app.controller';
+import { AppService } from 'src/app.service';
+import { AuthModule } from 'src/modules/auth/auth.module';
+import { SettingsInfoModule } from 'src/modules/settings-info/settings-info.module';
+import { FreelancerModule } from 'src/modules/freelancer/freelancer.module';
+import { CategoryModule } from 'src/modules/category/category.module';
+import { SkillModule } from 'src/modules/skill/skill.module';
+import { AvatarModule } from 'src/modules/avatar/avatar.module';
+import { JobPostModule } from 'src/modules/job-post/job-post.module';
+import { ProposalModule } from 'src/modules/proposal/proposal.module';
+import { ContractsModule } from 'src/modules/contracts/contracts.module';
+import { OfferModule } from 'src/modules/offer/offer.module';
+import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
+import { MessageModule } from './modules/message/message.module';
 
 @Module({
   imports: [
@@ -51,6 +54,9 @@ import { DatabaseModule } from 'src/modules/database/database.module';
     ProposalModule,
     ContractsModule,
     NotificationsModule,
+    OfferModule,
+    ChatRoomModule,
+    MessageModule,
   ],
   controllers: [AppController],
   providers: [AppService, WebsocketService],

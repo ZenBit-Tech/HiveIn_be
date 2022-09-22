@@ -9,6 +9,10 @@ import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
 import { Proposal } from 'src/modules/proposal/entities/proposal.entity';
 import { ProposalController } from 'src/modules/proposal/proposal.controller';
 import { ProposalService } from 'src/modules/proposal/proposal.service';
+import { ChatRoomService } from '../chat-room/chat-room.service';
+import { ChatRoom } from '../chat-room/entities/chat-room.entity';
+import { SettingsInfoService } from '../settings-info/settings-info.service';
+import { Message } from '../message/entities/message';
 
 @Module({
   imports: [
@@ -19,9 +23,18 @@ import { ProposalService } from 'src/modules/proposal/proposal.service';
       JobPost,
       Experience,
       Education,
+      ChatRoomService,
+      SettingsInfoService,
+      ChatRoom,
+      Message,
     ]),
   ],
   controllers: [ProposalController],
-  providers: [ProposalService, FreelancerService],
+  providers: [
+    ProposalService,
+    FreelancerService,
+    ChatRoomService,
+    SettingsInfoService,
+  ],
 })
 export class ProposalModule {}

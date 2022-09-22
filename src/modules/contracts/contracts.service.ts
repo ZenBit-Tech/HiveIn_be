@@ -31,19 +31,24 @@ export class ContractsService {
   async findAll(): Promise<Contracts[]> {
     return await this.contractRepo
       .createQueryBuilder('contracts')
-      .leftJoinAndSelect('contracts.jobPost', 'jobPost')
+      .leftJoinAndSelect('contracts.offer', 'offer')
+      .leftJoinAndSelect('offer.jobPost', 'jobPost')
       .leftJoinAndSelect('jobPost.user', 'user')
-      .leftJoinAndSelect('contracts.freelancer', 'freelancer')
+      .leftJoinAndSelect('jobPost.category', 'category')
+      .leftJoinAndSelect('jobPost.skills', 'skills')
+      .leftJoinAndSelect('offer.freelancer', 'freelancer')
       .getMany();
   }
 
   async findOwnAsClient(userId: number): Promise<Contracts[]> {
     const contract = await this.contractRepo
       .createQueryBuilder('contracts')
-      .leftJoinAndSelect('contracts.jobPost', 'jobPost')
+      .leftJoinAndSelect('contracts.offer', 'offer')
+      .leftJoinAndSelect('offer.jobPost', 'jobPost')
       .leftJoinAndSelect('jobPost.user', 'user')
-      .leftJoinAndSelect('contracts.freelancer', 'freelancer')
-      .where({ jobPost: { user: { id: userId } } })
+      .leftJoinAndSelect('jobPost.category', 'category')
+      .leftJoinAndSelect('jobPost.skills', 'skills')
+      .where(`user.id = ${userId}`)
       .getMany();
 
     if (!contract) throw new NotFoundException();
@@ -54,10 +59,13 @@ export class ContractsService {
   async findOwnAsFreelancer(freelancerId: number): Promise<Contracts[]> {
     const contract = await this.contractRepo
       .createQueryBuilder('contracts')
-      .leftJoinAndSelect('contracts.jobPost', 'jobPost')
+      .leftJoinAndSelect('contracts.offer', 'offer')
+      .leftJoinAndSelect('offer.jobPost', 'jobPost')
       .leftJoinAndSelect('jobPost.user', 'user')
-      .leftJoinAndSelect('contracts.freelancer', 'freelancer')
-      .where({ freelancer: { user: { id: freelancerId } } })
+      .leftJoinAndSelect('jobPost.category', 'category')
+      .leftJoinAndSelect('jobPost.skills', 'skills')
+      .leftJoin('offer.freelancer', 'freelancer')
+      .where(`freelancer.userId = ${freelancerId}`)
       .getMany();
 
     if (!contract) throw new NotFoundException();
@@ -68,10 +76,13 @@ export class ContractsService {
   async findOne(id: number): Promise<Contracts[]> {
     const contract = await this.contractRepo
       .createQueryBuilder('contracts')
-      .leftJoinAndSelect('contracts.jobPost', 'jobPost')
+      .leftJoinAndSelect('contracts.offer', 'offer')
+      .leftJoinAndSelect('offer.jobPost', 'jobPost')
       .leftJoinAndSelect('jobPost.user', 'user')
-      .leftJoinAndSelect('contracts.freelancer', 'freelancer')
-      .where({ id: id })
+      .leftJoinAndSelect('jobPost.category', 'category')
+      .leftJoinAndSelect('jobPost.skills', 'skills')
+      .leftJoinAndSelect('offer.freelancer', 'freelancer')
+      .where(`contracts.id = ${id}`)
       .getMany();
 
     if (!contract) throw new NotFoundException();
