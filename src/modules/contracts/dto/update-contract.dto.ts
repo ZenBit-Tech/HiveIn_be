@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsDateString } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional } from 'class-validator';
 
 export class UpdateContractDto {
   @IsOptional()
@@ -6,10 +6,10 @@ export class UpdateContractDto {
   readonly freelancer: number;
 
   @IsOptional()
-  @IsDateString()
-  readonly startDate: Date;
+  @IsBoolean()
+  readonly isContractStart: boolean;
 
   @IsOptional()
-  @IsDateString()
-  readonly endDate: Date;
+  @IsBoolean()
+  readonly isContractEnd: boolean;
 }

@@ -65,14 +65,14 @@ export class ContractsService {
     return contract;
   }
 
-  async findOne(id: number): Promise<Contracts[]> {
+  async findOne(id: number): Promise<Contracts> {
     const contract = await this.contractRepo
       .createQueryBuilder('contracts')
       .leftJoinAndSelect('contracts.jobPost', 'jobPost')
       .leftJoinAndSelect('jobPost.user', 'user')
       .leftJoinAndSelect('contracts.freelancer', 'freelancer')
       .where({ id: id })
-      .getMany();
+      .getOne();
 
     if (!contract) throw new NotFoundException();
 
@@ -83,15 +83,19 @@ export class ContractsService {
     id: number,
     updateContractDto: UpdateContractDto,
   ): Promise<void> {
-    await this.findOne(id);
+    const contract = await this.findOne(id);
 
-    const { freelancer } = updateContractDto;
+    const { isContractStart, isContractEnd, freelancer } = updateContractDto;
+
+    if (isContractStart) contract.startDate = new Date();
+    if (isContractEnd) contract.endDate = new Date();
 
     await this.contractRepo
       .createQueryBuilder('contracts')
       .update(Contracts)
       .set({
-        ...updateContractDto,
+        startDate: contract.startDate,
+        endDate: contract.endDate,
         ...(freelancer && { freelancer: { id: +freelancer } }),
       })
       .where('id = :id', { id: id })
