@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { JobPost } from '../../job-post/entities/job-post.entity';
 import { Freelancer } from '../../freelancer/entities/freelancer.entity';
-import { Message } from '../../message/entities/message';
+import { Message } from '../../message/entities/message.entity';
 
 export enum chatRoomStatus {
   FOR_ALL = 'forAll',
@@ -30,7 +30,7 @@ export class ChatRoom {
   freelancer: Freelancer;
 
   @OneToMany(() => Message, (message) => message.chatRoom)
-  message: Message[];
+  message: Message;
 
   @Column({
     type: 'enum',

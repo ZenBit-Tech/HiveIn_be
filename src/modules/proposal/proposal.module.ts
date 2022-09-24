@@ -12,7 +12,7 @@ import { ProposalService } from 'src/modules/proposal/proposal.service';
 import { ChatRoomService } from '../chat-room/chat-room.service';
 import { ChatRoom } from '../chat-room/entities/chat-room.entity';
 import { SettingsInfoService } from '../settings-info/settings-info.service';
-import { Message } from '../message/entities/message';
+import { Message } from '../message/entities/message.entity';
 
 @Module({
   imports: [

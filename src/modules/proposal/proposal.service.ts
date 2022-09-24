@@ -6,7 +6,7 @@ import { Proposal } from 'src/modules/proposal/entities/proposal.entity';
 import { FreelancerService } from 'src/modules/freelancer/freelancer.service';
 import { ChatRoomService } from '../chat-room/chat-room.service';
 import { chatRoomStatus } from '../chat-room/entities/chat-room.entity';
-import { Message } from '../message/entities/message';
+import { Message } from '../message/entities/message.entity';
 import { SettingsInfoService } from '../settings-info/settings-info.service';
 
 @Injectable()

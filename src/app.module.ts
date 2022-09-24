@@ -20,6 +20,8 @@ import { ContractsModule } from 'src/modules/contracts/contracts.module';
 import { OfferModule } from 'src/modules/offer/offer.module';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
 import { MessageModule } from './modules/message/message.module';
+import { ChatConnectModule } from './modules/chat-room-connected/chat-connect.module';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -57,8 +59,9 @@ import { MessageModule } from './modules/message/message.module';
     OfferModule,
     ChatRoomModule,
     MessageModule,
+    ChatConnectModule,
   ],
   controllers: [AppController],
-  providers: [AppService, WebsocketService],
+  providers: [AppService, WebsocketService, JwtService],
 })
 export class AppModule {}

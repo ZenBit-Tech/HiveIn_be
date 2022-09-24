@@ -9,5 +9,6 @@ import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
   imports: [TypeOrmModule.forFeature([Users, Freelancer])],
   controllers: [SettingsInfoController],
   providers: [SettingsInfoService],
+  exports: [SettingsInfoService],
 })
 export class SettingsInfoModule {}

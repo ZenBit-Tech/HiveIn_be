@@ -1,6 +1,7 @@
 import {
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -39,6 +40,7 @@ export class ChatRoomService {
   }
 
   async getOneById(id: number): Promise<ChatRoom> {
+    Logger.warn('this is id', 123);
     const chatRoom = await this.get({
       columnName: ColumnNames.CHAT_ROOM,
       id,
