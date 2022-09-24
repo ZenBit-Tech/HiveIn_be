@@ -91,7 +91,7 @@ export class AuthService {
     return {
       authToken: this.jwtService.sign(payload, {
         secret: this.configService.get('SECRET_KEY'),
-        expiresIn: '15s',
+        expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),
       }),
       email,
       role,
@@ -103,7 +103,7 @@ export class AuthService {
 
     return this.jwtService.sign(payload, {
       secret: this.configService.get('SECRET_KEY'),
-      expiresIn: '30s',
+      expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME'),
     });
   }
 

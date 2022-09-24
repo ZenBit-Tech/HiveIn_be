@@ -37,6 +37,8 @@ jobs:
           envkey_API_PORT: ${{ secrets.API_PORT }}
           envkey_MYSQL_USER: ${{ secrets.MYSQL_USER }}
           envkey_SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          envkey_JWT_ACCESS_TOKEN_EXPIRATION_TIME: ${{ secrets.JWT_ACCESS_TOKEN_EXPIRATION_TIME }}
+          envkey_JWT_REFRESH_TOKEN_EXPIRATION_TIME: ${{ secrets.JWT_REFRESH_TOKEN_EXPIRATION_TIME }}
           envkey_OAUTH_GOOGLE_ID: ${{ secrets.OAUTH_GOOGLE_ID }}
           envkey_OAUTH_GOOGLE_SECRET_KEY: ${{ secrets.OAUTH_GOOGLE_SECRET_KEY }}
           envkey_OAUTH_GOOGLE_REDIRECT_URL: ${{ secrets.OAUTH_GOOGLE_REDIRECT_URL }}
