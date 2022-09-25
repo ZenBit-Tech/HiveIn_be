@@ -23,7 +23,7 @@ enum Event {
   ROOMS = 'rooms',
   ERROR = 'error',
   GET_ROOMS = 'getRooms',
-  JOIN_ROOMS = 'joinRoom',
+  JOIN_ROOM = 'joinRoom',
   MESSAGES = 'messages',
   GET_MESSAGES = 'getMessages',
   LEAVE_ROOM = 'leaveRoom',
@@ -110,7 +110,7 @@ export class WebsocketService
     return this.server.to(socket.id).emit(Event.ROOMS, rooms);
   }
 
-  @SubscribeMessage(Event.JOIN_ROOMS)
+  @SubscribeMessage(Event.JOIN_ROOM)
   async onJoinRoom(socket: Socket, data) {
     const messages = await this.messageService.getAllByRoomId(data);
     await this.joinedRoomService.create({
