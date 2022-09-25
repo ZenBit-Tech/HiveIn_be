@@ -17,7 +17,6 @@ import { JoinedRoomService } from '../../modules/chat-room-connected/connected-r
 import { ConnectedUserService } from '../../modules/chat-room-connected/connected-user.service';
 import { SettingsInfoService } from '../../modules/settings-info/settings-info.service';
 import { JwtService } from '@nestjs/jwt';
-import { createMessageDto } from '../../modules/message/dto/create-message.dto';
 
 enum Event {
   ROOMS = 'rooms',
@@ -135,14 +134,20 @@ export class WebsocketService
   }
 
   @SubscribeMessage(Event.ADD_MESSAGE)
-  async onAddMessage(socket: Socket, message: createMessageDto) {
-    const createdMessage = await this.messageService.create(message);
+  async onAddMessage(
+    socket: Socket,
+    data: { chatRoomId: number; text: string },
+  ) {
+    const createdMessage = await this.messageService.create({
+      ...data,
+      userId: socket.data.user.id,
+    });
     const room = await this.roomService.getOneById(createdMessage.chatRoom.id);
     const joinedUsers = await this.joinedRoomService.findByRoom(room.id);
     for (const user of joinedUsers) {
       this.server.to(user.socketId).emit(Event.MESSAGE_ADDED, createdMessage);
       const messages = await this.messageService.getAllByRoomId(
-        message.chatRoomId,
+        data.chatRoomId,
       );
       this.server.to(user.socketId).emit(Event.MESSAGES, messages);
     }
