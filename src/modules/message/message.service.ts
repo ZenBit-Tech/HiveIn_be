@@ -8,6 +8,7 @@ import {
   ChatRoom,
   chatRoomStatus,
 } from '../chat-room/entities/chat-room.entity';
+import { ChatRoomService } from '../chat-room/chat-room.service';
 
 @Injectable()
 export class MessageService {
@@ -18,6 +19,7 @@ export class MessageService {
     private readonly usersRepository: Repository<Users>,
     @InjectRepository(ChatRoom)
     private readonly chatRoomRepository: Repository<ChatRoom>,
+    private readonly chatRoomService: ChatRoomService,
   ) {}
 
   async create(data: createMessageDto): Promise<Message> {
@@ -41,7 +43,9 @@ export class MessageService {
       (user.role === UserRole.FREELANCER &&
         chatRoom.status === chatRoomStatus.FREELANCER_ONLY)
     ) {
+      await this.chatRoomService.changeStatus(data.chatRoomId);
     }
+
     return await this.messageRepository.save({
       text: data.text,
       chatRoom: { id: data.chatRoomId },

@@ -17,6 +17,7 @@ import { JoinedRoomService } from '../../modules/chat-room-connected/connected-r
 import { ConnectedUserService } from '../../modules/chat-room-connected/connected-user.service';
 import { SettingsInfoService } from '../../modules/settings-info/settings-info.service';
 import { JwtService } from '@nestjs/jwt';
+import { createMessageDto } from '../../modules/message/dto/create-message.dto';
 
 @WebSocketGateway({
   cors: {
@@ -97,7 +98,6 @@ export class WebsocketService
 
   @SubscribeMessage('joinRoom')
   async onJoinRoom(socket: Socket, data) {
-    this.logger.log(data);
     const messages = await this.messageService.getAllByRoomId(data.roomId);
     console.log('here', messages);
     await this.joinedRoomService.create({
@@ -109,6 +109,12 @@ export class WebsocketService
     this.server.to(socket.id).emit('messages', messages);
   }
 
+  @SubscribeMessage('getMessages')
+  async onGetMessage(socket: Socket, data) {
+    const messages = await this.messageService.getAllByRoomId(data);
+    this.server.to(socket.id).emit('messages', messages);
+  }
+
   @SubscribeMessage('leaveRoom')
   async onLeaveRoom(socket: Socket) {
     // remove connection from JoinedRooms
@@ -116,16 +122,17 @@ export class WebsocketService
   }
 
   @SubscribeMessage('addMessage')
-  async onAddMessage(socket: Socket, message) {
-    const createdMessage = await this.messageService.create({
-      ...message,
-      user: socket.data.user,
-    });
+  async onAddMessage(socket: Socket, message: createMessageDto) {
+    const createdMessage = await this.messageService.create(message);
     const room = await this.roomService.getOneById(createdMessage.chatRoom.id);
     const joinedUsers = await this.joinedRoomService.findByRoom(room.id);
     for (const user of joinedUsers) {
       this.server.to(user.socketId).emit('messageAdded', createdMessage);
     }
+    const messages = await this.messageService.getAllByRoomId(
+      message.chatRoomId,
+    );
+    this.server.to(socket.id).emit('messages', messages);
   }
 
   @SubscribeMessage('send-first-notification')

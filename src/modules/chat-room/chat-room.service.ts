@@ -6,7 +6,10 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
-import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
+import {
+  ChatRoom,
+  chatRoomStatus,
+} from 'src/modules/chat-room/entities/chat-room.entity';
 import { createChatRoomDto } from 'src/modules/chat-room/dto/create-chat-room.dto';
 import { UserRole, Users } from 'src/modules/entities/users.entity';
 
@@ -79,5 +82,16 @@ export class ChatRoomService {
       .leftJoinAndSelect('job_post.user', 'client_user_profile')
       .leftJoinAndSelect('freelancer.user', 'freelancer_user_profile')
       .where(`${columnName}.id = ${id}`);
+  }
+
+  async changeStatus(id: number) {
+    // const room = await this.getOneById(id);
+
+    return await this.chatRoomRepository.update(
+      { id },
+      {
+        status: chatRoomStatus.FOR_ALL,
+      },
+    );
   }
 }
