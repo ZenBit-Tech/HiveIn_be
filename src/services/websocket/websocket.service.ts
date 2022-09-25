@@ -19,6 +19,20 @@ import { SettingsInfoService } from '../../modules/settings-info/settings-info.s
 import { JwtService } from '@nestjs/jwt';
 import { createMessageDto } from '../../modules/message/dto/create-message.dto';
 
+enum Event {
+  ROOMS = 'rooms',
+  ERROR = 'error',
+  GET_ROOMS = 'getRooms',
+  JOIN_ROOMS = 'joinRoom',
+  MESSAGES = 'messages',
+  GET_MESSAGES = 'getMessages',
+  LEAVE_ROOM = 'leaveRoom',
+  ADD_MESSAGE = 'addMessage',
+  MESSAGE_ADDED = 'messageAdded',
+  NOTIFICATION = 'send-first-notification',
+  NOTIFICATION_SEND = "'first-message'",
+}
+
 @WebSocketGateway({
   cors: {
     origin: 'http://localhost:3000',
@@ -69,7 +83,7 @@ export class WebsocketService
           userId: user.id,
         });
         const rooms = await this.roomService.getAllByUserId(user.id);
-        return this.server.to(socket.id).emit('rooms', rooms);
+        return this.server.to(socket.id).emit(Event.ROOMS, rooms);
       }
     } catch {
       return this.disconnect(socket);
@@ -85,57 +99,56 @@ export class WebsocketService
   }
 
   private disconnect(socket: Socket) {
-    socket.emit('Error', new UnauthorizedException());
+    socket.emit(Event.ERROR, new UnauthorizedException());
     socket.disconnect();
   }
 
-  @SubscribeMessage('getRooms')
+  @SubscribeMessage(Event.GET_ROOMS)
   async onGetRooms(socket: Socket) {
     this.logger.log(socket.data);
     const rooms = await this.roomService.getAllByUserId(socket.data.user.id);
-    return this.server.to(socket.id).emit('rooms', rooms);
+    return this.server.to(socket.id).emit(Event.ROOMS, rooms);
   }
 
-  @SubscribeMessage('joinRoom')
+  @SubscribeMessage(Event.JOIN_ROOMS)
   async onJoinRoom(socket: Socket, data) {
-    const messages = await this.messageService.getAllByRoomId(data.roomId);
-    console.log('here', messages);
+    const messages = await this.messageService.getAllByRoomId(data);
     await this.joinedRoomService.create({
       socketId: socket.id,
-      userId: data.userId,
-      roomId: data.roomId,
+      userId: socket.data.user.id,
+      roomId: data,
     });
     // Send last messages from Room to User
-    this.server.to(socket.id).emit('messages', messages);
+    this.server.to(socket.id).emit(Event.MESSAGES, messages);
   }
 
-  @SubscribeMessage('getMessages')
+  @SubscribeMessage(Event.GET_MESSAGES)
   async onGetMessage(socket: Socket, data) {
     const messages = await this.messageService.getAllByRoomId(data);
-    this.server.to(socket.id).emit('messages', messages);
+    this.server.to(socket.id).emit(Event.MESSAGES, messages);
   }
 
-  @SubscribeMessage('leaveRoom')
+  @SubscribeMessage(Event.LEAVE_ROOM)
   async onLeaveRoom(socket: Socket) {
     // remove connection from JoinedRooms
     await this.joinedRoomService.deleteBySocketId(socket.id);
   }
 
-  @SubscribeMessage('addMessage')
+  @SubscribeMessage(Event.ADD_MESSAGE)
   async onAddMessage(socket: Socket, message: createMessageDto) {
     const createdMessage = await this.messageService.create(message);
     const room = await this.roomService.getOneById(createdMessage.chatRoom.id);
     const joinedUsers = await this.joinedRoomService.findByRoom(room.id);
     for (const user of joinedUsers) {
-      this.server.to(user.socketId).emit('messageAdded', createdMessage);
+      this.server.to(user.socketId).emit(Event.MESSAGE_ADDED, createdMessage);
+      const messages = await this.messageService.getAllByRoomId(
+        message.chatRoomId,
+      );
+      this.server.to(user.socketId).emit(Event.MESSAGES, messages);
     }
-    const messages = await this.messageService.getAllByRoomId(
-      message.chatRoomId,
-    );
-    this.server.to(socket.id).emit('messages', messages);
   }
 
-  @SubscribeMessage('send-first-notification')
+  @SubscribeMessage(Event.NOTIFICATION)
   async sendFirstNotification(
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: CreateNotificationDto,
@@ -144,7 +157,7 @@ export class WebsocketService
       await this.notificationService.create(payload);
 
     this.server.emit(
-      'first-message',
+      Event.NOTIFICATION_SEND,
       {
         id,
         read,

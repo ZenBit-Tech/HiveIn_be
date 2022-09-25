@@ -13,7 +13,7 @@ export class JoinedRoomService {
 
   async create(data: createConnectedUserDto): Promise<ChatRoomConnected> {
     const { socketId, roomId, userId } = data;
-    return this.chatRoomConnectedRepository.save({
+    return await this.chatRoomConnectedRepository.save({
       socketId: socketId,
       user: { id: userId },
       room: { id: roomId },
@@ -21,15 +21,15 @@ export class JoinedRoomService {
   }
 
   async findByUser(id: number) {
-    return this.chatRoomConnectedRepository.findBy({ user: { id } });
+    return await this.chatRoomConnectedRepository.findBy({ user: { id } });
   }
 
   async findByRoom(id: number) {
-    return this.chatRoomConnectedRepository.findBy({ room: { id } });
+    return await this.chatRoomConnectedRepository.findBy({ room: { id } });
   }
 
   async deleteBySocketId(socketId: string) {
-    return this.chatRoomConnectedRepository.delete({ socketId });
+    return await this.chatRoomConnectedRepository.delete({ socketId });
   }
 
   async deleteAll() {
