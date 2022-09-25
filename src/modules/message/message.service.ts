@@ -49,7 +49,7 @@ export class MessageService {
     });
   }
 
-  async getAll(id: number) {
+  async getAllByRoomId(id: number) {
     return await this.messageRepository
       .createQueryBuilder('message')
       .leftJoinAndSelect(
@@ -61,7 +61,7 @@ export class MessageService {
       .leftJoinAndSelect('chat_room.freelancer', 'freelancer')
       .leftJoinAndSelect('job_post.user', 'client_user_profile')
       .leftJoinAndSelect('freelancer.user', 'freelancer_user_profile')
-      .where(`client_user_profile.id = ${id}`)
+      .where(`chat_room.id = ${id}`)
       .getMany();
   }
 }

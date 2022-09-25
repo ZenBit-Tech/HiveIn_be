@@ -63,11 +63,11 @@ export class WebsocketService
         return this.disconnect(socket);
       } else {
         socket.data.user = user;
-        const rooms = await this.roomService.getAllByUserId(user.id);
         await this.connectedUserService.create({
           socketId: socket.id,
           userId: user.id,
         });
+        const rooms = await this.roomService.getAllByUserId(user.id);
         return this.server.to(socket.id).emit('rooms', rooms);
       }
     } catch {
@@ -79,6 +79,7 @@ export class WebsocketService
     this.logger.log('🚀🔴 Disconnected');
     // remove connection from DB
     await this.connectedUserService.deleteBySocketId(socket.id);
+    await this.joinedRoomService.deleteBySocketId(socket.id);
     socket.disconnect();
   }
 
@@ -87,10 +88,18 @@ export class WebsocketService
     socket.disconnect();
   }
 
+  @SubscribeMessage('getRooms')
+  async onGetRooms(socket: Socket) {
+    this.logger.log(socket.data);
+    const rooms = await this.roomService.getAllByUserId(socket.data.user.id);
+    return this.server.to(socket.id).emit('rooms', rooms);
+  }
+
   @SubscribeMessage('joinRoom')
   async onJoinRoom(socket: Socket, data) {
-    this.logger.log(444444);
-    const messages = await this.messageService.getAll(data.roomId);
+    this.logger.log(data);
+    const messages = await this.messageService.getAllByRoomId(data.roomId);
+    console.log('here', messages);
     await this.joinedRoomService.create({
       socketId: socket.id,
       userId: data.userId,
