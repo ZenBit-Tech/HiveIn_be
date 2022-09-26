@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { Users } from 'src/modules/entities/users.entity';
+import { IsBoolean } from 'class-validator';
 
 @Entity()
 export class Message {
@@ -27,4 +28,8 @@ export class Message {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @Column()
+  @IsBoolean()
+  isSystemMessage: boolean;
 }

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ChatRoomConnected } from './entities/chat-room-connected.entity';
-import { createConnectedUserDto } from './dto/create-connected-room.dto';
+import { ChatRoomConnected } from 'src/modules/chat-room-connected/entities/chat-room-connected.entity';
+import { createConnectedUserDto } from 'src/modules/chat-room-connected/dto/create-connected-room.dto';
 
 @Injectable()
 export class JoinedRoomService {

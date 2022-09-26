@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Message } from './entities/message.entity';
 import { Repository } from 'typeorm';
@@ -28,14 +28,18 @@ export class MessageService {
       id: data.chatRoomId,
     });
 
+    if (user.role === UserRole.UNDEFINED) throw new ForbiddenException();
+
     if (
-      user.role === UserRole.UNDEFINED ||
       (user.role === UserRole.CLIENT &&
         chatRoom.status === chatRoomStatus.FREELANCER_ONLY) ||
       (user.role === UserRole.FREELANCER &&
         chatRoom.status === chatRoomStatus.CLIENT_ONLY)
     )
-      throw new ForbiddenException();
+      throw new HttpException(
+        "This user can't send message to this room yet",
+        400,
+      );
 
     if (
       (user.role === UserRole.CLIENT &&
@@ -50,22 +54,35 @@ export class MessageService {
       text: data.text,
       chatRoom: { id: data.chatRoomId },
       user: { id: data.userId },
+      isSystemMessage: false,
+    });
+  }
+
+  async createSystemMessage(data: createMessageDto): Promise<Message> {
+    return await this.messageRepository.save({
+      text: data.text,
+      chatRoom: { id: data.chatRoomId },
+      user: { id: data.userId },
+      isSystemMessage: true,
     });
   }
 
   async getAllByRoomId(id: number) {
-    return await this.messageRepository
+    const messages = await this.messageRepository
       .createQueryBuilder('message')
-      .leftJoinAndSelect(
+      .leftJoin(
         'message.chatRoom',
         'chat_room',
         'message.chatRoomId = chat_room.Id',
       )
-      .leftJoinAndSelect('chat_room.jobPost', 'job_post')
-      .leftJoinAndSelect('chat_room.freelancer', 'freelancer')
-      .leftJoinAndSelect('job_post.user', 'client_user_profile')
-      .leftJoinAndSelect('freelancer.user', 'freelancer_user_profile')
+      .leftJoinAndSelect('message.user', 'user')
       .where(`chat_room.id = ${id}`)
+      .orderBy(`message.created_at`, 'ASC')
       .getMany();
+
+    return messages.map((data) => {
+      const { user, ...message } = data;
+      return { ...message, senderId: user?.id };
+    });
   }
 }

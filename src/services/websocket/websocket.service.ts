@@ -29,12 +29,12 @@ enum Event {
   ADD_MESSAGE = 'addMessage',
   MESSAGE_ADDED = 'messageAdded',
   NOTIFICATION = 'send-first-notification',
-  NOTIFICATION_SEND = "'first-message'",
+  NOTIFICATION_SEND = 'first-message',
 }
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:3000',
+    origin: [process.env.FRONTEND_URL, 'http://localhost:3000'],
     methods: ['GET', 'POST'],
     credentials: true,
   },

@@ -83,8 +83,6 @@ export class ChatRoomService {
   }
 
   async changeStatus(id: number) {
-    // const room = await this.getOneById(id);
-
     return await this.chatRoomRepository.update(
       { id },
       {

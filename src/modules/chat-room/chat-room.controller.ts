@@ -11,8 +11,8 @@ import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { createChatRoomDto } from 'src/modules/chat-room/dto/create-chat-room.dto';
 import { searchParamDto } from 'src/modules/chat-room/dto/search-param.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { AuthRequest } from '../../utils/@types/AuthRequest';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
+import { AuthRequest } from 'src/utils/@types/AuthRequest';
 
 @Controller('chat-room')
 export class ChatRoomController {

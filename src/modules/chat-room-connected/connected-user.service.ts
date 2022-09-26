@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
-import { UserConnected } from './entities/user-connected.entity';
-import { createConnectedUserDto } from './dto/create-connected-user.dto';
+import { UserConnected } from 'src/modules/chat-room-connected/entities/user-connected.entity';
+import { createConnectedUserDto } from 'src/modules/chat-room-connected/dto/create-connected-user.dto';
 
 @Injectable()
 export class ConnectedUserService {

@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JoinedRoomService } from './connected-room.service';
-import { ConnectedUserService } from './connected-user.service';
-import { ChatRoomConnected } from './entities/chat-room-connected.entity';
-import { UserConnected } from './entities/user-connected.entity';
+import { JoinedRoomService } from 'src/modules/chat-room-connected/connected-room.service';
+import { ConnectedUserService } from 'src/modules/chat-room-connected/connected-user.service';
+import { ChatRoomConnected } from 'src/modules/chat-room-connected/entities/chat-room-connected.entity';
+import { UserConnected } from 'src/modules/chat-room-connected/entities/user-connected.entity';
 
 @Module({
   imports: [
