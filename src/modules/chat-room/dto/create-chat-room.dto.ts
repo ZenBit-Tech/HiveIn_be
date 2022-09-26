@@ -1,5 +1,5 @@
 import { IsEnum, IsNumber } from 'class-validator';
-import { chatRoomStatus } from '../entities/chat-room.entity';
+import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
 
 export class createChatRoomDto {
   @IsNumber()

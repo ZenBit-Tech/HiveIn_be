@@ -6,15 +6,10 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { JobPost } from '../../job-post/entities/job-post.entity';
-import { Freelancer } from '../../freelancer/entities/freelancer.entity';
-import { Message } from '../../message/entities/message.entity';
-
-export enum chatRoomStatus {
-  FOR_ALL = 'forAll',
-  FREELANCER_ONLY = 'freelancerOnly',
-  CLIENT_ONLY = 'clientOnly',
-}
+import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
+import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
+import { Message } from 'src/modules/message/entities/message.entity';
+import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
 
 @Entity()
 export class ChatRoom {

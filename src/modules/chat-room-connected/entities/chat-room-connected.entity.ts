@@ -5,8 +5,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Users } from '../../entities/users.entity';
-import { ChatRoom } from '../../chat-room/entities/chat-room.entity';
+import { Users } from 'src/modules/entities/users.entity';
+import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 
 @Entity()
 export class ChatRoomConnected {

@@ -4,25 +4,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
-import {
-  ChatRoom,
-  chatRoomStatus,
-} from 'src/modules/chat-room/entities/chat-room.entity';
+import { Repository, SelectQueryBuilder, UpdateResult } from 'typeorm';
+import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { createChatRoomDto } from 'src/modules/chat-room/dto/create-chat-room.dto';
 import { UserRole, Users } from 'src/modules/entities/users.entity';
-
-enum ColumnNames {
-  CLIENT = 'client_user_profile',
-  FREELANCER = 'freelancer_user_profile',
-  CHAT_ROOM = 'chat_room',
-  JOB_POST = 'job_post',
-}
-
-type TArgs = {
-  columnName: ColumnNames;
-  id: number;
-};
+import {
+  chatRoomStatus,
+  ColumnNames,
+  TArgs,
+} from 'src/modules/chat-room/typesDef';
 
 @Injectable()
 export class ChatRoomService {
@@ -82,12 +72,12 @@ export class ChatRoomService {
       .where(`${columnName}.id = ${id}`);
   }
 
-  async changeStatus(id: number) {
-    return await this.chatRoomRepository.update(
-      { id },
-      {
-        status: chatRoomStatus.FOR_ALL,
-      },
-    );
+  async changeStatus(id: number): Promise<UpdateResult> {
+    return await this.chatRoomRepository
+      .createQueryBuilder()
+      .update(ChatRoom)
+      .set({ status: chatRoomStatus.FOR_ALL })
+      .where('id = :id', { id })
+      .execute();
   }
 }

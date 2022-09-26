@@ -1,14 +1,13 @@
 import { ForbiddenException, HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Message } from './entities/message.entity';
 import { Repository } from 'typeorm';
-import { createMessageDto } from './dto/create-message.dto';
-import { UserRole, Users } from '../entities/users.entity';
-import {
-  ChatRoom,
-  chatRoomStatus,
-} from '../chat-room/entities/chat-room.entity';
-import { ChatRoomService } from '../chat-room/chat-room.service';
+import { Message } from 'src/modules/message/entities/message.entity';
+import { createMessageDto } from 'src/modules/message/dto/create-message.dto';
+import { UserRole, Users } from 'src/modules/entities/users.entity';
+import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
+import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
+import { ReturnedMessage } from 'src/modules/message/typesDef';
+import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
 
 @Injectable()
 export class MessageService {
@@ -67,7 +66,7 @@ export class MessageService {
     });
   }
 
-  async getAllByRoomId(id: number) {
+  async getAllByRoomId(id: number): Promise<ReturnedMessage[]> {
     const messages = await this.messageRepository
       .createQueryBuilder('message')
       .leftJoin(

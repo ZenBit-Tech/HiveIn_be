@@ -7,12 +7,13 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { searchParamDto } from '../chat-room/dto/search-param.dto';
-import { AuthRequest } from '../../utils/@types/AuthRequest';
-import { OfferService } from './offer.service';
-import { Offer } from './entities/offer.entity';
-import { createOfferDto } from './dto/create-offer.dto';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
+import { searchParamDto } from 'src/modules/chat-room/dto/search-param.dto';
+import { AuthRequest } from 'src/utils/@types/AuthRequest';
+import { OfferService } from 'src/modules/offer/offer.service';
+import { Offer } from 'src/modules/offer/entities/offer.entity';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { createOfferDto } from 'src/modules/offer/dto/create-offer.dto';
 
 @Controller('offer')
 export class OfferController {

@@ -4,7 +4,7 @@ import { ChatRoomController } from 'src/modules/chat-room/chat-room.controller';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { Users } from 'src/modules/entities/users.entity';
-import { Message } from '../message/entities/message.entity';
+import { Message } from 'src/modules/message/entities/message.entity';
 
 @Module({
   imports: [

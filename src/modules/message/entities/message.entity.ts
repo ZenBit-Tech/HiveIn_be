@@ -6,9 +6,9 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { IsBoolean, IsString } from 'class-validator';
 import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { Users } from 'src/modules/entities/users.entity';
-import { IsBoolean } from 'class-validator';
 
 @Entity()
 export class Message {
@@ -16,6 +16,7 @@ export class Message {
   id: number;
 
   @Column()
+  @IsString()
   text: string;
 
   @ManyToOne(() => Users)

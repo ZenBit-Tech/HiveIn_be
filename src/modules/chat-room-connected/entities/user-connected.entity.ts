@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Users } from '../../entities/users.entity';
+import { Users } from 'src/modules/entities/users.entity';
 
 @Entity()
 export class UserConnected {

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { ChatRoomConnected } from 'src/modules/chat-room-connected/entities/chat-room-connected.entity';
 import { createConnectedUserDto } from 'src/modules/chat-room-connected/dto/create-connected-room.dto';
 
@@ -20,20 +20,20 @@ export class JoinedRoomService {
     });
   }
 
-  async findByUser(id: number) {
+  async findByUser(id: number): Promise<ChatRoomConnected[]> {
     return await this.chatRoomConnectedRepository.findBy({ user: { id } });
   }
 
-  async findByRoom(id: number) {
+  async findByRoom(id: number): Promise<ChatRoomConnected[]> {
     return await this.chatRoomConnectedRepository.findBy({ room: { id } });
   }
 
-  async deleteBySocketId(socketId: string) {
+  async deleteBySocketId(socketId: string): Promise<DeleteResult> {
     return await this.chatRoomConnectedRepository.delete({ socketId });
   }
 
-  async deleteAll() {
-    await this.chatRoomConnectedRepository
+  async deleteAll(): Promise<DeleteResult> {
+    return await this.chatRoomConnectedRepository
       .createQueryBuilder()
       .delete()
       .execute();

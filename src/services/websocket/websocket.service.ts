@@ -8,15 +8,15 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { JwtService } from '@nestjs/jwt';
 import { Server, Socket } from 'socket.io';
 import { CreateNotificationDto } from 'src/modules/notifications/dto/create-notification.dto';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
-import { MessageService } from '../../modules/message/message.service';
-import { JoinedRoomService } from '../../modules/chat-room-connected/connected-room.service';
-import { ConnectedUserService } from '../../modules/chat-room-connected/connected-user.service';
-import { SettingsInfoService } from '../../modules/settings-info/settings-info.service';
-import { JwtService } from '@nestjs/jwt';
+import { MessageService } from 'src/modules/message/message.service';
+import { JoinedRoomService } from 'src/modules/chat-room-connected/connected-room.service';
+import { ConnectedUserService } from 'src/modules/chat-room-connected/connected-user.service';
+import { SettingsInfoService } from 'src/modules/settings-info/settings-info.service';
 
 enum Event {
   ROOMS = 'rooms',
@@ -57,15 +57,16 @@ export class WebsocketService
 
   private logger: Logger = new Logger('AppGateway');
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     await this.connectedUserService.deleteAll();
     await this.joinedRoomService.deleteAll();
   }
 
-  async handleConnection(socket: Socket) {
+  async handleConnection(socket: Socket): Promise<void> {
     this.logger.log('🚀🔴 Connected');
     try {
       const decodedToken = await this.jwtService.verify(
+        //  Removing "Bearer "
         socket.handshake.headers.authorization.split('').slice(7).join(''),
         {
           secret: process.env.SECRET_KEY,
@@ -82,54 +83,51 @@ export class WebsocketService
           userId: user.id,
         });
         const rooms = await this.roomService.getAllByUserId(user.id);
-        return this.server.to(socket.id).emit(Event.ROOMS, rooms);
+        this.server.to(socket.id).emit(Event.ROOMS, rooms);
       }
     } catch {
       return this.disconnect(socket);
     }
   }
 
-  async handleDisconnect(socket: Socket) {
+  async handleDisconnect(socket: Socket): Promise<void> {
     this.logger.log('🚀🔴 Disconnected');
-    // remove connection from DB
     await this.connectedUserService.deleteBySocketId(socket.id);
     await this.joinedRoomService.deleteBySocketId(socket.id);
     socket.disconnect();
   }
 
-  private disconnect(socket: Socket) {
+  private disconnect(socket: Socket): void {
     socket.emit(Event.ERROR, new UnauthorizedException());
     socket.disconnect();
   }
 
   @SubscribeMessage(Event.GET_ROOMS)
-  async onGetRooms(socket: Socket) {
-    this.logger.log(socket.data);
+  async onGetRooms(socket: Socket): Promise<void> {
     const rooms = await this.roomService.getAllByUserId(socket.data.user.id);
-    return this.server.to(socket.id).emit(Event.ROOMS, rooms);
+    this.server.to(socket.id).emit(Event.ROOMS, rooms);
   }
 
   @SubscribeMessage(Event.JOIN_ROOM)
-  async onJoinRoom(socket: Socket, data) {
+  async onJoinRoom(socket: Socket, data: number): Promise<void> {
     const messages = await this.messageService.getAllByRoomId(data);
     await this.joinedRoomService.create({
       socketId: socket.id,
       userId: socket.data.user.id,
       roomId: data,
     });
-    // Send last messages from Room to User
+
     this.server.to(socket.id).emit(Event.MESSAGES, messages);
   }
 
   @SubscribeMessage(Event.GET_MESSAGES)
-  async onGetMessage(socket: Socket, data) {
+  async onGetMessage(socket: Socket, data: number): Promise<void> {
     const messages = await this.messageService.getAllByRoomId(data);
     this.server.to(socket.id).emit(Event.MESSAGES, messages);
   }
 
   @SubscribeMessage(Event.LEAVE_ROOM)
-  async onLeaveRoom(socket: Socket) {
-    // remove connection from JoinedRooms
+  async onLeaveRoom(socket: Socket): Promise<void> {
     await this.joinedRoomService.deleteBySocketId(socket.id);
   }
 
@@ -137,7 +135,7 @@ export class WebsocketService
   async onAddMessage(
     socket: Socket,
     data: { chatRoomId: number; text: string },
-  ) {
+  ): Promise<void> {
     const createdMessage = await this.messageService.create({
       ...data,
       userId: socket.data.user.id,
