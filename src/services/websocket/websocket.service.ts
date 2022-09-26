@@ -17,6 +17,9 @@ import { MessageService } from 'src/modules/message/message.service';
 import { JoinedRoomService } from 'src/modules/chat-room-connected/connected-room.service';
 import { ConnectedUserService } from 'src/modules/chat-room-connected/connected-user.service';
 import { SettingsInfoService } from 'src/modules/settings-info/settings-info.service';
+import { config } from 'dotenv';
+
+config();
 
 enum Event {
   ROOMS = 'rooms',
@@ -34,7 +37,7 @@ enum Event {
 
 @WebSocketGateway({
   cors: {
-    origin: [process.env.FRONTEND_URL, 'http://localhost:3000'],
+    origin: [process.env.FRONTEND_URL],
     methods: ['GET', 'POST'],
     credentials: true,
   },

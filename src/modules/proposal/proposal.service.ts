@@ -53,11 +53,13 @@ export class ProposalService {
         chatRoom,
         user,
         text: createProposalDto.coverLetter,
+        isSystemMessage: false,
       },
       {
         chatRoom,
         user,
         text: `bid: ${createProposalDto.bid}`,
+        isSystemMessage: false,
       },
     ];
 
