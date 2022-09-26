@@ -5,7 +5,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Offer } from '../../offer/entities/offer.entity';
+import { Offer } from 'src/modules/offer/entities/offer.entity';
 
 @Entity()
 export class Contracts {

@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { NotificationsModule } from './modules/notifications/notifications.module';
+import { JwtService } from '@nestjs/jwt';
+import { NotificationsModule } from 'src/modules/notifications/notifications.module';
 import { WebsocketService } from 'src/services/websocket/websocket.service';
 import { DatabaseModule } from 'src/modules/database/database.module';
 import { ClientModule } from 'src/modules/client/client.module';
@@ -19,9 +20,8 @@ import { ProposalModule } from 'src/modules/proposal/proposal.module';
 import { ContractsModule } from 'src/modules/contracts/contracts.module';
 import { OfferModule } from 'src/modules/offer/offer.module';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
-import { MessageModule } from './modules/message/message.module';
-import { ChatConnectModule } from './modules/chat-room-connected/chat-connect.module';
-import { JwtService } from '@nestjs/jwt';
+import { MessageModule } from 'src/modules/message/message.module';
+import { ChatConnectModule } from 'src/modules/chat-room-connected/chat-connect.module';
 
 @Module({
   imports: [
