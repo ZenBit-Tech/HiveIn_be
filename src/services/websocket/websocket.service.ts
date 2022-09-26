@@ -70,7 +70,7 @@ export class WebsocketService
     try {
       const decodedToken = await this.jwtService.verify(
         //  Removing "Bearer "
-        socket.handshake.headers.authorization.split('').slice(7).join(''),
+        socket.handshake.headers.authorization.slice(7),
         {
           secret: process.env.SECRET_KEY,
         },
