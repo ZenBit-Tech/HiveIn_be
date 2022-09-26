@@ -14,7 +14,7 @@ export class Offer {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => JobPost)
+  @ManyToOne(() => JobPost, (jobPost) => jobPost.offer)
   @JoinColumn({ name: 'jobPostId' })
   jobPost: JobPost;
 

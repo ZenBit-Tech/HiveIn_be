@@ -6,6 +6,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -14,11 +15,13 @@ import { Category } from 'src/modules/category/entities/category.entity';
 import { Skill } from 'src/modules/skill/entities/skill.entity';
 import { Users } from 'src/modules/entities/users.entity';
 import { LocalFile } from 'src/modules/entities/localFile.entity';
+import { Offer } from '../../offer/entities/offer.entity';
 
 export enum DurationType {
   WEEK = 'week',
   MONTH = 'month',
 }
+
 export enum EnglishLevel {
   PRE_INTERMEDIATE = 'pre-intermediate',
   INTERMEDIATE = 'intermediate',
@@ -53,6 +56,10 @@ export class JobPost {
   @ManyToOne(() => Users, (user) => user.id, { cascade: true })
   @JoinColumn()
   user: Users;
+
+  @OneToMany(() => Offer, (offer) => offer.jobPost)
+  @JoinColumn()
+  offer: Offer;
 
   @JoinColumn({ name: 'fileId' })
   @OneToOne(() => LocalFile, {
