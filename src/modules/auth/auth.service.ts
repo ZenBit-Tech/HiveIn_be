@@ -15,6 +15,10 @@ import { Users } from 'src/modules/entities/users.entity';
 import { ForgotPassword } from 'src/modules/entities/forgot-password.entity';
 import { AuthDto } from 'src/modules/auth/dto/auth.dto';
 import { AuthRestorePasswordDto } from 'src/modules/auth/dto/restore-password.dto';
+import {
+  JWT_ACCESS_TOKEN_EXPIRATION_TIME,
+  JWT_REFRESH_TOKEN_EXPIRATION_TIME,
+} from 'src/utils/jwt.consts';
 
 export interface ITokenPayload {
   id: number;
@@ -91,7 +95,7 @@ export class AuthService {
     return {
       authToken: this.jwtService.sign(payload, {
         secret: this.configService.get('SECRET_KEY'),
-        expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),
+        expiresIn: JWT_ACCESS_TOKEN_EXPIRATION_TIME,
       }),
       email,
       role,
@@ -103,7 +107,7 @@ export class AuthService {
 
     return this.jwtService.sign(payload, {
       secret: this.configService.get('SECRET_KEY'),
-      expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME'),
+      expiresIn: JWT_REFRESH_TOKEN_EXPIRATION_TIME,
     });
   }
 
