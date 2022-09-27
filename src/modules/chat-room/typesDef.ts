@@ -15,3 +15,27 @@ export enum chatRoomStatus {
   FREELANCER_ONLY = 'freelancerOnly',
   CLIENT_ONLY = 'clientOnly',
 }
+
+interface IUser {
+  id: number;
+  firstName: string | null;
+  lastName: string | null;
+  avatarURL: string | null;
+}
+
+export interface IRoom {
+  id: number;
+  status: chatRoomStatus;
+  freelancer: IUser;
+  client: IUser;
+  jobPost: {
+    id: number;
+    title: string;
+  };
+  lastMessage: {
+    created_at: Date;
+    id: number;
+    isSystemMessage: boolean;
+    text: string;
+  };
+}

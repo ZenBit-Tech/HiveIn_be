@@ -25,7 +25,7 @@ export class ChatRoom {
   freelancer: Freelancer;
 
   @OneToMany(() => Message, (message) => message.chatRoom)
-  message: Message;
+  message: Message[];
 
   @Column({
     type: 'enum',
