@@ -7,14 +7,23 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AuthDto } from './dto/auth.dto';
-import { Users } from '../entities/users.entity';
-import { ForgotPassword } from '../entities/forgot-password.entity';
 import { compare, genSalt, hash } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
-import { AuthRestorePasswordDto } from './dto/restore-password.dto';
 import { ConfigService } from '@nestjs/config';
+import { Users } from 'src/modules/entities/users.entity';
+import { ForgotPassword } from 'src/modules/entities/forgot-password.entity';
+import { AuthDto } from 'src/modules/auth/dto/auth.dto';
+import { AuthRestorePasswordDto } from 'src/modules/auth/dto/restore-password.dto';
+import {
+  JWT_ACCESS_TOKEN_EXPIRATION_TIME,
+  JWT_REFRESH_TOKEN_EXPIRATION_TIME,
+} from 'src/utils/jwt.consts';
+
+export interface ITokenPayload {
+  id: number;
+  email?: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -50,56 +59,98 @@ export class AuthService {
       password: hashPassword,
     });
 
-    return this.signUser(createdUser.id, createdUser.email);
+    const accessToken = await this.getJwtAccessToken(createdUser.id);
+    const refreshToken = await this.getJwtRefreshToken(createdUser.id);
+
+    await this.setCurrentRefreshToken(refreshToken, createdUser.id);
+
+    return { accessToken, refreshToken };
   }
 
   async signIn(dto: AuthDto) {
     const { password, email } = dto;
     const user = await this.authRepo.findOneBy({ email });
 
-    if (!user) {
-      throw new NotFoundException("User doesn't exist");
-    }
+    if (!user) throw new NotFoundException("User doesn't exist");
 
-    if (user.googleId) {
+    if (user.googleId)
       throw new ConflictException('User should sign in through Google');
-    }
 
     const isMatch = await compare(password, user.password);
 
     if (!isMatch) throw new UnauthorizedException('Password incorrect');
 
-    return this.signUser(user.id, user.email);
+    const accessToken = await this.getJwtAccessToken(user.id);
+    const refreshToken = await this.getJwtRefreshToken(user.id);
+
+    await this.setCurrentRefreshToken(refreshToken, user.id);
+
+    return { accessToken, refreshToken };
   }
 
-  async signUser(id: number, email: string) {
-    const { role } = await this.authRepo.findOneBy({ email });
+  async getJwtAccessToken(id: number) {
+    const { email, role } = await this.authRepo.findOneBy({ id });
+    const payload: ITokenPayload = { id, email };
 
     return {
-      token: this.jwtService.sign({
-        sub: id,
-        email,
-        role,
+      authToken: this.jwtService.sign(payload, {
+        secret: this.configService.get('SECRET_KEY'),
+        expiresIn: JWT_ACCESS_TOKEN_EXPIRATION_TIME,
       }),
       email,
       role,
     };
   }
 
+  async getJwtRefreshToken(id: number) {
+    const payload: ITokenPayload = { id };
+
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get('SECRET_KEY'),
+      expiresIn: JWT_REFRESH_TOKEN_EXPIRATION_TIME,
+    });
+  }
+
+  async getUserIfRefreshTokenMatches(refreshToken: string, id: number) {
+    const user = await this.authRepo.findOneBy({ id });
+
+    const isRefreshTokenMatching = await compare(
+      refreshToken,
+      user.currentHashedRefreshToken,
+    );
+
+    if (isRefreshTokenMatching) {
+      return user;
+    }
+  }
+
+  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+    const currentHashedRefreshToken = await hash(refreshToken, this.saltRounds);
+    await this.authRepo.update(userId, {
+      currentHashedRefreshToken,
+    });
+  }
+
+  async removeRefreshToken(userId: number) {
+    return this.authRepo.update(userId, {
+      currentHashedRefreshToken: null,
+    });
+  }
+
   async forgotPassword({ email }: AuthForgotPasswordDto) {
     const user = await this.authRepo.findOneBy({ email });
 
     if (user) {
-      const userAbout = await this.signUser(user.id, user.email);
+      const userAbout = await this.getJwtAccessToken(user.id);
 
       await this.forgotPasswordRepo.save({
         user: user,
-        link: userAbout.token,
+        link: userAbout.authToken,
       });
 
       const url =
         this.configService.get<string>('FRONTEND_RESTORE_PASSWORD_URL') +
-        userAbout.token;
+        userAbout.authToken;
 
       await this.mailService.sendMail({
         to: email,

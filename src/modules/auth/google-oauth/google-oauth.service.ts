@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from 'src/modules/entities/users.entity';
 import { GoogleReq } from 'src/modules/auth/google-oauth/google-oauth.controller';
 import { Repository } from 'typeorm';
 import { Response } from 'express';
+import { AuthService } from 'src/modules/auth/auth.service';
 
 @Injectable()
 export class GoogleOauthService {
   constructor(
     @InjectRepository(Users)
     private readonly userRepo: Repository<Users>,
-    private readonly jwtService: JwtService,
+    private readonly authService: AuthService,
   ) {}
 
   async googleSignUp(req: GoogleReq, res: Response) {
@@ -38,16 +38,14 @@ export class GoogleOauthService {
   async googleSignIn(req: GoogleReq) {
     const { googleId } = req.user;
 
-    const { id, email, role } = await this.userRepo.findOneBy({ googleId });
+    const { id } = await this.userRepo.findOneBy({ googleId });
 
-    return {
-      token: this.jwtService.sign({
-        sub: id,
-        email,
-      }),
-      email,
-      role,
-    };
+    const accessToken = await this.authService.getJwtAccessToken(id);
+    const refreshToken = await this.authService.getJwtRefreshToken(id);
+
+    await this.authService.setCurrentRefreshToken(refreshToken, id);
+
+    return { accessToken, refreshToken };
   }
 
   async findUserByGoogleID(googleId: string) {
