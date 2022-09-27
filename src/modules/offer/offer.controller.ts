@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Request,
   UseGuards,
@@ -14,6 +15,7 @@ import { OfferService } from 'src/modules/offer/offer.service';
 import { Offer } from 'src/modules/offer/entities/offer.entity';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { createOfferDto } from 'src/modules/offer/dto/create-offer.dto';
+import { Status } from 'src/modules/offer/typesDef';
 
 @Controller('offer')
 export class OfferController {
@@ -35,5 +37,14 @@ export class OfferController {
   @Post()
   create(@Body() createOfferDto: createOfferDto): Promise<Offer> {
     return this.offerService.create(createOfferDto);
+  }
+
+  // @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  update(
+    @Param() { id }: searchParamDto,
+    @Body() data: { status: Status },
+  ): Promise<Offer> {
+    return this.offerService.update({ status: data.status, id: +id });
   }
 }

@@ -13,18 +13,11 @@ export class ContractsService {
   ) {}
 
   async create(createContractDto: CreateContractDto): Promise<InsertResult> {
-    const { freelancer } = createContractDto;
-
     return await this.contractRepo
       .createQueryBuilder('contracts')
       .insert()
       .into(Contracts)
-      .values([
-        {
-          ...createContractDto,
-          ...(freelancer && { freelancer: { id: +freelancer } }),
-        },
-      ])
+      .values([createContractDto])
       .execute();
   }
 

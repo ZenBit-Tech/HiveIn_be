@@ -1,8 +1,9 @@
 import { IsDateString, IsNumber } from 'class-validator';
+import { Offer } from 'src/modules/offer/entities/offer.entity';
 
 export class CreateContractDto {
   @IsNumber()
-  readonly freelancer: number;
+  readonly offer: Offer;
 
   @IsDateString()
   readonly startDate: Date;
