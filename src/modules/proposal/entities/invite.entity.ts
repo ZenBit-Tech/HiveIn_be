@@ -16,6 +16,9 @@ export class Invite {
   @Column()
   inviteMessage: string;
 
+  @Column()
+  bid: number;
+
   @ManyToOne(() => JobPost, (jobPost) => jobPost.id, { cascade: true })
   @JoinColumn()
   jobPost: JobPost;

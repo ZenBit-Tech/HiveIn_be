@@ -42,6 +42,7 @@ export class ProposalService {
     idFreelancer,
     idJobPost,
     inviteMessage,
+    bid,
   }: CreateInviteDto): Promise<InsertResult> {
     return await this.inviteRepo
       .createQueryBuilder('invite')
@@ -49,6 +50,7 @@ export class ProposalService {
       .into(Invite)
       .values([
         {
+          bid,
           jobPost: { id: idJobPost },
           freelancer: { id: idFreelancer },
           inviteMessage,
