@@ -13,6 +13,7 @@ import { createChatRoomDto } from 'src/modules/chat-room/dto/create-chat-room.dt
 import { searchParamDto } from 'src/modules/chat-room/dto/search-param.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
+import { IRoom } from './typesDef';
 
 @Controller('chat-room')
 export class ChatRoomController {
@@ -26,13 +27,13 @@ export class ChatRoomController {
 
   @UseGuards(JwtAuthGuard)
   @Get('room/:id')
-  getOne(@Param() { id }: searchParamDto): Promise<ChatRoom> {
+  getOne(@Param() { id }: searchParamDto): Promise<IRoom> {
     return this.chatRoomService.getOneById(+id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('self')
-  getAllOwn(@Request() req: AuthRequest): Promise<ChatRoom[]> {
+  getAllOwn(@Request() req: AuthRequest): Promise<IRoom[]> {
     return this.chatRoomService.getAllByUserId(req.user.id);
   }
 
