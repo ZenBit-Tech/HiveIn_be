@@ -16,7 +16,7 @@ import { ForgotPassword } from 'src/modules/entities/forgot-password.entity';
 import { AuthDto } from 'src/modules/auth/dto/auth.dto';
 import { AuthRestorePasswordDto } from 'src/modules/auth/dto/restore-password.dto';
 
-export interface TokenPayload {
+export interface ITokenPayload {
   id: number;
   email?: string;
 }
@@ -86,7 +86,7 @@ export class AuthService {
 
   async getJwtAccessToken(id: number) {
     const { email, role } = await this.authRepo.findOneBy({ id });
-    const payload: TokenPayload = { id, email };
+    const payload: ITokenPayload = { id, email };
 
     return {
       authToken: this.jwtService.sign(payload, {
@@ -99,7 +99,7 @@ export class AuthService {
   }
 
   async getJwtRefreshToken(id: number) {
-    const payload: TokenPayload = { id };
+    const payload: ITokenPayload = { id };
 
     return this.jwtService.sign(payload, {
       secret: this.configService.get('SECRET_KEY'),
