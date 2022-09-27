@@ -5,7 +5,7 @@ import { ChatRoomConnected } from 'src/modules/chat-room-connected/entities/chat
 import { createConnectedUserDto } from 'src/modules/chat-room-connected/dto/create-connected-room.dto';
 
 @Injectable()
-export class JoinedRoomService {
+export class ChatRoomConnectedService {
   constructor(
     @InjectRepository(ChatRoomConnected)
     private readonly chatRoomConnectedRepository: Repository<ChatRoomConnected>,

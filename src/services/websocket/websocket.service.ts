@@ -14,7 +14,7 @@ import { CreateNotificationDto } from 'src/modules/notifications/dto/create-noti
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import { MessageService } from 'src/modules/message/message.service';
-import { JoinedRoomService } from 'src/modules/chat-room-connected/connected-room.service';
+import { ChatRoomConnectedService } from 'src/modules/chat-room-connected/connected-room.service';
 import { ConnectedUserService } from 'src/modules/chat-room-connected/connected-user.service';
 import { SettingsInfoService } from 'src/modules/settings-info/settings-info.service';
 import { config } from 'dotenv';
@@ -53,7 +53,7 @@ export class WebsocketService
     private userService: SettingsInfoService,
     private roomService: ChatRoomService,
     private messageService: MessageService,
-    private joinedRoomService: JoinedRoomService,
+    private chatRoomConnectedService: ChatRoomConnectedService,
     private connectedUserService: ConnectedUserService,
     private notificationService: NotificationsService,
   ) {}
@@ -62,7 +62,7 @@ export class WebsocketService
 
   async onModuleInit(): Promise<void> {
     await this.connectedUserService.deleteAll();
-    await this.joinedRoomService.deleteAll();
+    await this.chatRoomConnectedService.deleteAll();
   }
 
   async handleConnection(socket: Socket): Promise<void> {
@@ -96,7 +96,7 @@ export class WebsocketService
   async handleDisconnect(socket: Socket): Promise<void> {
     this.logger.log('🚀🔴 Disconnected');
     await this.connectedUserService.deleteBySocketId(socket.id);
-    await this.joinedRoomService.deleteBySocketId(socket.id);
+    await this.chatRoomConnectedService.deleteBySocketId(socket.id);
     socket.disconnect();
   }
 
@@ -114,7 +114,7 @@ export class WebsocketService
   @SubscribeMessage(Event.JOIN_ROOM)
   async onJoinRoom(socket: Socket, data: number): Promise<void> {
     const messages = await this.messageService.getAllByRoomId(data);
-    await this.joinedRoomService.create({
+    await this.chatRoomConnectedService.create({
       socketId: socket.id,
       userId: socket.data.user.id,
       roomId: data,
@@ -131,7 +131,7 @@ export class WebsocketService
 
   @SubscribeMessage(Event.LEAVE_ROOM)
   async onLeaveRoom(socket: Socket): Promise<void> {
-    await this.joinedRoomService.deleteBySocketId(socket.id);
+    await this.chatRoomConnectedService.deleteBySocketId(socket.id);
   }
 
   @SubscribeMessage(Event.ADD_MESSAGE)
@@ -144,7 +144,7 @@ export class WebsocketService
       userId: socket.data.user.id,
     });
     const room = await this.roomService.getOneById(createdMessage.chatRoom.id);
-    const joinedUsers = await this.joinedRoomService.findByRoom(room.id);
+    const joinedUsers = await this.chatRoomConnectedService.findByRoom(room.id);
     for (const user of joinedUsers) {
       this.server.to(user.socketId).emit(Event.MESSAGE_ADDED, createdMessage);
       const messages = await this.messageService.getAllByRoomId(

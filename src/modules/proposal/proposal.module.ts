@@ -23,8 +23,6 @@ import { Message } from 'src/modules/message/entities/message.entity';
       JobPost,
       Experience,
       Education,
-      ChatRoomService,
-      SettingsInfoService,
       ChatRoom,
       Message,
     ]),
