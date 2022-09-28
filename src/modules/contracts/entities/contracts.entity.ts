@@ -1,26 +1,20 @@
-import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
-import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
 import {
   Column,
   Entity,
-  ManyToOne,
+  JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Offer } from 'src/modules/offer/entities/offer.entity';
 
 @Entity()
 export class Contracts {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => JobPost, (jobPost) => jobPost.contract)
-  jobPost: JobPost;
-
-  @ManyToOne(() => Freelancer, (freelancer) => freelancer.id, {
-    cascade: true,
-    nullable: true,
-  })
-  freelancer: Freelancer;
+  @OneToOne(() => Offer)
+  @JoinColumn({ name: 'offerId' })
+  offer: Offer;
 
   @Column({ nullable: true })
   startDate: Date;

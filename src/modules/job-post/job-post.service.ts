@@ -76,7 +76,7 @@ export class JobPostService {
   ): Promise<UpdateResult> {
     const jobPost = await this.jobPostRepository.findOne({
       where: { id: id, user: { id: updateJobPostDto.userId } },
-      relations: ['category', 'skills', 'user', 'contract'],
+      relations: ['category', 'skills', 'user', 'offer'],
     });
     if (!jobPost) {
       throw new HttpException('job post not found', 404);
@@ -101,7 +101,7 @@ export class JobPostService {
       )
       .leftJoinAndSelect('job_post.skills', 'skills')
       .leftJoinAndSelect('job_post.user', 'users')
-      .leftJoinAndSelect('job_post.contract', 'contracts')
+      .leftJoinAndSelect('job_post.offer', 'offer')
       .getMany();
   }
 
@@ -153,7 +153,7 @@ export class JobPostService {
   async findOne(id: number): Promise<JobPost> {
     const jobPost = await this.jobPostRepository.findOne({
       where: { id: id },
-      relations: ['category', 'skills', 'user', 'file', 'contract'],
+      relations: ['category', 'skills', 'user', 'file', 'offer'],
     });
     if (!jobPost) {
       throw new HttpException('Job post not found', 404);
@@ -167,7 +167,7 @@ export class JobPostService {
       .leftJoinAndSelect('jobPost.category', 'category')
       .leftJoinAndSelect('jobPost.user', 'user')
       .leftJoinAndSelect('jobPost.skills', 'skills')
-      .leftJoinAndSelect('jobPost.contract', 'contract')
+      .leftJoinAndSelect('jobPost.offer', 'offer')
       .where({ user: { id: userId }, isDraft })
       .orderBy('jobPost.createdAt', 'DESC')
       .getMany();
@@ -188,7 +188,7 @@ export class JobPostService {
         },
         isDraft,
       },
-      relations: ['contract'],
+      relations: ['offer'],
       order: {
         createdAt: 'DESC',
       },
