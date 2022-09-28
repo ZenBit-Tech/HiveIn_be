@@ -39,7 +39,7 @@ export class OfferController {
     return this.offerService.create(createOfferDto);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(
     @Param() { id }: searchParamDto,
