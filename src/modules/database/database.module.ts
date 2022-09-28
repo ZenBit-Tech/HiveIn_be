@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DEV } from 'src/utils/env.consts';
 
 @Module({
   imports: [
@@ -18,9 +19,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         migrations: ['dist/migrations/**/*{.ts,.js}'],
         timezone: 'Z',
         logging: true,
-        migrationsRun: true,
+        migrationsRun: configService.get<string>('NODE_ENV') != DEV,
         autoLoadEntities: true,
-        synchronize: false,
+        synchronize: configService.get<string>('NODE_ENV') === DEV,
         cli: { migrationsDir: 'src/migrations' },
         ssl: {
           rejectUnauthorized: false,
