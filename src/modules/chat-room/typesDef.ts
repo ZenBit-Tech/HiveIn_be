@@ -1,3 +1,5 @@
+import { MessageType } from 'src/modules/message/typesDef';
+
 export enum ColumnNames {
   CLIENT = 'client_user_profile',
   FREELANCER = 'freelancer_user_profile',
@@ -35,7 +37,7 @@ export interface IRoom {
   lastMessage: {
     created_at: Date;
     id: number;
-    isSystemMessage: boolean;
+    messageType: MessageType;
     text: string;
   };
 }

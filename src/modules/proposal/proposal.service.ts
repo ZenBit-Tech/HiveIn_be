@@ -8,6 +8,7 @@ import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import { Message } from 'src/modules/message/entities/message.entity';
 import { SettingsInfoService } from 'src/modules/settings-info/settings-info.service';
 import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
+import { MessageType } from 'src/modules/message/typesDef';
 
 @Injectable()
 export class ProposalService {
@@ -52,14 +53,20 @@ export class ProposalService {
       {
         chatRoom,
         user,
+        text: 'You have received a new proposal!',
+        messageType: MessageType.FROM_SYSTEM,
+      },
+      {
+        chatRoom,
+        user,
         text: createProposalDto.coverLetter,
-        isSystemMessage: false,
+        messageType: MessageType.FROM_USER,
       },
       {
         chatRoom,
         user,
         text: `bid: ${createProposalDto.bid}`,
-        isSystemMessage: false,
+        messageType: MessageType.FROM_USER,
       },
     ];
 

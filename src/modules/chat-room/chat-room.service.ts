@@ -64,11 +64,20 @@ export class ChatRoomService {
     return rooms.map((room) => this.parseChatRoomData(room));
   }
 
+  async updateAfterReceiveMessage(id: number): Promise<UpdateResult> {
+    return await this.chatRoomRepository
+      .createQueryBuilder()
+      .update(ChatRoom)
+      .set({ updated_at: new Date() })
+      .where('id = :id', { id })
+      .execute();
+  }
+
   async changeStatus(id: number): Promise<UpdateResult> {
     return await this.chatRoomRepository
       .createQueryBuilder()
       .update(ChatRoom)
-      .set({ status: chatRoomStatus.FOR_ALL })
+      .set({ status: chatRoomStatus.FOR_ALL, updated_at: new Date() })
       .where('id = :id', { id })
       .execute();
   }
@@ -81,7 +90,8 @@ export class ChatRoomService {
       .leftJoinAndSelect('chat_room.freelancer', 'freelancer')
       .leftJoinAndSelect('job_post.user', 'client_user_profile')
       .leftJoinAndSelect('freelancer.user', 'freelancer_user_profile')
-      .where(`${columnName}.id = ${id}`);
+      .where(`${columnName}.id = ${id}`)
+      .orderBy('updated_at', 'DESC');
   }
 
   private parseChatRoomData(chatRoom: ChatRoom): IRoom {

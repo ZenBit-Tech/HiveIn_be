@@ -5,6 +5,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
@@ -32,4 +33,7 @@ export class ChatRoom {
     enum: chatRoomStatus,
   })
   status: chatRoomStatus;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

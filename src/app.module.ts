@@ -21,7 +21,6 @@ import { ContractsModule } from 'src/modules/contracts/contracts.module';
 import { OfferModule } from 'src/modules/offer/offer.module';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
 import { MessageModule } from 'src/modules/message/message.module';
-import { ChatConnectModule } from 'src/modules/chat-room-connected/chat-connect.module';
 
 @Module({
   imports: [
@@ -59,7 +58,6 @@ import { ChatConnectModule } from 'src/modules/chat-room-connected/chat-connect.
     OfferModule,
     ChatRoomModule,
     MessageModule,
-    ChatConnectModule,
   ],
   controllers: [AppController],
   providers: [AppService, WebsocketService, JwtService],

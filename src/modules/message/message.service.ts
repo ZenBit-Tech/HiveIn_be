@@ -6,7 +6,7 @@ import { createMessageDto } from 'src/modules/message/dto/create-message.dto';
 import { UserRole, Users } from 'src/modules/entities/users.entity';
 import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
-import { ReturnedMessage } from 'src/modules/message/typesDef';
+import { MessageType, ReturnedMessage } from 'src/modules/message/typesDef';
 import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
 
 @Injectable()
@@ -49,12 +49,16 @@ export class MessageService {
       await this.chatRoomService.changeStatus(data.chatRoomId);
     }
 
-    return await this.messageRepository.save({
+    const message = await this.messageRepository.save({
       text: data.text,
       chatRoom: { id: data.chatRoomId },
       user: { id: data.userId },
-      isSystemMessage: false,
+      messageType: MessageType.FROM_USER,
     });
+
+    await this.chatRoomService.updateAfterReceiveMessage(data.chatRoomId);
+
+    return message;
   }
 
   async createSystemMessage(data: createMessageDto): Promise<Message> {
@@ -62,7 +66,7 @@ export class MessageService {
       text: data.text,
       chatRoom: { id: data.chatRoomId },
       user: { id: data.userId },
-      isSystemMessage: true,
+      messageType: MessageType.FROM_SYSTEM,
     });
   }
 

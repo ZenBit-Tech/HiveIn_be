@@ -6,9 +6,10 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { IsBoolean, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { Users } from 'src/modules/entities/users.entity';
+import { MessageType } from 'src/modules/message/typesDef';
 
 @Entity()
 export class Message {
@@ -27,10 +28,12 @@ export class Message {
   @JoinColumn({ name: 'chatRoomId' })
   chatRoom: ChatRoom;
 
+  @Column({
+    type: 'enum',
+    enum: MessageType,
+  })
+  messageType: MessageType;
+
   @CreateDateColumn()
   created_at: Date;
-
-  @Column()
-  @IsBoolean()
-  isSystemMessage: boolean;
 }

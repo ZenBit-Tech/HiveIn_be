@@ -91,17 +91,22 @@ export class WebsocketService
   async handleDisconnect(socket: Socket): Promise<void> {
     this.logger.log('🚀🔴 Disconnected');
     this.users.delete(socket.id);
-    this.rooms.forEach((socketIds, roomId) => {
-      if (socketIds.has(socket.id)) socketIds.delete(socket.id);
+    this.removeUserFromRoom(socket.id);
 
-      if (socketIds.size === 0) this.rooms.delete(roomId);
-    });
     socket.disconnect();
   }
 
   private disconnect(socket: Socket): void {
     socket.emit(Event.ERROR, new UnauthorizedException());
     socket.disconnect();
+  }
+
+  private removeUserFromRoom(socketId: string): void {
+    this.rooms.forEach((socketIds, roomId) => {
+      if (socketIds.has(socketId)) socketIds.delete(socketId);
+
+      if (socketIds.size === 0) this.rooms.delete(roomId);
+    });
   }
 
   @SubscribeMessage(Event.GET_ROOMS)
@@ -132,18 +137,8 @@ export class WebsocketService
   }
 
   @SubscribeMessage(Event.LEAVE_ROOM)
-  async onLeaveRoom(socket: Socket): Promise<void> {
-    this.rooms.forEach((socketIds, roomId) => {
-      if (socketIds.has(socket.id)) socketIds.delete(socket.id);
-
-      if (socketIds.size === 0) this.rooms.delete(roomId);
-    });
-
-    this.rooms.forEach((socketIds, roomId) => {
-      if (socketIds.has(socket.id)) socketIds.delete(socket.id);
-
-      if (socketIds.size === 0) this.rooms.delete(roomId);
-    });
+  onLeaveRoom(socket: Socket): void {
+    this.removeUserFromRoom(socket.id);
   }
 
   @SubscribeMessage(Event.ADD_MESSAGE)
@@ -157,14 +152,13 @@ export class WebsocketService
     });
     const room = await this.roomService.getOneById(createdMessage.chatRoom.id);
 
-    const usersAn = [room.freelancer.id, room.client.id];
-    const objToIter = [];
+    const usersInRoom = [room.freelancer.id, room.client.id];
+    const connectedUsersInRoom = new Set<string>();
     this.users.forEach((userId, socketId) => {
-      if (usersAn.includes(userId)) objToIter.push(socketId);
+      if (usersInRoom.includes(userId)) connectedUsersInRoom.add(socketId);
     });
-    // const users = this.rooms.get(room.id);
 
-    for (const user of objToIter) {
+    for (const user of connectedUsersInRoom) {
       this.server.to(user).emit(Event.MESSAGE_ADDED, createdMessage);
       const messages = await this.messageService.getAllByRoomId(
         data.chatRoomId,
@@ -173,7 +167,6 @@ export class WebsocketService
       const rooms = await this.roomService.getAllByUserId(this.users.get(user));
       this.server.to(user).emit(Event.ROOMS, rooms);
       this.server.to(user).emit(Event.MESSAGES, messages);
-      console.log(objToIter);
     }
   }
 
