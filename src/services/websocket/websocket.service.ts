@@ -75,7 +75,7 @@ export class WebsocketService
         },
       );
 
-      const user = await this.userService.findOne(decodedToken.sub);
+      const user = await this.userService.findOne(decodedToken.id);
       if (!user) {
         return this.disconnect(socket);
       } else {
