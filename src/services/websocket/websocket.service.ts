@@ -10,14 +10,12 @@ import {
 } from '@nestjs/websockets';
 import { JwtService } from '@nestjs/jwt';
 import { Server, Socket } from 'socket.io';
+import { config } from 'dotenv';
 import { CreateNotificationDto } from 'src/modules/notifications/dto/create-notification.dto';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import { MessageService } from 'src/modules/message/message.service';
-import { ChatRoomConnectedService } from 'src/modules/chat-room-connected/connected-room.service';
-import { ConnectedUserService } from 'src/modules/chat-room-connected/connected-user.service';
 import { SettingsInfoService } from 'src/modules/settings-info/settings-info.service';
-import { config } from 'dotenv';
 
 config();
 
@@ -53,16 +51,17 @@ export class WebsocketService
     private userService: SettingsInfoService,
     private roomService: ChatRoomService,
     private messageService: MessageService,
-    private chatRoomConnectedService: ChatRoomConnectedService,
-    private connectedUserService: ConnectedUserService,
     private notificationService: NotificationsService,
   ) {}
+
+  private users = new Map<string, number>();
+  private rooms = new Map<number, Set<string>>();
 
   private logger: Logger = new Logger('AppGateway');
 
   async onModuleInit(): Promise<void> {
-    await this.connectedUserService.deleteAll();
-    await this.chatRoomConnectedService.deleteAll();
+    this.users.clear();
+    this.rooms.clear();
   }
 
   async handleConnection(socket: Socket): Promise<void> {
@@ -80,12 +79,8 @@ export class WebsocketService
       if (!user) {
         return this.disconnect(socket);
       } else {
-        socket.data.user = user;
-        await this.connectedUserService.create({
-          socketId: socket.id,
-          userId: user.id,
-        });
         const rooms = await this.roomService.getAllByUserId(user.id);
+        this.users.set(socket.id, user.id);
         this.server.to(socket.id).emit(Event.ROOMS, rooms);
       }
     } catch {
@@ -95,8 +90,12 @@ export class WebsocketService
 
   async handleDisconnect(socket: Socket): Promise<void> {
     this.logger.log('🚀🔴 Disconnected');
-    await this.connectedUserService.deleteBySocketId(socket.id);
-    await this.chatRoomConnectedService.deleteBySocketId(socket.id);
+    this.users.delete(socket.id);
+    this.rooms.forEach((socketIds, roomId) => {
+      if (socketIds.has(socket.id)) socketIds.delete(socket.id);
+
+      if (socketIds.size === 0) this.rooms.delete(roomId);
+    });
     socket.disconnect();
   }
 
@@ -107,19 +106,22 @@ export class WebsocketService
 
   @SubscribeMessage(Event.GET_ROOMS)
   async onGetRooms(socket: Socket): Promise<void> {
-    const rooms = await this.roomService.getAllByUserId(socket.data.user.id);
+    const rooms = await this.roomService.getAllByUserId(
+      this.users.get(socket.id),
+    );
     this.server.to(socket.id).emit(Event.ROOMS, rooms);
   }
 
   @SubscribeMessage(Event.JOIN_ROOM)
   async onJoinRoom(socket: Socket, data: number): Promise<void> {
     const messages = await this.messageService.getAllByRoomId(data);
-    await this.chatRoomConnectedService.create({
-      socketId: socket.id,
-      userId: socket.data.user.id,
-      roomId: data,
-    });
 
+    if (this.rooms.has(data)) {
+      const room = this.rooms.get(data);
+      room.add(socket.id);
+    } else {
+      this.rooms.set(data, new Set<string>().add(socket.id));
+    }
     this.server.to(socket.id).emit(Event.MESSAGES, messages);
   }
 
@@ -131,7 +133,17 @@ export class WebsocketService
 
   @SubscribeMessage(Event.LEAVE_ROOM)
   async onLeaveRoom(socket: Socket): Promise<void> {
-    await this.chatRoomConnectedService.deleteBySocketId(socket.id);
+    this.rooms.forEach((socketIds, roomId) => {
+      if (socketIds.has(socket.id)) socketIds.delete(socket.id);
+
+      if (socketIds.size === 0) this.rooms.delete(roomId);
+    });
+
+    this.rooms.forEach((socketIds, roomId) => {
+      if (socketIds.has(socket.id)) socketIds.delete(socket.id);
+
+      if (socketIds.size === 0) this.rooms.delete(roomId);
+    });
   }
 
   @SubscribeMessage(Event.ADD_MESSAGE)
@@ -141,16 +153,27 @@ export class WebsocketService
   ): Promise<void> {
     const createdMessage = await this.messageService.create({
       ...data,
-      userId: socket.data.user.id,
+      userId: this.users.get(socket.id),
     });
     const room = await this.roomService.getOneById(createdMessage.chatRoom.id);
-    const joinedUsers = await this.chatRoomConnectedService.findByRoom(room.id);
-    for (const user of joinedUsers) {
-      this.server.to(user.socketId).emit(Event.MESSAGE_ADDED, createdMessage);
+
+    const usersAn = [room.freelancer.id, room.client.id];
+    const objToIter = [];
+    this.users.forEach((userId, socketId) => {
+      if (usersAn.includes(userId)) objToIter.push(socketId);
+    });
+    // const users = this.rooms.get(room.id);
+
+    for (const user of objToIter) {
+      this.server.to(user).emit(Event.MESSAGE_ADDED, createdMessage);
       const messages = await this.messageService.getAllByRoomId(
         data.chatRoomId,
       );
-      this.server.to(user.socketId).emit(Event.MESSAGES, messages);
+
+      const rooms = await this.roomService.getAllByUserId(this.users.get(user));
+      this.server.to(user).emit(Event.ROOMS, rooms);
+      this.server.to(user).emit(Event.MESSAGES, messages);
+      console.log(objToIter);
     }
   }
 
