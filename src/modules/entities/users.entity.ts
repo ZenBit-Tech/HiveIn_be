@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { ForgotPassword } from './forgot-password.entity';
+import { Exclude } from 'class-transformer';
 export enum UserRole {
   CLIENT = 'client',
   FREELANCER = 'freelancer',
@@ -40,6 +41,10 @@ export class Users {
 
   @Column({ nullable: true, unique: true })
   googleId: string;
+
+  @Column({ nullable: true })
+  @Exclude()
+  public currentHashedRefreshToken?: string;
 
   @Column({ nullable: true })
   @IsString()
