@@ -153,20 +153,26 @@ export class WebsocketService
     const room = await this.roomService.getOneById(createdMessage.chatRoom.id);
 
     const usersInRoom = [room.freelancer.id, room.client.id];
-    const connectedUsersInRoom = new Set<string>();
+    const allUsersInRoom = new Set<string>();
     this.users.forEach((userId, socketId) => {
-      if (usersInRoom.includes(userId)) connectedUsersInRoom.add(socketId);
+      if (usersInRoom.includes(userId)) allUsersInRoom.add(socketId);
     });
 
-    for (const user of connectedUsersInRoom) {
+    for (const user of allUsersInRoom) {
       this.server.to(user).emit(Event.MESSAGE_ADDED, createdMessage);
+
+      const rooms = await this.roomService.getAllByUserId(this.users.get(user));
+      this.server.to(user).emit(Event.ROOMS, rooms);
+    }
+
+    const currentRoom = this.rooms.get(createdMessage.chatRoom.id);
+
+    for (const usersInRoom of currentRoom) {
       const messages = await this.messageService.getAllByRoomId(
         data.chatRoomId,
       );
 
-      const rooms = await this.roomService.getAllByUserId(this.users.get(user));
-      this.server.to(user).emit(Event.ROOMS, rooms);
-      this.server.to(user).emit(Event.MESSAGES, messages);
+      this.server.to(usersInRoom).emit(Event.MESSAGES, messages);
     }
   }
 
