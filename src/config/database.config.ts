@@ -1,8 +1,9 @@
 import { DataSource } from 'typeorm';
-import { ConfigService } from '@nestjs/config';
-import { config } from 'dotenv';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
-config();
+ConfigModule.forRoot({
+  envFilePath: '.production.env',
+});
 
 const configService = new ConfigService();
 
