@@ -1,4 +1,3 @@
-import { Invite } from 'src/modules/proposal/entities/invite.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from 'src/modules/entities/users.entity';
@@ -15,7 +14,6 @@ import { ProposalService } from 'src/modules/proposal/proposal.service';
   imports: [
     TypeOrmModule.forFeature([
       Proposal,
-      Invite,
       Users,
       Freelancer,
       JobPost,
