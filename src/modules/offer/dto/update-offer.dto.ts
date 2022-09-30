@@ -1,10 +1,7 @@
-import { IsEnum, IsNumber } from 'class-validator';
+import { IsEnum } from 'class-validator';
 import { Status } from 'src/modules/offer/typesDef';
 
-export class updateOfferDto {
-  @IsNumber()
-  id: number;
-
+export class UpdateOfferDto {
   @IsEnum(Status)
   status: Status;
 }
