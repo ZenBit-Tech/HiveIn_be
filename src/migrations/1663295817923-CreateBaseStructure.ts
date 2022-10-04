@@ -35,7 +35,7 @@ export class CreateBaseStructure1663295817923 implements MigrationInterface {
       `CREATE TABLE \`forgot_password\` (\`id\` int NOT NULL AUTO_INCREMENT, \`link\` varchar(255) NOT NULL, \`userId\` int NULL, UNIQUE INDEX \`IDX_578f17dec4aa5907aa43ed39a0\` (\`link\`), PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
     );
     await queryRunner.query(
-      `CREATE TABLE \`proposal\` (\`id\` int NOT NULL AUTO_INCREMENT, \`message\` varchar(255) NOT NULL, \`bid\` int NOT NULL, \`jobPostId\` int NULL, \`freelancerId\` int NULL, \`type\` enum ('invite', 'proposal') NOT NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
+      `CREATE TABLE \`proposal\` (\`id\` int NOT NULL AUTO_INCREMENT, \`coverLetter\` varchar(255) NOT NULL, \`bid\` int NOT NULL, \`jobPostId\` int NULL, \`freelancerId\` int NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
     );
     await queryRunner.query(
       `CREATE TABLE \`job_post_skills_skill\` (\`jobPostId\` int NOT NULL, \`skillId\` int NOT NULL, INDEX \`IDX_da75e60a1d514422767a088018\` (\`jobPostId\`), INDEX \`IDX_56e603ad9b063928f47e7a110f\` (\`skillId\`), PRIMARY KEY (\`jobPostId\`, \`skillId\`)) ENGINE=InnoDB`,
