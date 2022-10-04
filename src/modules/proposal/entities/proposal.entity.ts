@@ -8,13 +8,18 @@ import {
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
 
+export enum ProposalType {
+  PROPOSAL = 'proposal',
+  INVITE = 'invite',
+}
+
 @Entity()
 export class Proposal {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  coverLetter: string;
+  message: string;
 
   @Column()
   bid: number;
@@ -26,4 +31,10 @@ export class Proposal {
   @ManyToOne(() => Freelancer, (freelancer) => freelancer.id, { cascade: true })
   @JoinColumn()
   freelancer: Freelancer;
+
+  @Column({
+    type: 'enum',
+    enum: ProposalType,
+  })
+  type: ProposalType;
 }
