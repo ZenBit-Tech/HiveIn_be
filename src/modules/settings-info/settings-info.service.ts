@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserRole, Users } from 'src/modules/entities/users.entity';
+import {
+  ConfidentialSettings,
+  UserRole,
+  Users,
+} from 'src/modules/entities/users.entity';
 import { Repository } from 'typeorm';
 import { CreateSettingsInfoDto } from 'src/modules/settings-info/dto/create-settings-info.dto';
 import { UpdateSettingsInfoDto } from 'src/modules/settings-info/dto/update-settings-info.dto';
@@ -25,6 +29,7 @@ export class SettingsInfoService {
     return await this.settingsInfoRepo.save({
       ...currentUser,
       ...createSettingsInfoDto,
+      confidentialSetting: ConfidentialSettings.HIDDEN,
     });
   }
 

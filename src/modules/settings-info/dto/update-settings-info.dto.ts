@@ -6,7 +6,10 @@ import {
   IsString,
   MaxLength,
 } from 'class-validator';
-import { UserRole } from 'src/modules/entities/users.entity';
+import {
+  ConfidentialSettings,
+  UserRole,
+} from 'src/modules/entities/users.entity';
 import { CreateSettingsInfoDto } from './create-settings-info.dto';
 
 export class UpdateSettingsInfoDto extends PartialType(CreateSettingsInfoDto) {
@@ -36,4 +39,8 @@ export class UpdateSettingsInfoDto extends PartialType(CreateSettingsInfoDto) {
   @IsString()
   @IsOptional()
   readonly avatarURL: string;
+
+  @IsOptional()
+  @IsEnum(ConfidentialSettings)
+  readonly confidentialLettings: ConfidentialSettings;
 }
