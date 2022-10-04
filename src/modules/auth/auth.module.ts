@@ -10,16 +10,18 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleOauthModule } from 'src/modules/auth/google-oauth/google-oauth.module';
 import { JwtRefreshTokenStrategy } from 'src/modules/auth/strategies/jwt-refresh-token.strategy';
+import { FilesService } from 'src/modules/file/file.service';
+import PublicFile from 'src/modules/file/entities/publicFile.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forFeature([Users, ForgotPassword, Freelancer]),
+    TypeOrmModule.forFeature([Users, ForgotPassword, Freelancer, PublicFile]),
     JwtModule.register({}),
     forwardRef(() => GoogleOauthModule),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtRefreshTokenStrategy],
+  providers: [AuthService, JwtStrategy, JwtRefreshTokenStrategy, FilesService],
   exports: [AuthService],
 })
 export class AuthModule {}

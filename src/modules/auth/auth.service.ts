@@ -19,6 +19,7 @@ import {
   JWT_ACCESS_TOKEN_EXPIRATION_TIME,
   JWT_REFRESH_TOKEN_EXPIRATION_TIME,
 } from 'src/utils/jwt.consts';
+import { FilesService } from 'src/modules/file/file.service';
 
 export interface ITokenPayload {
   id: number;
@@ -35,6 +36,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private mailService: MailerService,
+    private readonly filesService: FilesService,
   ) {}
 
   /* 
@@ -183,5 +185,16 @@ export class AuthService {
       });
     }
     return createdUser;
+  }
+
+  async addAvatar(userId: number, imageBuffer: Buffer, filename: string) {
+    const avatar = await this.filesService.uploadPublicFile(
+      imageBuffer,
+      filename,
+    );
+    await this.authRepo.update(userId, {
+      avatar,
+    });
+    return avatar;
   }
 }
