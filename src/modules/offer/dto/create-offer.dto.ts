@@ -1,9 +1,11 @@
-import { IsString } from 'class-validator';
+import { IsInt, IsNumber } from 'class-validator';
 
-export class createOfferDto {
-  @IsString()
+export class CreateOfferDto {
+  @IsNumber()
+  @IsInt()
   jobPostId: number;
 
-  @IsString()
+  @IsNumber()
+  @IsInt()
   freelancerId: number;
 }
