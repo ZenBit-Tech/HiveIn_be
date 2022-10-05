@@ -47,7 +47,7 @@ export class OfferService {
       status: updateOfferDto.status,
     });
 
-    if (offer.status === Status.ACTIVE)
+    if (offer.status === Status.ACCEPTED)
       await this.contractsService.create({
         offer,
         startDate: new Date(),
@@ -83,6 +83,7 @@ export class OfferService {
       )
       .leftJoinAndSelect('jobPost.user', 'client')
       .where(`user.id = ${userId}`)
+      .andWhere(`offer.status != :accepted`, { accepted: Status.ACCEPTED })
       .getMany();
   }
 
