@@ -42,5 +42,5 @@ export class UpdateSettingsInfoDto extends PartialType(CreateSettingsInfoDto) {
 
   @IsOptional()
   @IsEnum(ConfidentialSettings)
-  readonly confidentialLettings: ConfidentialSettings;
+  readonly confidentialSettings: ConfidentialSettings;
 }
