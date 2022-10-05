@@ -20,7 +20,10 @@ export class FilesService {
     });
   }
 
-  async uploadPublicFile(dataBuffer: Buffer, filename: string) {
+  async uploadPublicFile(
+    dataBuffer: Buffer,
+    filename: string,
+  ): Promise<PublicFile> {
     const s3 = new S3();
     const uploadResult = await s3
       .upload({

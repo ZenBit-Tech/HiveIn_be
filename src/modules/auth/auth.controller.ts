@@ -21,6 +21,7 @@ import * as SendGrid from '@sendgrid/mail';
 import { AuthRestorePasswordDto } from './dto/restore-password.dto';
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
 import { FileInterceptor } from '@nestjs/platform-express';
+import PublicFile from 'src/modules/file/entities/publicFile.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -81,7 +82,7 @@ export class AuthController {
   async addAvatar(
     @Req() request: AuthRequest,
     @UploadedFile() file: Express.Multer.File,
-  ) {
+  ): Promise<PublicFile> {
     return this.authService.addAvatar(
       request.user.id,
       file.buffer,

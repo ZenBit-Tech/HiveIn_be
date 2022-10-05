@@ -20,6 +20,7 @@ import {
   JWT_REFRESH_TOKEN_EXPIRATION_TIME,
 } from 'src/utils/jwt.consts';
 import { FilesService } from 'src/modules/file/file.service';
+import PublicFile from 'src/modules/file/entities/publicFile.entity';
 
 export interface ITokenPayload {
   id: number;
@@ -187,7 +188,11 @@ export class AuthService {
     return createdUser;
   }
 
-  async addAvatar(userId: number, imageBuffer: Buffer, filename: string) {
+  async addAvatar(
+    userId: number,
+    imageBuffer: Buffer,
+    filename: string,
+  ): Promise<PublicFile> {
     const avatar = await this.filesService.uploadPublicFile(
       imageBuffer,
       filename,
