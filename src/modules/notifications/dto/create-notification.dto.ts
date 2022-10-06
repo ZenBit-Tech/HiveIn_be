@@ -1,12 +1,16 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsString } from 'class-validator';
+import { NotificationType } from '../entities/notification.entity';
 
 export class CreateNotificationDto {
-  @IsNumber()
-  fromUserId: number;
-
-  @IsNumber()
-  toUserId: number;
+  @IsEnum(NotificationType)
+  type: NotificationType;
 
   @IsString()
-  type: string;
+  text: string;
+
+  @IsNumber()
+  userId: number;
+
+  @IsNumber()
+  foreignKey: number;
 }

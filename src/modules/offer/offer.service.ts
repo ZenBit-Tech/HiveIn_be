@@ -69,7 +69,7 @@ export class OfferService {
       return await this.getAllOwnAsClient(userId);
   }
 
-  async getAllOwnAsFreelancer(userId: number): Promise<Offer[]> {
+  private async getAllOwnAsFreelancer(userId: number): Promise<Offer[]> {
     return await this.offerRepository
       .createQueryBuilder('offer')
       .leftJoin('offer.freelancer', 'freelancer')
@@ -87,7 +87,7 @@ export class OfferService {
       .getMany();
   }
 
-  async getAllOwnAsClient(userId: number): Promise<Offer[]> {
+  private async getAllOwnAsClient(userId: number): Promise<Offer[]> {
     return await this.offerRepository
       .createQueryBuilder('offer')
       .leftJoinAndSelect('offer.freelancer', 'freelancer')
