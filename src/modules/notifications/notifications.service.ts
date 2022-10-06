@@ -42,27 +42,43 @@ export class NotificationsService {
       .getManyAndCount();
   }
 
-  async getAllOwnMessageType(id: number): Promise<[Notification[], number]> {
+  async getAllOwnMessageType(
+    id: number,
+    isRead?: boolean,
+  ): Promise<[Notification[], number]> {
     return await this.notificationRepository
       .createQueryBuilder('notification')
       .where('notification.userId = :id', { id })
       .andWhere('notification.type = :type', { type: NotificationType.MESSAGE })
+      .andWhere(
+        typeof isRead !== 'undefined'
+          ? `notification.isRead = ${isRead}`
+          : '1 = 1',
+      )
       .getManyAndCount();
   }
 
-  async getAllOwnNotMessageType(id: number): Promise<[Notification[], number]> {
+  async getAllOwnNotMessageType(
+    id: number,
+    isRead?: boolean,
+  ): Promise<[Notification[], number]> {
     return await this.notificationRepository
       .createQueryBuilder('notification')
       .where('notification.userId = :id', { id })
       .andWhere('notification.type != :type', {
         type: NotificationType.MESSAGE,
       })
+      .andWhere(
+        typeof isRead !== 'undefined'
+          ? `notification.isRead = ${isRead}`
+          : '1 = 1',
+      )
       .getManyAndCount();
   }
 
   async getCount(id: number) {
-    const [, countOfMessage] = await this.getAllOwnMessageType(id);
-    const [, countOfOther] = await this.getAllOwnNotMessageType(id);
+    const [, countOfMessage] = await this.getAllOwnMessageType(id, false);
+    const [, countOfOther] = await this.getAllOwnNotMessageType(id, false);
 
     return { message: countOfMessage, other: countOfOther };
   }

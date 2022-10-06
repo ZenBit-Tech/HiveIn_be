@@ -8,10 +8,11 @@ import {
   ProposalType,
 } from 'src/modules/proposal/entities/proposal.entity';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
-import { Message } from 'src/modules/message/entities/message.entity';
 import { SettingsInfoService } from 'src/modules/settings-info/settings-info.service';
 import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
-import { MessageType } from 'src/modules/message/typesDef';
+import { MessageService } from '../message/message.service';
+import { JobPostService } from '../job-post/job-post.service';
+import { LocalFile } from '../entities/localFile.entity';
 
 @Injectable()
 export class ProposalService {
@@ -21,8 +22,10 @@ export class ProposalService {
     private readonly chatRoomService: ChatRoomService,
     private readonly freelancerService: FreelancerService,
     private readonly settingsInfoService: SettingsInfoService,
-    @InjectRepository(Message)
-    private readonly messageRepo: Repository<Message>,
+    private readonly messageService: MessageService,
+    private readonly jobPostService: JobPostService,
+    @InjectRepository(LocalFile)
+    private readonly local: Repository<LocalFile>,
   ) {}
 
   async create(
@@ -46,43 +49,33 @@ export class ProposalService {
       ])
       .execute();
 
-    const user = await this.settingsInfoService.findOne(userId);
-    const freelancer = await this.freelancerService.findOneByUserId(userId);
-
     const chatRoom = await this.chatRoomService.create({
       jobPostId: idJobPost,
-      freelancerId: freelancer.id,
-      status: chatRoomStatus.CLIENT_ONLY,
+      freelancerId: idFreelancer,
+      status:
+        type === ProposalType.PROPOSAL
+          ? chatRoomStatus.CLIENT_ONLY
+          : chatRoomStatus.FREELANCER_ONLY,
     });
 
-    const values = [
-      {
-        chatRoom,
-        user,
-        text: 'You have received a new proposal!',
-        messageType: MessageType.FROM_SYSTEM,
-      },
-      {
-        chatRoom,
-        user,
-        text: createProposalDto.message,
-        messageType: MessageType.FROM_USER,
-      },
-      {
-        chatRoom,
-        user,
-        text: `bid: ${createProposalDto.bid}`,
-        messageType: MessageType.FROM_USER,
-      },
-    ];
-
-    await this.messageRepo
-      .createQueryBuilder('message')
-      .insert()
-      .into(Message)
-      .values(values)
-      .execute();
+    // const id = this.defineInvitedUserId(userId, type);
+    //
+    // const messages = this.messageService.createInitialMessages(
+    //   chatRoom,
+    //   idFreelancer,
+    // );
 
     return proposal;
   }
+
+  // private async defineInvitedUserId(
+  //   currentUserId: number,
+  //   freelancerId: number,
+  //   jobPostId: number,
+  //   type: ProposalType,
+  // ) {
+  //   if (type === ProposalType.INVITE) return freelancerId;
+  //
+  //   return await this.jobPostService.getUserIdByRoomId(id);
+  // }
 }

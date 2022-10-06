@@ -13,6 +13,10 @@ import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { SettingsInfoService } from 'src/modules/settings-info/settings-info.service';
 import { Message } from 'src/modules/message/entities/message.entity';
+import { MessageService } from '../message/message.service';
+import { JobPostService } from '../job-post/job-post.service';
+import { LocalFilesService } from '../job-post/localFiles.service';
+import { LocalFile } from '../entities/localFile.entity';
 
 @Module({
   imports: [
@@ -25,6 +29,7 @@ import { Message } from 'src/modules/message/entities/message.entity';
       Education,
       ChatRoom,
       Message,
+      LocalFile,
     ]),
   ],
   controllers: [ProposalController],
@@ -33,6 +38,9 @@ import { Message } from 'src/modules/message/entities/message.entity';
     FreelancerService,
     ChatRoomService,
     SettingsInfoService,
+    MessageService,
+    JobPostService,
+    LocalFilesService,
   ],
 })
 export class ProposalModule {}

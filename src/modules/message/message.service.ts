@@ -61,6 +61,8 @@ export class MessageService {
     return message;
   }
 
+  // async createInitialMessages(room: ChatRoom, userId: number) {}
+
   async createSystemMessage(data: createMessageDto): Promise<Message> {
     return await this.messageRepository.save({
       text: data.text,

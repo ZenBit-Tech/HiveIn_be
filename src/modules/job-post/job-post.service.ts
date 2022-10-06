@@ -196,6 +196,17 @@ export class JobPostService {
     });
   }
 
+  async getUserIdByRoomId(id: number): Promise<number> {
+    const jobPost = await this.jobPostRepository
+      .createQueryBuilder('jobPost')
+      .leftJoinAndSelect('jobPost.user', 'user')
+      .where('jobPost.id = :id', { id })
+      .getOne();
+
+    if (!jobPost) throw new NotFoundException();
+    return jobPost.user.id;
+  }
+
   async remove(id: number): Promise<DeleteResult> {
     const jobPost = await this.findOne(id);
     if (!jobPost) {
