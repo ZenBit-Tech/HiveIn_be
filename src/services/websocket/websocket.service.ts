@@ -184,7 +184,7 @@ export class WebsocketService
   }
 
   @SubscribeMessage(Event.MARK_AS_READ_NOTIFICATION)
-  async onMarkAsRead(socket: Socket, data: number): Promise<void> {
+  async onMarkAsRead(socket: Socket, data: number[]): Promise<void> {
     try {
       await this.notificationService.markAsRead(data);
     } catch {

@@ -67,8 +67,13 @@ export class NotificationsService {
     return { message: countOfMessage, other: countOfOther };
   }
 
-  async markAsRead(id: number) {
-    return await this.notificationRepository.update({ id }, { isRead: true });
+  async markAsRead(ids: number[]) {
+    return await this.notificationRepository
+      .createQueryBuilder('notification')
+      .update(Notification)
+      .set({ isRead: true })
+      .where('notification.id IN (:ids)', { ids })
+      .execute();
   }
 
   async deleteById(id: number) {

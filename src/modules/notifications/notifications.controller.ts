@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Logger,
+  Patch,
+} from '@nestjs/common';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { CreateNotificationDto } from 'src/modules/notifications/dto/create-notification.dto';
 import { Notification } from 'src/modules/notifications/entities/notification.entity';
@@ -20,10 +28,11 @@ export class NotificationsController {
     return this.notificationsService.getAllOwn(+data.id);
   }
 
-  // @Patch(':id')
-  // read(@Param('id') id: string): Promise<boolean> {
-  //   return this.notificationsService.read(+id);
-  // }
+  @Patch('update')
+  read(@Body() ids: { id: number[] }) {
+    return this.notificationsService.markAsRead(ids.id);
+  }
+
   //
   // @Delete(':id')
   // remove(@Param('id') id: string): Promise<boolean> {
