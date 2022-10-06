@@ -35,18 +35,22 @@ export class NotificationsService {
     return { proposal: { id } };
   }
 
-  async getAllOwn(id: number): Promise<[Notification[], number]> {
-    return await this.notificationRepository
+  async getAllOwn(
+    id: number,
+  ): Promise<{ notifications: Notification[]; count: number }> {
+    const [notifications, count] = await this.notificationRepository
       .createQueryBuilder('notification')
       .where('notification.userId = :id', { id })
       .getManyAndCount();
+
+    return { notifications, count };
   }
 
   async getAllOwnMessageType(
     id: number,
     isRead?: boolean,
-  ): Promise<[Notification[], number]> {
-    return await this.notificationRepository
+  ): Promise<{ notifications: Notification[]; count: number }> {
+    const [notifications, count] = await this.notificationRepository
       .createQueryBuilder('notification')
       .where('notification.userId = :id', { id })
       .andWhere('notification.type = :type', { type: NotificationType.MESSAGE })
@@ -56,13 +60,15 @@ export class NotificationsService {
           : '1 = 1',
       )
       .getManyAndCount();
+
+    return { notifications, count };
   }
 
   async getAllOwnNotMessageType(
     id: number,
     isRead?: boolean,
-  ): Promise<[Notification[], number]> {
-    return await this.notificationRepository
+  ): Promise<{ notifications: Notification[]; count: number }> {
+    const [notifications, count] = await this.notificationRepository
       .createQueryBuilder('notification')
       .where('notification.userId = :id', { id })
       .andWhere('notification.type != :type', {
@@ -74,13 +80,15 @@ export class NotificationsService {
           : '1 = 1',
       )
       .getManyAndCount();
+
+    return { notifications, count };
   }
 
   async getCount(id: number) {
-    const [, countOfMessage] = await this.getAllOwnMessageType(id, false);
-    const [, countOfOther] = await this.getAllOwnNotMessageType(id, false);
+    const { count: message } = await this.getAllOwnMessageType(id, false);
+    const { count: other } = await this.getAllOwnNotMessageType(id, false);
 
-    return { message: countOfMessage, other: countOfOther };
+    return { message, other };
   }
 
   async markAsRead(ids: number[]) {
