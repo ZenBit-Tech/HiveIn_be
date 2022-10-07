@@ -88,7 +88,7 @@ export class Users {
   avatarURL: string;
 
   @JoinColumn()
-  @OneToOne(() => , {
+  @OneToOne(() => PublicFile, {
     eager: true,
     nullable: true,
   })
