@@ -108,8 +108,15 @@ export class JobPostService {
   async findAndFilterAll(
     queryParams: searchJobFiltersDto,
   ): Promise<{ data: JobPost[]; totalCount: number }> {
-    const { category, skills, englishLevel, duration, durationType, rate } =
-      queryParams;
+    const {
+      category,
+      skills,
+      englishLevel,
+      duration,
+      durationType,
+      rate,
+      keyWord,
+    } = queryParams;
     const take = queryParams.take || DEFAULT_AMOUNT_OF_QUERIED_POSTS;
     const skip = queryParams.skip || DEFAULT_SKIP_OF_QUERIED_POSTS;
 
@@ -139,6 +146,11 @@ export class JobPostService {
       )
       .andWhere(rate ? `rate >= ${rate}` : '1 = 1')
       .andWhere(skills ? `skills.id IN (${filterSkillsParams})` : '1 = 1')
+      .andWhere(
+        keyWord
+          ? `(job_post.title LIKE '%${keyWord}%' OR job_post.jobDescription LIKE '%${keyWord}%')`
+          : '1 = 1',
+      )
       .orderBy(`job_post.createdAt`, 'DESC')
       .skip(skip)
       .take(take)

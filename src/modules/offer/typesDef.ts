@@ -1,5 +1,6 @@
 export enum Status {
   PENDING = 'pending',
-  ACTIVE = 'active',
+  ACCEPTED = 'accepted',
   REJECTED = 'rejected',
+  EXPIRED = 'expired',
 }

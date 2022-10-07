@@ -14,7 +14,6 @@ import { SettingsInfoModule } from 'src/modules/settings-info/settings-info.modu
 import { FreelancerModule } from 'src/modules/freelancer/freelancer.module';
 import { CategoryModule } from 'src/modules/category/category.module';
 import { SkillModule } from 'src/modules/skill/skill.module';
-import { AvatarModule } from 'src/modules/avatar/avatar.module';
 import { JobPostModule } from 'src/modules/job-post/job-post.module';
 import { ProposalModule } from 'src/modules/proposal/proposal.module';
 import { ContractsModule } from 'src/modules/contracts/contracts.module';
@@ -51,7 +50,6 @@ import { MessageModule } from 'src/modules/message/message.module';
     CategoryModule,
     SkillModule,
     JobPostModule,
-    AvatarModule,
     ProposalModule,
     ContractsModule,
     NotificationsModule,
