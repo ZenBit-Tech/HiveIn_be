@@ -13,6 +13,7 @@ import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { ForgotPassword } from './forgot-password.entity';
 import { Exclude } from 'class-transformer';
 import PublicFile from 'src/modules/file/entities/publicFile.entity';
+
 export enum UserRole {
   CLIENT = 'client',
   FREELANCER = 'freelancer',
