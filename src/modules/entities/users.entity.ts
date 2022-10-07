@@ -19,6 +19,13 @@ export enum UserRole {
   UNDEFINED = '',
 }
 
+export enum ConfidentialSettings {
+  VISIBLE = 'visible',
+  PHONE_ONLY = 'phoneOnly',
+  EMAIL_ONLY = 'emailOnly',
+  HIDDEN = 'hidden',
+}
+
 @Entity()
 export class Users {
   @PrimaryGeneratedColumn({
@@ -40,6 +47,14 @@ export class Users {
     default: UserRole.UNDEFINED,
   })
   role: UserRole;
+
+  @Column({
+    type: 'enum',
+    enum: ConfidentialSettings,
+    default: null,
+    nullable: true,
+  })
+  confidentialSetting: ConfidentialSettings;
 
   @Column({ nullable: true, unique: true })
   googleId: string;
