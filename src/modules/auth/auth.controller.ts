@@ -22,6 +22,7 @@ import { AuthRestorePasswordDto } from './dto/restore-password.dto';
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
 import { FileInterceptor } from '@nestjs/platform-express';
 import PublicFile from 'src/modules/file/entities/publicFile.entity';
+import { multerAvatarOptions } from 'src/config/multer.config';
 
 @Controller('auth')
 export class AuthController {
@@ -78,7 +79,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('avatar')
-  @UseInterceptors(FileInterceptor('avatar'))
+  @UseInterceptors(FileInterceptor('avatar', multerAvatarOptions))
   async addAvatar(
     @Req() request: AuthRequest,
     @UploadedFile() file: Express.Multer.File,
