@@ -37,4 +37,8 @@ export class searchJobFiltersDto {
   @IsOptional()
   @IsEnum(EnglishLevel)
   englishLevel: EnglishLevel;
+
+  @IsOptional()
+  @IsString()
+  keyWord: string;
 }
