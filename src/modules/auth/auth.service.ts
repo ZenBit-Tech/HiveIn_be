@@ -152,7 +152,8 @@ export class AuthService {
       });
 
       const url =
-        this.configService.get<string>('FRONTEND_RESTORE_PASSWORD_URL') +
+        this.configService.get<string>('FRONTEND_SIGN_IN_REDIRECT_URL') +
+        '/restore-password?token=' +
         userAbout.authToken;
 
       await this.mailService.sendMail({
