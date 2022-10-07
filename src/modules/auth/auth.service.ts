@@ -21,6 +21,7 @@ import {
 } from 'src/utils/jwt.consts';
 import { FilesService } from 'src/modules/file/file.service';
 import PublicFile from 'src/modules/file/entities/publicFile.entity';
+import { RESTORE_PASSWORD_TOKEN } from 'src/utils/auth.consts';
 
 export interface ITokenPayload {
   id: number;
@@ -153,7 +154,7 @@ export class AuthService {
 
       const url =
         this.configService.get<string>('FRONTEND_SIGN_IN_REDIRECT_URL') +
-        '/restore-password?token=' +
+        +RESTORE_PASSWORD_TOKEN +
         userAbout.authToken;
 
       await this.mailService.sendMail({
