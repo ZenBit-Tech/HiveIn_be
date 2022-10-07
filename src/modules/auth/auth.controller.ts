@@ -76,9 +76,9 @@ export class AuthController {
     return this.authService.restorePassword(dto);
   }
 
-  @Post('avatar')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
+  @Post('avatar')
+  @UseInterceptors(FileInterceptor('avatar'))
   async addAvatar(
     @Req() request: AuthRequest,
     @UploadedFile() file: Express.Multer.File,

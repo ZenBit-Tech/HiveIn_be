@@ -193,13 +193,38 @@ export class AuthService {
     imageBuffer: Buffer,
     filename: string,
   ): Promise<PublicFile> {
+    const user = await this.authRepo.findOneBy({ id: userId });
+
+    if (user.avatar) {
+      await this.authRepo.update(userId, {
+        ...user,
+        avatar: null,
+      });
+      await this.filesService.deletePublicFile(user.avatar.id);
+    }
+
     const avatar = await this.filesService.uploadPublicFile(
       imageBuffer,
       filename,
     );
+
     await this.authRepo.update(userId, {
+      ...user,
       avatar,
     });
     return avatar;
+  }
+
+  async deleteAvatar(userId: number): Promise<void> {
+    const user = await this.authRepo.findOneBy({ id: userId });
+    const fileId = user.avatar?.id;
+
+    if (fileId) {
+      await this.authRepo.update(userId, {
+        ...user,
+        avatar: null,
+      });
+      await this.filesService.deletePublicFile(fileId);
+    }
   }
 }
