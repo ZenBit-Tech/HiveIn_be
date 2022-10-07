@@ -20,7 +20,8 @@ export class ClientService {
       .createQueryBuilder('freelancer')
       .leftJoinAndSelect('freelancer.category', 'category')
       .leftJoinAndSelect('freelancer.skills', 'skills')
-      .leftJoinAndSelect('freelancer.user', 'user')
+      .leftJoinAndSelect('freelancer.user', 'users')
+      .leftJoinAndSelect('users.avatar', 'avatar')
       .where({
         category: {
           id: +filters.category,
@@ -60,6 +61,7 @@ export class ClientService {
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.recentlyViewedFreelancers', 'freelancer')
       .leftJoinAndSelect('freelancer.user', 'freelancerUser')
+      .leftJoinAndSelect('freelancerUser.avatar', 'avatar')
       .where({ id: userId })
       .getOne();
 
@@ -75,6 +77,7 @@ export class ClientService {
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.recentlyViewedFreelancers', 'freelancer')
       .leftJoinAndSelect('freelancer.user', 'freelancerUser')
+      .leftJoinAndSelect('freelancerUser.avatar', 'avatar')
       .where({ id: userId })
       .getOne();
 
@@ -89,6 +92,7 @@ export class ClientService {
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.savedFreelancers', 'savedFreelancers')
       .leftJoinAndSelect('savedFreelancers.user', 'savedFreelancersUser')
+      .leftJoinAndSelect('savedFreelancersUser.avatar', 'avatar')
       .where({ id: userId })
       .getOne();
 
@@ -126,7 +130,9 @@ export class ClientService {
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.savedFreelancers', 'savedFreelancers')
       .leftJoinAndSelect('user.hiredFreelancers', 'hiredFreelancers')
-      .leftJoinAndSelect('hiredFreelancers.user', 'hiredFreelancersUuser')
+      .leftJoinAndSelect('hiredFreelancers.user', 'hiredFreelancersUser')
+      .leftJoinAndSelect('hiredFreelancersUser.avatar', 'avatar')
+
       .where({ id: userId })
       .getOne();
 

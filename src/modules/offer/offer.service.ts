@@ -81,7 +81,8 @@ export class OfferService {
         'category',
         'jobPost.categoryId = category.id',
       )
-      .leftJoinAndSelect('jobPost.user', 'client')
+      .leftJoinAndSelect('jobPost.user', 'users')
+      .leftJoinAndSelect('users.avatar', 'avatar')
       .where(`user.id = ${userId}`)
       .andWhere(`offer.status != :accepted`, { accepted: Status.ACCEPTED })
       .getMany();
