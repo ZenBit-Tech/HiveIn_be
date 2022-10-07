@@ -13,9 +13,9 @@ import { searchParamDto } from 'src/modules/chat-room/dto/search-param.dto';
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
 import { OfferService } from 'src/modules/offer/offer.service';
 import { Offer } from 'src/modules/offer/entities/offer.entity';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { createOfferDto } from 'src/modules/offer/dto/create-offer.dto';
-import { Status } from 'src/modules/offer/typesDef';
+import { CreateOfferDto } from 'src/modules/offer/dto/create-offer.dto';
+import { InsertResult } from 'typeorm';
+import { UpdateOfferDto } from 'src/modules/offer/dto/update-offer.dto';
 
 @Controller('offer')
 export class OfferController {
@@ -35,16 +35,16 @@ export class OfferController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createOfferDto: createOfferDto): Promise<Offer> {
+  create(@Body() createOfferDto: CreateOfferDto): Promise<InsertResult> {
     return this.offerService.create(createOfferDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(
-    @Param() { id }: searchParamDto,
-    @Body() data: { status: Status },
+    @Param('id') id: string,
+    @Body() updateOfferDto: UpdateOfferDto,
   ): Promise<Offer> {
-    return this.offerService.update({ status: data.status, id: +id });
+    return this.offerService.update(+id, updateOfferDto);
   }
 }

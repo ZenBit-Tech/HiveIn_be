@@ -13,10 +13,18 @@ import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { ForgotPassword } from './forgot-password.entity';
 import { Exclude } from 'class-transformer';
 import PublicFile from 'src/modules/file/entities/publicFile.entity';
+
 export enum UserRole {
   CLIENT = 'client',
   FREELANCER = 'freelancer',
   UNDEFINED = '',
+}
+
+export enum ConfidentialSettings {
+  VISIBLE = 'visible',
+  PHONE_ONLY = 'phoneOnly',
+  EMAIL_ONLY = 'emailOnly',
+  HIDDEN = 'hidden',
 }
 
 @Entity()
@@ -40,6 +48,14 @@ export class Users {
     default: UserRole.UNDEFINED,
   })
   role: UserRole;
+
+  @Column({
+    type: 'enum',
+    enum: ConfidentialSettings,
+    default: null,
+    nullable: true,
+  })
+  confidentialSetting: ConfidentialSettings;
 
   @Column({ nullable: true, unique: true })
   googleId: string;
@@ -72,7 +88,7 @@ export class Users {
   avatarURL: string;
 
   @JoinColumn()
-  @OneToOne(() => PublicFile, {
+  @OneToOne(() => , {
     eager: true,
     nullable: true,
   })

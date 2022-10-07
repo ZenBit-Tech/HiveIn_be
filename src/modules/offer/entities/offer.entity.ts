@@ -1,5 +1,6 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -21,6 +22,9 @@ export class Offer {
   @ManyToOne(() => Freelancer)
   @JoinColumn({ name: 'freelancerId' })
   freelancer: Freelancer;
+
+  @CreateDateColumn()
+  createdAt: Date;
 
   @Column({
     type: 'enum',
