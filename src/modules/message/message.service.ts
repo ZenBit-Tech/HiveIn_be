@@ -8,6 +8,8 @@ import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import { MessageType, ReturnedMessage } from 'src/modules/message/typesDef';
 import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
+import { ProposalType } from '../proposal/entities/proposal.entity';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class MessageService {
@@ -19,13 +21,12 @@ export class MessageService {
     @InjectRepository(ChatRoom)
     private readonly chatRoomRepository: Repository<ChatRoom>,
     private readonly chatRoomService: ChatRoomService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async create(data: createMessageDto): Promise<Message> {
     const user = await this.usersRepository.findOneBy({ id: data.userId });
-    const chatRoom = await this.chatRoomRepository.findOneBy({
-      id: data.chatRoomId,
-    });
+    const chatRoom = await this.chatRoomService.getOneById(data.chatRoomId);
 
     if (user.role === UserRole.UNDEFINED) throw new ForbiddenException();
 
@@ -48,7 +49,6 @@ export class MessageService {
     ) {
       await this.chatRoomService.changeStatus(data.chatRoomId);
     }
-
     const message = await this.messageRepository.save({
       text: data.text,
       chatRoom: { id: data.chatRoomId },
@@ -56,12 +56,65 @@ export class MessageService {
       messageType: MessageType.FROM_USER,
     });
 
-    await this.chatRoomService.updateAfterReceiveMessage(data.chatRoomId);
+    const receiverUserId =
+      chatRoom.freelancer.id === data.userId
+        ? chatRoom.client.id
+        : chatRoom.freelancer.id;
 
+    await this.chatRoomService.updateAfterReceiveMessage(data.chatRoomId);
+    await this.notificationsService.createMessageNotification(
+      message.id,
+      receiverUserId,
+    );
     return message;
   }
 
-  // async createInitialMessages(room: ChatRoom, userId: number) {}
+  async createInitialMessages(
+    chatRoomId: number,
+    inviteFrom: number,
+    inviteTo: number,
+    type: ProposalType,
+    message: string,
+    bid: number,
+  ) {
+    await this.createSystemMessage({
+      text: `You have received a new ${
+        type === ProposalType.PROPOSAL ? 'proposal' : 'invite'
+      }`,
+      chatRoomId,
+      userId: inviteTo,
+    });
+    const values = [
+      {
+        chatRoom: { id: chatRoomId },
+        user: { id: inviteFrom },
+        text: message,
+        messageType: MessageType.FROM_USER,
+      },
+      {
+        chatRoom: { id: chatRoomId },
+        user: { id: inviteFrom },
+        text: `bid: ${bid}`,
+        messageType: MessageType.FROM_USER,
+      },
+    ];
+
+    await this.messageRepository
+      .createQueryBuilder('message')
+      .insert()
+      .into(Message)
+      .values(values)
+      .execute();
+
+    const messages = await this.getAllByRoomId(chatRoomId);
+
+    messages.map(async (message) => {
+      await this.notificationsService.createMessageNotification(
+        message.id,
+        inviteTo,
+      );
+    });
+  }
 
   async createSystemMessage(data: createMessageDto): Promise<Message> {
     return await this.messageRepository.save({

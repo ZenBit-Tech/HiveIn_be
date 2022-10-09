@@ -168,6 +168,7 @@ export class WebsocketService
     }
 
     const joinedUsers = this.rooms.get(createdMessage.chatRoom.id);
+
     const messages = await this.messageService.getAllByRoomId(data.chatRoomId);
     for (const usersInRoom of joinedUsers) {
       this.server.to(usersInRoom).emit(Event.MESSAGES, messages);
@@ -191,6 +192,7 @@ export class WebsocketService
       throw new WsException('error occurred, notification not updated');
     }
     await this.onGetCount(socket);
+    await this.onGetNotifications(socket);
   }
 
   @SubscribeMessage(Event.GET_NOTIFICATIONS)
@@ -199,5 +201,19 @@ export class WebsocketService
     const notifications =
       await this.notificationService.getAllOwnNotMessageType(user);
     this.server.to(socket.id).emit(Event.GET_NOTIFICATIONS, notifications);
+  }
+
+  async onAddNotification(id: number) {
+    let user;
+
+    this.users.forEach((userId, socketId) => {
+      if (userId === id) {
+        user = socketId;
+      }
+    });
+    if (user) {
+      await this.onGetCount(user);
+      await this.onGetNotifications(user);
+    }
   }
 }

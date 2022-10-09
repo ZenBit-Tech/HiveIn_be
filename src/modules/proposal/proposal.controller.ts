@@ -1,5 +1,8 @@
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
-import { ProposalType } from 'src/modules/proposal/entities/proposal.entity';
+import {
+  Proposal,
+  ProposalType,
+} from 'src/modules/proposal/entities/proposal.entity';
 import {
   Body,
   Controller,
@@ -11,7 +14,6 @@ import {
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { CreateProposalDto } from 'src/modules/proposal/dto/create-proposal.dto';
 import { ProposalService } from 'src/modules/proposal/proposal.service';
-import { InsertResult } from 'typeorm';
 
 @Controller('proposal')
 export class ProposalController {
@@ -23,7 +25,7 @@ export class ProposalController {
     @Param('type') type: ProposalType,
     @Body() createProposalDto: CreateProposalDto,
     @Request() req: AuthRequest,
-  ): Promise<InsertResult> {
+  ): Promise<Proposal> {
     return this.proposalService.create(createProposalDto, req.user.id, type);
   }
 }

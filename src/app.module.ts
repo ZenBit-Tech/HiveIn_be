@@ -21,6 +21,9 @@ import { ContractsModule } from 'src/modules/contracts/contracts.module';
 import { OfferModule } from 'src/modules/offer/offer.module';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
 import { MessageModule } from 'src/modules/message/message.module';
+import { NotificationsService } from './modules/notifications/notifications.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Notification } from './modules/notifications/entities/notification.entity';
 
 @Module({
   imports: [
@@ -58,8 +61,9 @@ import { MessageModule } from 'src/modules/message/message.module';
     OfferModule,
     ChatRoomModule,
     MessageModule,
+    TypeOrmModule.forFeature([Notification]),
   ],
   controllers: [AppController],
-  providers: [AppService, WebsocketService, JwtService],
+  providers: [AppService, WebsocketService, JwtService, NotificationsService],
 })
 export class AppModule {}

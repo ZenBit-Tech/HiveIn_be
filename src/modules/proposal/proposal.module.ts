@@ -17,6 +17,8 @@ import { MessageService } from '../message/message.service';
 import { JobPostService } from '../job-post/job-post.service';
 import { LocalFilesService } from '../job-post/localFiles.service';
 import { LocalFile } from '../entities/localFile.entity';
+import { NotificationsService } from '../notifications/notifications.service';
+import { Notification } from '../notifications/entities/notification.entity';
 
 @Module({
   imports: [
@@ -30,6 +32,7 @@ import { LocalFile } from '../entities/localFile.entity';
       ChatRoom,
       Message,
       LocalFile,
+      Notification,
     ]),
   ],
   controllers: [ProposalController],
@@ -41,6 +44,7 @@ import { LocalFile } from '../entities/localFile.entity';
     MessageService,
     JobPostService,
     LocalFilesService,
+    NotificationsService,
   ],
 })
 export class ProposalModule {}

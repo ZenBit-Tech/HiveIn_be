@@ -14,7 +14,6 @@ import { AuthRequest } from 'src/utils/@types/AuthRequest';
 import { OfferService } from 'src/modules/offer/offer.service';
 import { Offer } from 'src/modules/offer/entities/offer.entity';
 import { CreateOfferDto } from 'src/modules/offer/dto/create-offer.dto';
-import { InsertResult } from 'typeorm';
 import { UpdateOfferDto } from 'src/modules/offer/dto/update-offer.dto';
 
 @Controller('offer')
@@ -35,7 +34,7 @@ export class OfferController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createOfferDto: CreateOfferDto): Promise<InsertResult> {
+  create(@Body() createOfferDto: CreateOfferDto): Promise<Offer> {
     return this.offerService.create(createOfferDto);
   }
 

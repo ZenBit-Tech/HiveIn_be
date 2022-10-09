@@ -196,7 +196,7 @@ export class JobPostService {
     });
   }
 
-  async getUserIdByRoomId(id: number): Promise<number> {
+  async getOwnerIdByPostId(id: number): Promise<number> {
     const jobPost = await this.jobPostRepository
       .createQueryBuilder('jobPost')
       .leftJoinAndSelect('jobPost.user', 'user')

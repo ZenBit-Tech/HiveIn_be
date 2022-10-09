@@ -6,6 +6,7 @@ import {
   Notification,
   NotificationType,
 } from 'src/modules/notifications/entities/notification.entity';
+import { ProposalType } from '../proposal/entities/proposal.entity';
 
 type TResult =
   | { message: { id: number } }
@@ -26,6 +27,39 @@ export class NotificationsService {
       ...rest,
       ...foreignTableConnect,
       user: { id: userId },
+    });
+  }
+
+  async createNewProposalNotification(
+    proposalId: number,
+    userId: number,
+    type: ProposalType,
+  ) {
+    await this.create({
+      type: NotificationType.PROPOSAL,
+      text: `You have receive a new ${
+        type === ProposalType.PROPOSAL ? 'proposal' : 'invite'
+      }`,
+      foreignKey: proposalId,
+      userId,
+    });
+  }
+
+  async createOfferNotification(offerId: number, userId: number, text: string) {
+    await this.create({
+      type: NotificationType.OFFER,
+      foreignKey: offerId,
+      userId,
+      text,
+    });
+  }
+
+  async createMessageNotification(messageId: number, userId: number) {
+    return await this.create({
+      type: NotificationType.MESSAGE,
+      foreignKey: messageId,
+      userId,
+      text: 'New message',
     });
   }
 

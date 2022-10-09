@@ -94,6 +94,16 @@ export class FreelancerService {
       .getOne();
   }
 
+  async getUserIdByFreelancerId(id: number): Promise<number> {
+    const freelancer = await this.freelancerRepository
+      .createQueryBuilder('freelancer')
+      .select('freelancer.userId')
+      .where('freelancer.id = :id', { id })
+      .getOne();
+
+    return freelancer.userId;
+  }
+
   async update(id: number, data: UpdateFreelancerDto): Promise<Freelancer> {
     try {
       const { educations, experiences, skillsIds, user, ...rest } = data;
