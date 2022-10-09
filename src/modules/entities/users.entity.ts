@@ -83,6 +83,10 @@ export class Users {
   @IsString()
   description: string;
 
+  @Column({ nullable: true })
+  @IsString()
+  avatarURL: string;
+
   @JoinColumn()
   @OneToOne(() => PublicFile, {
     eager: true,

@@ -1,16 +1,12 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UploadImageRefactor1665155848609 implements MigrationInterface {
-  name = 'UploadImageRefactor1665155848609';
+export class UserAvatarAdded1665329033752 implements MigrationInterface {
+  name = 'UserAvatarAdded1665329033752';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE \`users\` CHANGE \`avatarURL\` \`avatarId\` varchar(255) NULL`,
-    );
-    await queryRunner.query(
       `CREATE TABLE \`public_file\` (\`id\` int NOT NULL AUTO_INCREMENT, \`url\` varchar(255) NOT NULL, \`key\` varchar(255) NOT NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`,
     );
-    await queryRunner.query(`ALTER TABLE \`users\` DROP COLUMN \`avatarId\``);
     await queryRunner.query(`ALTER TABLE \`users\` ADD \`avatarId\` int NULL`);
     await queryRunner.query(
       `ALTER TABLE \`users\` ADD UNIQUE INDEX \`IDX_3e1f52ec904aed992472f2be14\` (\`avatarId\`)`,
@@ -34,12 +30,6 @@ export class UploadImageRefactor1665155848609 implements MigrationInterface {
       `ALTER TABLE \`users\` DROP INDEX \`IDX_3e1f52ec904aed992472f2be14\``,
     );
     await queryRunner.query(`ALTER TABLE \`users\` DROP COLUMN \`avatarId\``);
-    await queryRunner.query(
-      `ALTER TABLE \`users\` ADD \`avatarId\` varchar(255) NULL`,
-    );
     await queryRunner.query(`DROP TABLE \`public_file\``);
-    await queryRunner.query(
-      `ALTER TABLE \`users\` CHANGE \`avatarId\` \`avatarURL\` varchar(255) NULL`,
-    );
   }
 }
