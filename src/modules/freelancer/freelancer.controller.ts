@@ -8,6 +8,7 @@ import {
   Delete,
   Req,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { FreelancerService } from './freelancer.service';
 import { CreateFreelancerDto } from './dto/create-freelancer.dto';
@@ -30,8 +31,8 @@ export class FreelancerController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll(): Promise<Freelancer[]> {
-    return this.freelancerService.findAll();
+  findAll(@Request() req: AuthRequest): Promise<Freelancer[]> {
+    return this.freelancerService.findAll(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)

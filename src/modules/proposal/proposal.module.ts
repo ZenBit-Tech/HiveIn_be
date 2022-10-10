@@ -1,3 +1,4 @@
+import { ClientService } from 'src/modules/client/client.service';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from 'src/modules/entities/users.entity';
@@ -33,6 +34,7 @@ import { Message } from 'src/modules/message/entities/message.entity';
     FreelancerService,
     ChatRoomService,
     SettingsInfoService,
+    ClientService,
   ],
 })
 export class ProposalModule {}
