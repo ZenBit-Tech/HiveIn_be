@@ -84,8 +84,9 @@ export class AuthController {
     @Req() request: AuthRequest,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<PublicFile> {
+    console.log(request.user);
     return this.authService.addAvatar(
-      request.user.id,
+      request.user,
       file.buffer,
       file.originalname,
     );

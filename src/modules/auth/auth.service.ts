@@ -23,11 +23,6 @@ import { FilesService } from 'src/modules/file/file.service';
 import PublicFile from 'src/modules/file/entities/publicFile.entity';
 import { RESTORE_PASSWORD_TOKEN } from 'src/utils/auth.consts';
 
-export interface ITokenPayload {
-  id: number;
-  email?: string;
-}
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -93,21 +88,21 @@ export class AuthService {
   }
 
   async getJwtAccessToken(id: number) {
-    const { email, role } = await this.authRepo.findOneBy({ id });
-    const payload: ITokenPayload = { id, email };
+    const user = await this.authRepo.findOneBy({ id });
+    const tokenPayload = { ...user };
 
     return {
-      authToken: this.jwtService.sign(payload, {
+      authToken: this.jwtService.sign(tokenPayload, {
         secret: this.configService.get('SECRET_KEY'),
         expiresIn: JWT_ACCESS_TOKEN_EXPIRATION_TIME,
       }),
-      email,
-      role,
+      email: user.email,
+      role: user.role,
     };
   }
 
   async getJwtRefreshToken(id: number) {
-    const payload: ITokenPayload = { id };
+    const payload = { id };
 
     return this.jwtService.sign(payload, {
       secret: this.configService.get('SECRET_KEY'),
@@ -191,14 +186,12 @@ export class AuthService {
   }
 
   async addAvatar(
-    userId: number,
+    user: Users,
     imageBuffer: Buffer,
     filename: string,
   ): Promise<PublicFile> {
-    const user = await this.authRepo.findOneBy({ id: userId });
-
     if (user.avatar) {
-      await this.authRepo.update(userId, {
+      await this.authRepo.update(user.id, {
         ...user,
         avatar: null,
       });
@@ -210,7 +203,7 @@ export class AuthService {
       filename,
     );
 
-    await this.authRepo.update(userId, {
+    await this.authRepo.update(user.id, {
       ...user,
       avatar,
     });
