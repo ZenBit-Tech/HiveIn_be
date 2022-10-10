@@ -46,6 +46,10 @@ jobs:
           envkey_DNS_URL: ${{ secrets.DNS_URL }}
           envkey_SEND_GRID_KEY: ${{ secrets.SEND_GRID_KEY }}
           envkey_UPLOADED_FILES_DESTINATION: ${{ secrets.UPLOADED_FILES_DESTINATION }}
+          envkey_AWS_REGION: ${{ secrets.AWS_REGION }}
+          envkey_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          envkey_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          envkey_AWS_PUBLIC_BUCKET_NAME: ${{ secrets.AWS_PUBLIC_BUCKET_NAME }}
           file_name: .env
           fail_on_empty: false
 

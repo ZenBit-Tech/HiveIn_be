@@ -71,6 +71,7 @@ export class FreelancerService {
         )
         .leftJoinAndSelect('freelancer.skills', 'skill')
         .leftJoinAndSelect('freelancer.user', 'user')
+        .leftJoinAndSelect('user.avatar', 'avatar')
         .getMany(),
     );
   }
@@ -95,6 +96,7 @@ export class FreelancerService {
       )
       .leftJoinAndSelect('freelancer.skills', 'skill')
       .leftJoinAndSelect('freelancer.user', 'user')
+      .leftJoinAndSelect('user.avatar', 'avatar')
       .where(`freelancer.userId = ${id}`)
       .getOne();
   }

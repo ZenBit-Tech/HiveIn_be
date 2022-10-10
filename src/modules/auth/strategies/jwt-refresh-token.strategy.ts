@@ -2,7 +2,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AuthService, ITokenPayload } from 'src/modules/auth/auth.service';
+import { AuthService } from 'src/modules/auth/auth.service';
 import { Users } from 'src/modules/entities/users.entity';
 
 @Injectable()
@@ -23,7 +23,7 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
   }
 
   // Attach the return object to req.user
-  async validate(req: Request, payload: ITokenPayload): Promise<Users> {
+  async validate(req: Request, payload: Users): Promise<Users> {
     const authorization = req.headers['authorization'];
 
     if (!authorization) throw new UnauthorizedException();
