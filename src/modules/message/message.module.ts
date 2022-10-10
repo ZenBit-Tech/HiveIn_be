@@ -1,15 +1,13 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MessageService } from 'src/modules/message/message.service';
 import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { Users } from 'src/modules/entities/users.entity';
 import { Message } from 'src/modules/message/entities/message.entity';
-import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
-import { NotificationsService } from '../notifications/notifications.service';
 import { Notification } from '../notifications/entities/notification.entity';
-import { JwtService } from '@nestjs/jwt';
-import { SettingsInfoService } from '../settings-info/settings-info.service';
 import { Freelancer } from '../freelancer/entities/freelancer.entity';
+import { ChatRoomModule } from '../chat-room/chat-room.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -21,14 +19,10 @@ import { Freelancer } from '../freelancer/entities/freelancer.entity';
       Notification,
       Freelancer,
     ]),
+    ChatRoomModule,
+    forwardRef(() => NotificationsModule),
   ],
-  providers: [
-    MessageService,
-    ChatRoomService,
-    NotificationsService,
-    JwtService,
-    SettingsInfoService,
-  ],
+  providers: [MessageService],
   exports: [MessageService],
 })
 export class MessageModule {}

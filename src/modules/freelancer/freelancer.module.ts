@@ -13,5 +13,6 @@ import { Users } from '../entities/users.entity';
   ],
   controllers: [FreelancerController],
   providers: [FreelancerService],
+  exports: [FreelancerService],
 })
 export class FreelancerModule {}

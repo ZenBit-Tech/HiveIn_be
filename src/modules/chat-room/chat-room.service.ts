@@ -94,6 +94,31 @@ export class ChatRoomService {
       .orderBy('updated_at', 'DESC');
   }
 
+  async getRoomIdByJobPostAndFreelancerIds(
+    jobPostId: number,
+    freelancerId: number,
+  ) {
+    const room = await this.chatRoomRepository
+      .createQueryBuilder('chat_room')
+      .leftJoin('chat_room.jobPost', 'jobPost')
+      .leftJoin('chat_room.freelancer', 'freelancer')
+      .where(`jobPost.id = ${jobPostId}`)
+      .andWhere(`freelancer.id = ${freelancerId}`)
+      .getOneOrFail();
+
+    return room.id;
+  }
+
+  async getRoomIdByMessageId(id: number) {
+    const room = await this.chatRoomRepository
+      .createQueryBuilder('chat_room')
+      .leftJoin('chat_room.message', 'message')
+      .where('message.id = :id', { id })
+      .getOneOrFail();
+
+    return room.id;
+  }
+
   private parseChatRoomData(chatRoom: ChatRoom): IRoom {
     const freelancer = {
       id: chatRoom.freelancer.user.id,

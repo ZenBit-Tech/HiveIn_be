@@ -1,4 +1,10 @@
-import { Logger, OnModuleInit, UnauthorizedException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Logger,
+  OnModuleInit,
+  UnauthorizedException,
+} from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -30,6 +36,7 @@ enum Event {
   MESSAGE_ADDED = 'messageAdded',
   GET_COUNT_NOTIFICATIONS = 'getCount',
   GET_NOTIFICATIONS = 'getNotifications',
+  GET_MESSAGE_NOTIFICATION = 'getMessageNotification',
   MARK_AS_READ_NOTIFICATION = 'markAsRead',
 }
 
@@ -51,6 +58,7 @@ export class WebsocketService
     private userService: SettingsInfoService,
     private roomService: ChatRoomService,
     private messageService: MessageService,
+    @Inject(forwardRef(() => NotificationsService))
     private notificationService: NotificationsService,
   ) {}
 
@@ -179,6 +187,7 @@ export class WebsocketService
   async onGetCount(socket: Socket): Promise<void> {
     const user = this.users.get(socket.id);
     const countOfNotification = await this.notificationService.getCount(user);
+    console.log(countOfNotification);
     this.server
       .to(socket.id)
       .emit(Event.GET_COUNT_NOTIFICATIONS, countOfNotification);
@@ -201,6 +210,17 @@ export class WebsocketService
     const notifications =
       await this.notificationService.getAllOwnNotMessageType(user);
     this.server.to(socket.id).emit(Event.GET_NOTIFICATIONS, notifications);
+  }
+
+  @SubscribeMessage(Event.GET_MESSAGE_NOTIFICATION)
+  async onGetMessageNotification(socket: Socket): Promise<void> {
+    const user = this.users.get(socket.id);
+    const notifications = await this.notificationService.getAllOwnMessageType(
+      user,
+    );
+    this.server
+      .to(socket.id)
+      .emit(Event.GET_MESSAGE_NOTIFICATION, notifications);
   }
 
   async onAddNotification(id: number) {

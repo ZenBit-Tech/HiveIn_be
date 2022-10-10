@@ -6,19 +6,19 @@ import { OfferController } from 'src/modules/offer/offer.controller';
 import { ContractsModule } from 'src/modules/contracts/contracts.module';
 import { Users } from 'src/modules/entities/users.entity';
 import { Notification } from '../notifications/entities/notification.entity';
-import { NotificationsService } from '../notifications/notifications.service';
 import { Message } from '../message/entities/message.entity';
-import { MessageService } from '../message/message.service';
-import { FreelancerService } from '../freelancer/freelancer.service';
-import { ChatRoomService } from '../chat-room/chat-room.service';
 import { ChatRoom } from '../chat-room/entities/chat-room.entity';
 import { Freelancer } from '../freelancer/entities/freelancer.entity';
 import { Education } from '../freelancer/entities/education.entity';
 import { Experience } from '../freelancer/entities/experience.entity';
-import { JobPostService } from '../job-post/job-post.service';
-import { LocalFilesService } from '../job-post/localFiles.service';
 import { JobPost } from '../job-post/entities/job-post.entity';
 import { LocalFile } from '../entities/localFile.entity';
+import { WebsocketModule } from '../websocket/websocket.module';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { MessageModule } from '../message/message.module';
+import { FreelancerModule } from '../freelancer/freelancer.module';
+import { ChatRoomModule } from '../chat-room/chat-room.module';
+import { JobPostModule } from '../job-post/job-post.module';
 
 @Module({
   imports: [
@@ -35,16 +35,14 @@ import { LocalFile } from '../entities/localFile.entity';
       LocalFile,
     ]),
     ContractsModule,
+    WebsocketModule,
+    NotificationsModule,
+    MessageModule,
+    FreelancerModule,
+    ChatRoomModule,
+    JobPostModule,
   ],
-  providers: [
-    OfferService,
-    NotificationsService,
-    MessageService,
-    FreelancerService,
-    ChatRoomService,
-    JobPostService,
-    LocalFilesService,
-  ],
+  providers: [OfferService],
   controllers: [OfferController],
 })
 export class OfferModule {}
