@@ -10,7 +10,7 @@ import {
   ConfidentialSettings,
   UserRole,
 } from 'src/modules/entities/users.entity';
-import { CreateSettingsInfoDto } from './create-settings-info.dto';
+import { CreateSettingsInfoDto } from 'src/modules/settings-info/dto/create-settings-info.dto';
 
 export class UpdateSettingsInfoDto extends PartialType(CreateSettingsInfoDto) {
   @IsOptional()

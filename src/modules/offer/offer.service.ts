@@ -12,10 +12,10 @@ import { UpdateOfferDto } from 'src/modules/offer/dto/update-offer.dto';
 import { Status } from 'src/modules/offer/typesDef';
 import { ContractsService } from 'src/modules/contracts/contracts.service';
 import { UserRole, Users } from 'src/modules/entities/users.entity';
-import { NotificationsService } from '../notifications/notifications.service';
-import { FreelancerService } from '../freelancer/freelancer.service';
-import { MessageService } from '../message/message.service';
-import { JobPostService } from '../job-post/job-post.service';
+import { NotificationsService } from 'src/modules/notifications/notifications.service';
+import { FreelancerService } from 'src/modules/freelancer/freelancer.service';
+import { MessageService } from 'src/modules/message/message.service';
+import { JobPostService } from 'src/modules/job-post/job-post.service';
 
 @Injectable()
 export class OfferService {

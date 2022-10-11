@@ -1,4 +1,4 @@
-import { Notification } from './entities/notification.entity';
+import { Notification } from 'src/modules/notifications/entities/notification.entity';
 
 export type TColumnToJoin =
   | { message: { id: number } }

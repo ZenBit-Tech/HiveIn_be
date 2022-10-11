@@ -5,20 +5,20 @@ import { Offer } from 'src/modules/offer/entities/offer.entity';
 import { OfferController } from 'src/modules/offer/offer.controller';
 import { ContractsModule } from 'src/modules/contracts/contracts.module';
 import { Users } from 'src/modules/entities/users.entity';
-import { Notification } from '../notifications/entities/notification.entity';
-import { Message } from '../message/entities/message.entity';
-import { ChatRoom } from '../chat-room/entities/chat-room.entity';
-import { Freelancer } from '../freelancer/entities/freelancer.entity';
-import { Education } from '../freelancer/entities/education.entity';
-import { Experience } from '../freelancer/entities/experience.entity';
-import { JobPost } from '../job-post/entities/job-post.entity';
-import { LocalFile } from '../entities/localFile.entity';
-import { WebsocketModule } from '../websocket/websocket.module';
-import { NotificationsModule } from '../notifications/notifications.module';
-import { MessageModule } from '../message/message.module';
-import { FreelancerModule } from '../freelancer/freelancer.module';
-import { ChatRoomModule } from '../chat-room/chat-room.module';
-import { JobPostModule } from '../job-post/job-post.module';
+import { Notification } from 'src/modules/notifications/entities/notification.entity';
+import { Message } from 'src/modules/message/entities/message.entity';
+import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
+import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
+import { Education } from 'src/modules/freelancer/entities/education.entity';
+import { Experience } from 'src/modules/freelancer/entities/experience.entity';
+import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
+import { LocalFile } from 'src/modules/entities/localFile.entity';
+import { WebsocketModule } from 'src/modules/websocket/websocket.module';
+import { NotificationsModule } from 'src/modules/notifications/notifications.module';
+import { MessageModule } from 'src/modules/message/message.module';
+import { FreelancerModule } from 'src/modules/freelancer/freelancer.module';
+import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
+import { JobPostModule } from 'src/modules/job-post/job-post.module';
 
 @Module({
   imports: [

@@ -193,18 +193,6 @@ export class WebsocketService
       .emit(Event.GET_COUNT_NOTIFICATIONS, countOfNotification);
   }
 
-  @SubscribeMessage(Event.MARK_AS_READ_NOTIFICATION)
-  async onMarkAsRead(socket: Socket, data: number[]): Promise<void> {
-    try {
-      await this.notificationService.markAsRead(data);
-    } catch {
-      throw new WsException('error occurred, notification not updated');
-    }
-    await this.onGetCount(socket);
-    await this.onGetNotifications(socket);
-    await this.onGetMessageNotification(socket);
-  }
-
   @SubscribeMessage(Event.GET_NOTIFICATIONS)
   async onGetNotifications(socket: Socket): Promise<void> {
     const user = this.users.get(socket.id);
@@ -223,6 +211,18 @@ export class WebsocketService
     this.server
       .to(socket.id)
       .emit(Event.GET_MESSAGE_NOTIFICATION, notifications);
+  }
+
+  @SubscribeMessage(Event.MARK_AS_READ_NOTIFICATION)
+  async onMarkAsRead(socket: Socket, data: number[]): Promise<void> {
+    try {
+      await this.notificationService.markAsRead(data);
+    } catch {
+      throw new WsException('error occurred, notification not updated');
+    }
+    await this.onGetCount(socket);
+    await this.onGetNotifications(socket);
+    await this.onGetMessageNotification(socket);
   }
 
   async onAddNotification(id: number): Promise<void> {

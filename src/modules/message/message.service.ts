@@ -14,8 +14,8 @@ import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import { MessageType, ReturnedMessage } from 'src/modules/message/typesDef';
 import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
-import { ProposalType } from '../proposal/entities/proposal.entity';
-import { NotificationsService } from '../notifications/notifications.service';
+import { ProposalType } from 'src/modules/proposal/entities/proposal.entity';
+import { NotificationsService } from 'src/modules/notifications/notifications.service';
 
 @Injectable()
 export class MessageService {

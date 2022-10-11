@@ -10,10 +10,10 @@ import {
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import { SettingsInfoService } from 'src/modules/settings-info/settings-info.service';
 import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
-import { MessageService } from '../message/message.service';
-import { JobPostService } from '../job-post/job-post.service';
-import { LocalFile } from '../entities/localFile.entity';
-import { NotificationsService } from '../notifications/notifications.service';
+import { MessageService } from 'src/modules/message/message.service';
+import { JobPostService } from 'src/modules/job-post/job-post.service';
+import { LocalFile } from 'src/modules/entities/localFile.entity';
+import { NotificationsService } from 'src/modules/notifications/notifications.service';
 
 @Injectable()
 export class ProposalService {
@@ -84,7 +84,10 @@ export class ProposalService {
     return proposal;
   }
 
-  async getOneByJobPostAndFreelancerId(freelancerId, jobPostId) {
+  async getOneByJobPostAndFreelancerId(
+    freelancerId,
+    jobPostId,
+  ): Promise<Proposal> {
     return await this.proposalRepo
       .createQueryBuilder('proposal')
       .leftJoinAndSelect('proposal.freelancer', 'freelancer')

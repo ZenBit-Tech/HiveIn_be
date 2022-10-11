@@ -1,22 +1,22 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { CreateNotificationDto } from 'src/modules/notifications/dto/create-notification.dto';
 import {
   Notification,
   NotificationType,
 } from 'src/modules/notifications/entities/notification.entity';
-import { ProposalType } from '../proposal/entities/proposal.entity';
-import { WebsocketService } from '../websocket/websocket.service';
-import { MessageService } from '../message/message.service';
-import { ChatRoomService } from '../chat-room/chat-room.service';
+import { ProposalType } from 'src/modules/proposal/entities/proposal.entity';
+import { WebsocketService } from 'src/modules/websocket/websocket.service';
+import { MessageService } from 'src/modules/message/message.service';
+import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import {
   ICountOfNotifications,
   INotificationWithRoomId,
   TColumnToJoin,
   ICountedNotifications,
   ICountedParsedNotifications,
-} from './typesDef';
+} from 'src/modules/notifications/typesDef';
 
 @Injectable()
 export class NotificationsService {
@@ -224,7 +224,7 @@ export class NotificationsService {
     }
   }
 
-  async deleteById(id: number) {
+  async deleteById(id: number): Promise<DeleteResult> {
     return await this.notificationRepository.delete({ id });
   }
 }
