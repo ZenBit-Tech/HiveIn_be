@@ -83,7 +83,7 @@ export class MessageService {
     type: ProposalType,
     message: string,
     bid: number,
-  ) {
+  ): Promise<void> {
     await this.createSystemMessage({
       text: `You have received a new ${
         type === ProposalType.PROPOSAL ? 'proposal' : 'invite'

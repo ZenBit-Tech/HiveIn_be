@@ -187,7 +187,7 @@ export class WebsocketService
   async onGetCount(socket: Socket): Promise<void> {
     const user = this.users.get(socket.id);
     const countOfNotification = await this.notificationService.getCount(user);
-    console.log(countOfNotification);
+
     this.server
       .to(socket.id)
       .emit(Event.GET_COUNT_NOTIFICATIONS, countOfNotification);
@@ -202,6 +202,7 @@ export class WebsocketService
     }
     await this.onGetCount(socket);
     await this.onGetNotifications(socket);
+    await this.onGetMessageNotification(socket);
   }
 
   @SubscribeMessage(Event.GET_NOTIFICATIONS)
@@ -217,13 +218,14 @@ export class WebsocketService
     const user = this.users.get(socket.id);
     const notifications = await this.notificationService.getAllOwnMessageType(
       user,
+      false,
     );
     this.server
       .to(socket.id)
       .emit(Event.GET_MESSAGE_NOTIFICATION, notifications);
   }
 
-  async onAddNotification(id: number) {
+  async onAddNotification(id: number): Promise<void> {
     let user;
 
     this.users.forEach((userId, socketId) => {
@@ -234,6 +236,7 @@ export class WebsocketService
     if (user) {
       await this.onGetCount(user);
       await this.onGetNotifications(user);
+      await this.onGetMessageNotification(user);
     }
   }
 }

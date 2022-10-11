@@ -10,11 +10,13 @@ import { ProposalType } from '../proposal/entities/proposal.entity';
 import { WebsocketService } from '../websocket/websocket.service';
 import { MessageService } from '../message/message.service';
 import { ChatRoomService } from '../chat-room/chat-room.service';
-
-type TResult =
-  | { message: { id: number } }
-  | { offer: { id: number } }
-  | { proposal: { id: number } };
+import {
+  ICountOfNotifications,
+  INotificationWithRoomId,
+  TColumnToJoin,
+  ICountedNotifications,
+  ICountedParsedNotifications,
+} from './typesDef';
 
 @Injectable()
 export class NotificationsService {
@@ -46,8 +48,8 @@ export class NotificationsService {
     proposalId: number,
     userId: number,
     type: ProposalType,
-  ) {
-    await this.create({
+  ): Promise<Notification> {
+    return await this.create({
       type: NotificationType.PROPOSAL,
       text: `You have receive a new ${
         type === ProposalType.PROPOSAL ? 'proposal' : 'invite'
@@ -57,8 +59,12 @@ export class NotificationsService {
     });
   }
 
-  async createOfferNotification(offerId: number, userId: number, text: string) {
-    await this.create({
+  async createOfferNotification(
+    offerId: number,
+    userId: number,
+    text: string,
+  ): Promise<Notification> {
+    return await this.create({
       type: NotificationType.OFFER,
       foreignKey: offerId,
       userId,
@@ -66,7 +72,10 @@ export class NotificationsService {
     });
   }
 
-  async createMessageNotification(messageId: number, userId: number) {
+  async createMessageNotification(
+    messageId: number,
+    userId: number,
+  ): Promise<Notification> {
     return await this.create({
       type: NotificationType.MESSAGE,
       foreignKey: messageId,
@@ -75,15 +84,13 @@ export class NotificationsService {
     });
   }
 
-  private generateColumn(type: NotificationType, id: number): TResult {
+  private generateColumn(type: NotificationType, id: number): TColumnToJoin {
     if (type === NotificationType.MESSAGE) return { message: { id } };
     if (type === NotificationType.OFFER) return { offer: { id } };
     return { proposal: { id } };
   }
 
-  async getAllOwn(
-    id: number,
-  ): Promise<{ notifications: Notification[]; count: number }> {
+  async getAllOwn(id: number): Promise<ICountedNotifications> {
     const [notifications, count] = await this.notificationRepository
       .createQueryBuilder('notification')
       .where('notification.userId = :id', { id })
@@ -95,7 +102,7 @@ export class NotificationsService {
   async getAllOwnMessageType(
     id: number,
     isRead?: boolean,
-  ): Promise<{ notifications: any; count: number }> {
+  ): Promise<ICountedParsedNotifications> {
     const [notifications, count] = await this.notificationRepository
       .createQueryBuilder('notification')
       .leftJoinAndSelect('notification.message', 'message')
@@ -107,11 +114,11 @@ export class NotificationsService {
           : '1 = 1',
       )
       .getManyAndCount();
-    for (let i = 0; i < notifications.length; i++) {
-      notifications[i] = await this.parseData(notifications[i]);
-    }
+
+    const parsed = await this.parseArrayOfNotification(notifications);
+
     return {
-      notifications,
+      notifications: parsed,
       count,
     };
   }
@@ -119,7 +126,7 @@ export class NotificationsService {
   async getAllOwnNotMessageType(
     id: number,
     isRead?: boolean,
-  ): Promise<{ notifications: any; count: number }> {
+  ): Promise<ICountedParsedNotifications> {
     const [notifications, count] = await this.notificationRepository
       .createQueryBuilder('notification')
       .leftJoinAndSelect('notification.message', 'message')
@@ -141,16 +148,17 @@ export class NotificationsService {
       .orderBy('notification.createdAt', 'DESC')
       .getManyAndCount();
 
-    for (let i = 0; i < notifications.length; i++) {
-      notifications[i] = await this.parseData(notifications[i]);
-    }
-    return {
+    const parsedNotification = await this.parseArrayOfNotification(
       notifications,
+    );
+
+    return {
+      notifications: parsedNotification,
       count,
     };
   }
 
-  async getCount(id: number) {
+  async getCount(id: number): Promise<ICountOfNotifications> {
     const { count: message } = await this.getAllOwnMessageType(id, false);
     const { count: other } = await this.getAllOwnNotMessageType(id, false);
 
@@ -167,7 +175,17 @@ export class NotificationsService {
       .execute();
   }
 
-  private async parseData(notification: Notification): Promise<any> {
+  async parseArrayOfNotification(
+    notifications: Notification[],
+  ): Promise<INotificationWithRoomId[]> {
+    return await Promise.all(
+      notifications.map(async (notification) => this.parseData(notification)),
+    );
+  }
+
+  private async parseData(
+    notification: Notification,
+  ): Promise<INotificationWithRoomId> {
     if (notification.type === NotificationType.MESSAGE) {
       const roomId = await this.chatRoomService.getRoomIdByMessageId(
         notification.message.id,

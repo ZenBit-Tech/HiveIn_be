@@ -32,10 +32,4 @@ export class NotificationsController {
   read(@Body() ids: { id: number[] }) {
     return this.notificationsService.markAsRead(ids.id);
   }
-
-  //
-  // @Delete(':id')
-  // remove(@Param('id') id: string): Promise<boolean> {
-  //   return this.notificationsService.remove(+id);
-  // }
 }
