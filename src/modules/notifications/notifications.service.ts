@@ -22,6 +22,7 @@ export class NotificationsService {
     @InjectRepository(Notification)
     private notificationRepository: Repository<Notification>,
     @Inject(forwardRef(() => MessageService))
+    private messageService: MessageService,
     @Inject(forwardRef(() => WebsocketService))
     private wsService: WebsocketService,
     private chatRoomService: ChatRoomService,
