@@ -1,3 +1,5 @@
+import { MailerService } from '@nestjs-modules/mailer';
+import { TasksService } from 'src/services/task.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateContractDto } from 'src/modules/contracts/dto/create-contract.dto';
@@ -10,6 +12,8 @@ export class ContractsService {
   constructor(
     @InjectRepository(Contracts)
     private readonly contractRepo: Repository<Contracts>,
+    private readonly tasksService: TasksService,
+    private readonly mailService: MailerService,
   ) {}
 
   async create(createContractDto: CreateContractDto): Promise<InsertResult> {
@@ -25,13 +29,39 @@ export class ContractsService {
       .leftJoinAndSelect('contracts.offer', 'offer')
       .leftJoinAndSelect('offer.jobPost', 'jobPost')
       .leftJoinAndSelect('jobPost.user', 'user')
+      .leftJoinAndSelect('offer.chatRoom', 'chatRoom')
       .where({ id: result.raw.insertId })
       .getOne();
-
     console.log(contract);
-    const timeDifference = this.getSecondsDiff(new Date(), contract.endDate);
 
+    const timeDifference = this.getSecondsDiff(new Date(), contract.endDate);
     console.log(timeDifference);
+
+    this.tasksService.addNewTimeout(
+      'task ' + timeDifference,
+      timeDifference * 1000,
+      async () => {
+        const { email } = contract.offer.jobPost.user;
+
+        const chatRoom = contract.offer.jobPost.chatRoom;
+
+        const chatUrl = '';
+        const deleteChatUrl = '';
+        const prolongChatUrl = '';
+
+        await this.mailService.sendMail({
+          to: email,
+          subject: 'GetJob Delete Chat',
+          from: 'milkav06062003@gmail.com',
+          html: `<h1>Hello</h1><h1>Your <a href="${chatUrl}">chat</a> will be automatically deleted in ${contract.endDate}</h1>
+          <h2>Please select one of the following variants:</h2>
+          <ul>
+          <li><a href="${deleteChatUrl}">Delete chat</a></li>
+          <li><a href="${prolongChatUrl}">Prolong chat chat</a></li
+          </ul>`,
+        });
+      },
+    );
 
     return result;
   }

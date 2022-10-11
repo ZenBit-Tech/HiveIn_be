@@ -16,6 +16,7 @@ import { Skill } from 'src/modules/skill/entities/skill.entity';
 import { Users } from 'src/modules/entities/users.entity';
 import { LocalFile } from 'src/modules/entities/localFile.entity';
 import { Offer } from 'src/modules/offer/entities/offer.entity';
+import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 
 export enum DurationType {
   WEEK = 'week',
@@ -98,4 +99,7 @@ export class JobPost {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => ChatRoom, (chatRoom) => chatRoom.jobPost)
+  chatRoom: ChatRoom[];
 }

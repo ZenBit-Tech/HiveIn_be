@@ -1,4 +1,3 @@
-import { TasksService } from './services/task.servise';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';
@@ -6,6 +5,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { JwtService } from '@nestjs/jwt';
 import { NotificationsModule } from 'src/modules/notifications/notifications.module';
 import { WebsocketService } from 'src/services/websocket/websocket.service';
+import { TasksService } from 'src/services/task.service';
 import { DatabaseModule } from 'src/modules/database/database.module';
 import { ClientModule } from 'src/modules/client/client.module';
 import { AppController } from 'src/app.controller';
