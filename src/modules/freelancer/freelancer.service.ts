@@ -1,3 +1,4 @@
+import { ClientService } from 'src/modules/client/client.service';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -19,6 +20,7 @@ export class FreelancerService {
     private experienceRepository: Repository<Experience>,
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
+    private readonly clientService: ClientService,
   ) {}
 
   async create(data: CreateFreelancerDto): Promise<Freelancer> {
@@ -47,27 +49,31 @@ export class FreelancerService {
     });
   }
 
-  async findAll(): Promise<Freelancer[]> {
-    return this.freelancerRepository
-      .createQueryBuilder('freelancer')
-      .leftJoinAndSelect(
-        'freelancer.education',
-        'education',
-        'freelancer.id = education.freelancerId AND education.active = true',
-      )
-      .leftJoinAndSelect(
-        'freelancer.experience',
-        'experience',
-        'freelancer.id = experience.freelancerId AND experience.active = true',
-      )
-      .leftJoinAndSelect(
-        'freelancer.category',
-        'category',
-        'freelancer.categoryId = category.id',
-      )
-      .leftJoinAndSelect('freelancer.skills', 'skill')
-      .leftJoinAndSelect('freelancer.user', 'user')
-      .getMany();
+  async findAll(userId: number): Promise<Freelancer[]> {
+    return await this.clientService.addSavesField(
+      userId,
+      await this.freelancerRepository
+        .createQueryBuilder('freelancer')
+        .leftJoinAndSelect(
+          'freelancer.education',
+          'education',
+          'freelancer.id = education.freelancerId AND education.active = true',
+        )
+        .leftJoinAndSelect(
+          'freelancer.experience',
+          'experience',
+          'freelancer.id = experience.freelancerId AND experience.active = true',
+        )
+        .leftJoinAndSelect(
+          'freelancer.category',
+          'category',
+          'freelancer.categoryId = category.id',
+        )
+        .leftJoinAndSelect('freelancer.skills', 'skill')
+        .leftJoinAndSelect('freelancer.user', 'user')
+        .leftJoinAndSelect('user.avatar', 'avatar')
+        .getMany(),
+    );
   }
 
   findOneByUserId(id: number): Promise<Freelancer> {
@@ -90,6 +96,7 @@ export class FreelancerService {
       )
       .leftJoinAndSelect('freelancer.skills', 'skill')
       .leftJoinAndSelect('freelancer.user', 'user')
+      .leftJoinAndSelect('user.avatar', 'avatar')
       .where(`freelancer.userId = ${id}`)
       .getOne();
   }

@@ -7,10 +7,12 @@ import {
   OneToMany,
   ManyToMany,
   JoinTable,
+  JoinColumn,
 } from 'typeorm';
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { ForgotPassword } from './forgot-password.entity';
 import { Exclude } from 'class-transformer';
+import PublicFile from 'src/modules/file/entities/publicFile.entity';
 
 export enum UserRole {
   CLIENT = 'client',
@@ -84,6 +86,13 @@ export class Users {
   @Column({ nullable: true })
   @IsString()
   avatarURL: string;
+
+  @JoinColumn()
+  @OneToOne(() => PublicFile, {
+    eager: true,
+    nullable: true,
+  })
+  public avatar?: PublicFile;
 
   @OneToOne(() => Freelancer, (freelancer) => freelancer.user)
   user: Users;

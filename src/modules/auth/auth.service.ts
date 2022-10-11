@@ -19,11 +19,9 @@ import {
   JWT_ACCESS_TOKEN_EXPIRATION_TIME,
   JWT_REFRESH_TOKEN_EXPIRATION_TIME,
 } from 'src/utils/jwt.consts';
-
-export interface ITokenPayload {
-  id: number;
-  email?: string;
-}
+import { FilesService } from 'src/modules/file/file.service';
+import PublicFile from 'src/modules/file/entities/publicFile.entity';
+import { RESTORE_PASSWORD_TOKEN } from 'src/utils/auth.consts';
 
 @Injectable()
 export class AuthService {
@@ -35,6 +33,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private mailService: MailerService,
+    private readonly filesService: FilesService,
   ) {}
 
   /* 
@@ -89,21 +88,21 @@ export class AuthService {
   }
 
   async getJwtAccessToken(id: number) {
-    const { email, role } = await this.authRepo.findOneBy({ id });
-    const payload: ITokenPayload = { id, email };
+    const user = await this.authRepo.findOneBy({ id });
+    const tokenPayload = { ...user };
 
     return {
-      authToken: this.jwtService.sign(payload, {
+      authToken: this.jwtService.sign(tokenPayload, {
         secret: this.configService.get('SECRET_KEY'),
         expiresIn: JWT_ACCESS_TOKEN_EXPIRATION_TIME,
       }),
-      email,
-      role,
+      email: user.email,
+      role: user.role,
     };
   }
 
   async getJwtRefreshToken(id: number) {
-    const payload: ITokenPayload = { id };
+    const payload = { id };
 
     return this.jwtService.sign(payload, {
       secret: this.configService.get('SECRET_KEY'),
@@ -149,7 +148,8 @@ export class AuthService {
       });
 
       const url =
-        this.configService.get<string>('FRONTEND_RESTORE_PASSWORD_URL') +
+        this.configService.get<string>('FRONTEND_SIGN_IN_REDIRECT_URL') +
+        +RESTORE_PASSWORD_TOKEN +
         userAbout.authToken;
 
       await this.mailService.sendMail({
@@ -183,5 +183,43 @@ export class AuthService {
       });
     }
     return createdUser;
+  }
+
+  async addAvatar(
+    user: Users,
+    imageBuffer: Buffer,
+    filename: string,
+  ): Promise<PublicFile> {
+    if (user.avatar) {
+      await this.authRepo.update(user.id, {
+        ...user,
+        avatar: null,
+      });
+      await this.filesService.deletePublicFile(user.avatar.id);
+    }
+
+    const avatar = await this.filesService.uploadPublicFile(
+      imageBuffer,
+      filename,
+    );
+
+    await this.authRepo.update(user.id, {
+      ...user,
+      avatar,
+    });
+    return avatar;
+  }
+
+  async deleteAvatar(userId: number): Promise<void> {
+    const user = await this.authRepo.findOneBy({ id: userId });
+    const fileId = user.avatar?.id;
+
+    if (fileId) {
+      await this.authRepo.update(userId, {
+        ...user,
+        avatar: null,
+      });
+      await this.filesService.deletePublicFile(fileId);
+    }
   }
 }

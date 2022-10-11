@@ -124,14 +124,14 @@ export class ChatRoomService {
       id: chatRoom.freelancer.user.id,
       firstName: chatRoom.freelancer.user.firstName,
       lastName: chatRoom.freelancer.user.lastName,
-      avatarURL: chatRoom.freelancer.user.avatarURL,
+      avatarURL: chatRoom.freelancer.user.avatar.url,
     };
 
     const client = {
       id: chatRoom.jobPost.user.id,
       firstName: chatRoom.jobPost.user.firstName,
       lastName: chatRoom.jobPost.user.lastName,
-      avatarURL: chatRoom.jobPost.user.avatarURL,
+      avatarURL: chatRoom.jobPost.user.avatar.url,
     };
 
     const jobPost = {

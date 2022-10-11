@@ -8,6 +8,8 @@ import {
   UseGuards,
   Patch,
   Req,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { AuthDto } from './dto/auth.dto';
 import { AuthService } from './auth.service';
@@ -18,6 +20,9 @@ import { ConfigService } from '@nestjs/config';
 import * as SendGrid from '@sendgrid/mail';
 import { AuthRestorePasswordDto } from './dto/restore-password.dto';
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
+import { FileInterceptor } from '@nestjs/platform-express';
+import PublicFile from 'src/modules/file/entities/publicFile.entity';
+import { multerAvatarOptions } from 'src/config/multer.config';
 
 @Controller('auth')
 export class AuthController {
@@ -70,5 +75,19 @@ export class AuthController {
   @Patch('restore-password')
   async restorePassword(@Body() dto: AuthRestorePasswordDto) {
     return this.authService.restorePassword(dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('avatar')
+  @UseInterceptors(FileInterceptor('avatar', multerAvatarOptions))
+  async addAvatar(
+    @Req() request: AuthRequest,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<PublicFile> {
+    return this.authService.addAvatar(
+      request.user,
+      file.buffer,
+      file.originalname,
+    );
   }
 }
