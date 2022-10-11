@@ -13,13 +13,36 @@ export class ContractsService {
   ) {}
 
   async create(createContractDto: CreateContractDto): Promise<InsertResult> {
-    return await this.contractRepo
+    const result = await this.contractRepo
       .createQueryBuilder('contracts')
       .insert()
       .into(Contracts)
       .values([createContractDto])
       .execute();
+
+    const contract = await this.contractRepo
+      .createQueryBuilder('contracts')
+      .leftJoinAndSelect('contracts.offer', 'offer')
+      .leftJoinAndSelect('offer.jobPost', 'jobPost')
+      .leftJoinAndSelect('jobPost.user', 'user')
+      .where({ id: result.raw.insertId })
+      .getOne();
+
+    console.log(contract);
+    const timeDifference = this.getSecondsDiff(new Date(), contract.endDate);
+
+    console.log(timeDifference);
+
+    return result;
   }
+
+  getSecondsDiff = (startDate, endDate) => {
+    const msInSecond = 1000;
+
+    return Math.round(
+      Math.abs(endDate.getTime() - startDate.getTime()) / msInSecond,
+    );
+  };
 
   async findAll(): Promise<Contracts[]> {
     return await this.contractRepo

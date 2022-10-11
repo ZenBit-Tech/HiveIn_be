@@ -1,3 +1,4 @@
+import { TasksService } from './services/task.servise';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';
@@ -20,6 +21,7 @@ import { ContractsModule } from 'src/modules/contracts/contracts.module';
 import { OfferModule } from 'src/modules/offer/offer.module';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
 import { MessageModule } from 'src/modules/message/message.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -42,6 +44,7 @@ import { MessageModule } from 'src/modules/message/message.module';
     MulterModule.register({
       dest: '/uploads',
     }),
+    ScheduleModule.forRoot(),
     DatabaseModule,
     AuthModule,
     ClientModule,
@@ -58,6 +61,6 @@ import { MessageModule } from 'src/modules/message/message.module';
     MessageModule,
   ],
   controllers: [AppController],
-  providers: [AppService, WebsocketService, JwtService],
+  providers: [AppService, WebsocketService, JwtService, TasksService],
 })
 export class AppModule {}
