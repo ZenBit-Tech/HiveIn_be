@@ -89,9 +89,7 @@ export class ChatRoomService {
       .leftJoinAndSelect('chat_room.jobPost', 'job_post')
       .leftJoinAndSelect('chat_room.freelancer', 'freelancer')
       .leftJoinAndSelect('job_post.user', 'client_user_profile')
-      .leftJoinAndSelect('client_user_profile.avatar', 'avatar')
       .leftJoinAndSelect('freelancer.user', 'freelancer_user_profile')
-      .leftJoinAndSelect('freelancer_user_profile.avatar', 'avatar')
       .where(`${columnName}.id = ${id}`)
       .orderBy('updated_at', 'DESC');
   }
@@ -126,14 +124,14 @@ export class ChatRoomService {
       id: chatRoom.freelancer.user.id,
       firstName: chatRoom.freelancer.user.firstName,
       lastName: chatRoom.freelancer.user.lastName,
-      avatarURL: chatRoom.freelancer.user.avatar.url,
+      avatarURL: chatRoom.freelancer.user.avatarURL,
     };
 
     const client = {
       id: chatRoom.jobPost.user.id,
       firstName: chatRoom.jobPost.user.firstName,
       lastName: chatRoom.jobPost.user.lastName,
-      avatarURL: chatRoom.jobPost.user.avatar.url,
+      avatarURL: chatRoom.jobPost.user.avatarURL,
     };
 
     const jobPost = {
