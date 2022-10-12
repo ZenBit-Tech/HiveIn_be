@@ -27,7 +27,6 @@ export class ProposalService {
 
   async create(
     createProposalDto: CreateProposalDto,
-    userId: number,
     type: ProposalType,
   ): Promise<Proposal> {
     const { idJobPost, idFreelancer } = createProposalDto;
