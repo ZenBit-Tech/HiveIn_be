@@ -140,17 +140,17 @@ export class AuthService {
     const user = await this.authRepo.findOneBy({ email });
 
     if (user) {
-      const userAbout = await this.getJwtAccessToken(user.id);
+      const userAbout = await this.getJwtRefreshToken(user.id);
 
       await this.forgotPasswordRepo.save({
         user: user,
-        link: userAbout.authToken,
+        link: userAbout,
       });
 
       const url =
         this.configService.get<string>('FRONTEND_SIGN_IN_REDIRECT_URL') +
-        +RESTORE_PASSWORD_TOKEN +
-        userAbout.authToken;
+        RESTORE_PASSWORD_TOKEN +
+        userAbout;
 
       await this.mailService.sendMail({
         to: email,
