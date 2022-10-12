@@ -13,7 +13,6 @@ import { Education } from 'src/modules/freelancer/entities/education.entity';
 import { Experience } from 'src/modules/freelancer/entities/experience.entity';
 import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
 import { LocalFile } from 'src/modules/entities/localFile.entity';
-import { WebsocketModule } from 'src/modules/websocket/websocket.module';
 import { NotificationsModule } from 'src/modules/notifications/notifications.module';
 import { MessageModule } from 'src/modules/message/message.module';
 import { FreelancerModule } from 'src/modules/freelancer/freelancer.module';
@@ -35,7 +34,6 @@ import { JobPostModule } from 'src/modules/job-post/job-post.module';
       LocalFile,
     ]),
     ContractsModule,
-    WebsocketModule,
     NotificationsModule,
     MessageModule,
     FreelancerModule,

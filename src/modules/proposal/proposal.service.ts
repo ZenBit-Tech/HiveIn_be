@@ -8,11 +8,9 @@ import {
   ProposalType,
 } from 'src/modules/proposal/entities/proposal.entity';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
-import { SettingsInfoService } from 'src/modules/settings-info/settings-info.service';
 import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
 import { MessageService } from 'src/modules/message/message.service';
 import { JobPostService } from 'src/modules/job-post/job-post.service';
-import { LocalFile } from 'src/modules/entities/localFile.entity';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 
 @Injectable()
@@ -22,11 +20,8 @@ export class ProposalService {
     private readonly proposalRepo: Repository<Proposal>,
     private readonly chatRoomService: ChatRoomService,
     private readonly freelancerService: FreelancerService,
-    private readonly settingsInfoService: SettingsInfoService,
     private readonly messageService: MessageService,
     private readonly jobPostService: JobPostService,
-    @InjectRepository(LocalFile)
-    private readonly local: Repository<LocalFile>,
     private readonly notificationsService: NotificationsService,
   ) {}
 

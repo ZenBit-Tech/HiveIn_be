@@ -8,7 +8,6 @@ import {
 } from 'src/modules/notifications/entities/notification.entity';
 import { ProposalType } from 'src/modules/proposal/entities/proposal.entity';
 import { WebsocketService } from 'src/modules/websocket/websocket.service';
-import { MessageService } from 'src/modules/message/message.service';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import {
   ICountOfNotifications,
@@ -23,8 +22,6 @@ export class NotificationsService {
   constructor(
     @InjectRepository(Notification)
     private notificationRepository: Repository<Notification>,
-    @Inject(forwardRef(() => MessageService))
-    private messageService: MessageService,
     @Inject(forwardRef(() => WebsocketService))
     private wsService: WebsocketService,
     private chatRoomService: ChatRoomService,

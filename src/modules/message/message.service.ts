@@ -10,7 +10,6 @@ import { Repository } from 'typeorm';
 import { Message } from 'src/modules/message/entities/message.entity';
 import { createMessageDto } from 'src/modules/message/dto/create-message.dto';
 import { UserRole, Users } from 'src/modules/entities/users.entity';
-import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import { MessageType, ReturnedMessage } from 'src/modules/message/typesDef';
 import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
@@ -24,8 +23,6 @@ export class MessageService {
     private readonly messageRepository: Repository<Message>,
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
-    @InjectRepository(ChatRoom)
-    private readonly chatRoomRepository: Repository<ChatRoom>,
     private readonly chatRoomService: ChatRoomService,
     @Inject(forwardRef(() => NotificationsService))
     private notificationsService: NotificationsService,

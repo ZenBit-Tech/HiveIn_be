@@ -230,7 +230,7 @@ export class WebsocketService
 
     this.users.forEach((userId, socketId) => {
       if (userId === id) {
-        user = socketId;
+        user = { id: socketId };
       }
     });
     if (user) {

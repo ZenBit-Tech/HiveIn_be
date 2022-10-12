@@ -89,7 +89,9 @@ export class ChatRoomService {
       .leftJoinAndSelect('chat_room.jobPost', 'job_post')
       .leftJoinAndSelect('chat_room.freelancer', 'freelancer')
       .leftJoinAndSelect('job_post.user', 'client_user_profile')
+      .leftJoinAndSelect('client_user_profile.avatar', 'avatar')
       .leftJoinAndSelect('freelancer.user', 'freelancer_user_profile')
+      .leftJoinAndSelect('freelancer_user_profile.avatar', 'avatar')
       .where(`${columnName}.id = ${id}`)
       .orderBy('updated_at', 'DESC');
   }
