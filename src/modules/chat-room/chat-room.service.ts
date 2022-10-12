@@ -97,7 +97,7 @@ export class ChatRoomService {
   async getRoomIdByJobPostAndFreelancerIds(
     jobPostId: number,
     freelancerId: number,
-  ) {
+  ): Promise<number> {
     const room = await this.chatRoomRepository
       .createQueryBuilder('chat_room')
       .leftJoin('chat_room.jobPost', 'jobPost')
@@ -109,7 +109,7 @@ export class ChatRoomService {
     return room.id;
   }
 
-  async getRoomIdByMessageId(id: number) {
+  async getRoomIdByMessageId(id: number): Promise<number> {
     const room = await this.chatRoomRepository
       .createQueryBuilder('chat_room')
       .leftJoin('chat_room.message', 'message')
