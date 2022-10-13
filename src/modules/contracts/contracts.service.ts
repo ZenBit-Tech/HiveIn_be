@@ -1,11 +1,13 @@
+import { CHAT } from './../../utils/auth.consts';
 import { MailerService } from '@nestjs-modules/mailer';
-import { TasksService } from 'src/services/task.service';
+import { TasksService } from 'src/modules/task.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateContractDto } from 'src/modules/contracts/dto/create-contract.dto';
 import { UpdateContractDto } from 'src/modules/contracts/dto/update-contract.dto';
 import { Contracts } from 'src/modules/contracts/entities/contracts.entity';
 import { DeleteResult, InsertResult, Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ContractsService {
@@ -14,9 +16,11 @@ export class ContractsService {
     private readonly contractRepo: Repository<Contracts>,
     private readonly tasksService: TasksService,
     private readonly mailService: MailerService,
+    private readonly configService: ConfigService,
   ) {}
 
   async create(createContractDto: CreateContractDto): Promise<InsertResult> {
+    console.warn('contract start create');
     const result = await this.contractRepo
       .createQueryBuilder('contracts')
       .insert()
@@ -29,10 +33,12 @@ export class ContractsService {
       .leftJoinAndSelect('contracts.offer', 'offer')
       .leftJoinAndSelect('offer.jobPost', 'jobPost')
       .leftJoinAndSelect('jobPost.user', 'user')
-      .leftJoinAndSelect('offer.chatRoom', 'chatRoom')
+      .leftJoinAndSelect('jobPost.chatRoom', 'chatRoom')
       .where({ id: result.raw.insertId })
       .getOne();
     console.log(contract);
+    console.log(contract.offer.jobPost.chatRoom);
+    const chatRoom = contract.offer.jobPost.chatRoom[0]; // it should be one chatRoom to one job
 
     const timeDifference = this.getSecondsDiff(new Date(), contract.endDate);
     console.log(timeDifference);
@@ -43,9 +49,12 @@ export class ContractsService {
       async () => {
         const { email } = contract.offer.jobPost.user;
 
-        const chatRoom = contract.offer.jobPost.chatRoom;
+        const chatUrl =
+          this.configService.get<string>('FRONTEND_SIGN_IN_REDIRECT_URL') +
+          CHAT +
+          '/' +
+          chatRoom.id;
 
-        const chatUrl = '';
         const deleteChatUrl = '';
         const prolongChatUrl = '';
 
