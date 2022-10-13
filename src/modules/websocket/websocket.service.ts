@@ -1,17 +1,21 @@
-import { Logger, OnModuleInit, UnauthorizedException } from '@nestjs/common';
 import {
-  ConnectedSocket,
-  MessageBody,
+  forwardRef,
+  Inject,
+  Logger,
+  OnModuleInit,
+  UnauthorizedException,
+} from '@nestjs/common';
+import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { JwtService } from '@nestjs/jwt';
 import { Server, Socket } from 'socket.io';
 import { config } from 'dotenv';
-import { CreateNotificationDto } from 'src/modules/notifications/dto/create-notification.dto';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import { MessageService } from 'src/modules/message/message.service';
@@ -21,6 +25,7 @@ config();
 
 enum Event {
   ROOMS = 'rooms',
+  ROOM = 'room',
   ERROR = 'error',
   GET_ROOMS = 'getRooms',
   JOIN_ROOM = 'joinRoom',
@@ -29,8 +34,10 @@ enum Event {
   LEAVE_ROOM = 'leaveRoom',
   ADD_MESSAGE = 'addMessage',
   MESSAGE_ADDED = 'messageAdded',
-  NOTIFICATION = 'send-first-notification',
-  NOTIFICATION_SEND = 'first-message',
+  GET_COUNT_NOTIFICATIONS = 'getCount',
+  GET_NOTIFICATIONS = 'getNotifications',
+  GET_MESSAGE_NOTIFICATION = 'getMessageNotification',
+  MARK_AS_READ_NOTIFICATION = 'markAsRead',
 }
 
 @WebSocketGateway({
@@ -51,6 +58,7 @@ export class WebsocketService
     private userService: SettingsInfoService,
     private roomService: ChatRoomService,
     private messageService: MessageService,
+    @Inject(forwardRef(() => NotificationsService))
     private notificationService: NotificationsService,
   ) {}
 
@@ -120,6 +128,7 @@ export class WebsocketService
   @SubscribeMessage(Event.JOIN_ROOM)
   async onJoinRoom(socket: Socket, data: number): Promise<void> {
     const messages = await this.messageService.getAllByRoomId(data);
+    const currentRoom = await this.roomService.getOneById(data);
 
     if (this.rooms.has(data)) {
       const room = this.rooms.get(data);
@@ -128,6 +137,7 @@ export class WebsocketService
       this.rooms.set(data, new Set<string>().add(socket.id));
     }
     this.server.to(socket.id).emit(Event.MESSAGES, messages);
+    this.server.to(socket.id).emit(Event.ROOM, currentRoom);
   }
 
   @SubscribeMessage(Event.GET_MESSAGES)
@@ -165,36 +175,68 @@ export class WebsocketService
       this.server.to(user).emit(Event.ROOMS, rooms);
     }
 
-    const currentRoom = this.rooms.get(createdMessage.chatRoom.id);
+    const joinedUsers = this.rooms.get(createdMessage.chatRoom.id);
 
-    for (const usersInRoom of currentRoom) {
-      const messages = await this.messageService.getAllByRoomId(
-        data.chatRoomId,
-      );
-
+    const messages = await this.messageService.getAllByRoomId(data.chatRoomId);
+    for (const usersInRoom of joinedUsers) {
       this.server.to(usersInRoom).emit(Event.MESSAGES, messages);
     }
   }
 
-  @SubscribeMessage(Event.NOTIFICATION)
-  async sendFirstNotification(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() payload: CreateNotificationDto,
-  ): Promise<void> {
-    const { toUserId, fromUserId, type, id, read, fromUser } =
-      await this.notificationService.create(payload);
+  @SubscribeMessage(Event.GET_COUNT_NOTIFICATIONS)
+  async onGetCount(socket: Socket): Promise<void> {
+    const user = this.users.get(socket.id);
+    const countOfNotification = await this.notificationService.getCount(user);
 
-    this.server.emit(
-      Event.NOTIFICATION_SEND,
-      {
-        id,
-        read,
-        toUserId,
-        fromUserId,
-        type,
-        fromUser,
-      },
-      client.id,
+    this.server
+      .to(socket.id)
+      .emit(Event.GET_COUNT_NOTIFICATIONS, countOfNotification);
+  }
+
+  @SubscribeMessage(Event.GET_NOTIFICATIONS)
+  async onGetNotifications(socket: Socket): Promise<void> {
+    const user = this.users.get(socket.id);
+    const notifications =
+      await this.notificationService.getAllOwnNotMessageType(user);
+    this.server.to(socket.id).emit(Event.GET_NOTIFICATIONS, notifications);
+  }
+
+  @SubscribeMessage(Event.GET_MESSAGE_NOTIFICATION)
+  async onGetMessageNotification(socket: Socket): Promise<void> {
+    const user = this.users.get(socket.id);
+    const notifications = await this.notificationService.getAllOwnMessageType(
+      user,
+      false,
     );
+    this.server
+      .to(socket.id)
+      .emit(Event.GET_MESSAGE_NOTIFICATION, notifications);
+  }
+
+  @SubscribeMessage(Event.MARK_AS_READ_NOTIFICATION)
+  async onMarkAsRead(socket: Socket, data: number[]): Promise<void> {
+    try {
+      await this.notificationService.markAsRead(data);
+    } catch {
+      throw new WsException('error occurred, notification not updated');
+    }
+    await this.onGetCount(socket);
+    await this.onGetNotifications(socket);
+    await this.onGetMessageNotification(socket);
+  }
+
+  async onAddNotification(id: number): Promise<void> {
+    let user;
+
+    this.users.forEach((userId, socketId) => {
+      if (userId === id) {
+        user = { id: socketId };
+      }
+    });
+    if (user) {
+      await this.onGetCount(user);
+      await this.onGetNotifications(user);
+      await this.onGetMessageNotification(user);
+    }
   }
 }

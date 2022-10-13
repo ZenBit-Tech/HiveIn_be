@@ -1,5 +1,5 @@
-import { ClientService } from 'src/modules/client/client.service';
 import { Module } from '@nestjs/common';
+import { ClientService } from 'src/modules/client/client.service';
 import { FreelancerService } from './freelancer.service';
 import { FreelancerController } from './freelancer.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -14,5 +14,6 @@ import { Users } from 'src/modules/entities/users.entity';
   ],
   controllers: [FreelancerController],
   providers: [FreelancerService, ClientService],
+  exports: [FreelancerService],
 })
 export class FreelancerModule {}

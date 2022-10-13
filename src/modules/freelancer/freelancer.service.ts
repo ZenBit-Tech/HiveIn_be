@@ -71,6 +71,7 @@ export class FreelancerService {
         )
         .leftJoinAndSelect('freelancer.skills', 'skill')
         .leftJoinAndSelect('freelancer.user', 'user')
+        .leftJoinAndSelect('user.avatar', 'avatar')
         .getMany(),
     );
   }
@@ -95,8 +96,19 @@ export class FreelancerService {
       )
       .leftJoinAndSelect('freelancer.skills', 'skill')
       .leftJoinAndSelect('freelancer.user', 'user')
+      .leftJoinAndSelect('user.avatar', 'avatar')
       .where(`freelancer.userId = ${id}`)
       .getOne();
+  }
+
+  async getUserIdByFreelancerId(id: number): Promise<number> {
+    const freelancer = await this.freelancerRepository
+      .createQueryBuilder('freelancer')
+      .select('freelancer.userId')
+      .where('freelancer.id = :id', { id })
+      .getOne();
+
+    return freelancer.userId;
   }
 
   async update(id: number, data: UpdateFreelancerDto): Promise<Freelancer> {
