@@ -87,6 +87,7 @@ export class WebsocketService
       if (!user) {
         return this.disconnect(socket);
       } else {
+        console.log(user);
         const rooms = await this.roomService.getAllByUserId(user.id);
         this.users.set(socket.id, user.id);
         this.server.to(socket.id).emit(Event.ROOMS, rooms);
@@ -119,6 +120,8 @@ export class WebsocketService
 
   @SubscribeMessage(Event.GET_ROOMS)
   async onGetRooms(socket: Socket): Promise<void> {
+    console.log(socket.id);
+    console.log(this.users);
     const rooms = await this.roomService.getAllByUserId(
       this.users.get(socket.id),
     );

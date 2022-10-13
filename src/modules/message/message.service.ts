@@ -4,6 +4,9 @@ import {
   HttpException,
   Inject,
   Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -29,48 +32,60 @@ export class MessageService {
   ) {}
 
   async create(data: createMessageDto): Promise<Message> {
-    const user = await this.usersRepository.findOneBy({ id: data.userId });
-    const chatRoom = await this.chatRoomService.getOneById(data.chatRoomId);
+    try {
+      const user = await this.usersRepository.findOneBy({ id: data.userId });
+      const chatRoom = await this.chatRoomService.getOneById(data.chatRoomId);
 
-    if (user.role === UserRole.UNDEFINED) throw new ForbiddenException();
+      if (user && chatRoom) throw new NotFoundException();
 
-    if (
-      (user.role === UserRole.CLIENT &&
-        chatRoom.status === chatRoomStatus.FREELANCER_ONLY) ||
-      (user.role === UserRole.FREELANCER &&
-        chatRoom.status === chatRoomStatus.CLIENT_ONLY)
-    )
-      throw new HttpException(
-        "This user can't send message to this room yet",
-        400,
+      if (user.role === UserRole.UNDEFINED) throw new ForbiddenException();
+
+      if (
+        (user.role === UserRole.CLIENT &&
+          chatRoom.status === chatRoomStatus.FREELANCER_ONLY) ||
+        (user.role === UserRole.FREELANCER &&
+          chatRoom.status === chatRoomStatus.CLIENT_ONLY)
+      )
+        throw new HttpException(
+          "This user can't send message to this room yet",
+          400,
+        );
+
+      if (
+        (user.role === UserRole.CLIENT &&
+          chatRoom.status === chatRoomStatus.CLIENT_ONLY) ||
+        (user.role === UserRole.FREELANCER &&
+          chatRoom.status === chatRoomStatus.FREELANCER_ONLY)
+      ) {
+        await this.chatRoomService.changeStatus(data.chatRoomId);
+      }
+      const message = await this.messageRepository.save({
+        text: data.text,
+        chatRoom: { id: data.chatRoomId },
+        user: { id: data.userId },
+        messageType: MessageType.FROM_USER,
+      });
+
+      const receiverUserId =
+        chatRoom.freelancer.id === data.userId
+          ? chatRoom.client.id
+          : chatRoom.freelancer.id;
+
+      await this.chatRoomService.updateAfterReceiveMessage(data.chatRoomId);
+      await this.notificationsService.createMessageNotification(
+        message.id,
+        receiverUserId,
       );
-
-    if (
-      (user.role === UserRole.CLIENT &&
-        chatRoom.status === chatRoomStatus.CLIENT_ONLY) ||
-      (user.role === UserRole.FREELANCER &&
-        chatRoom.status === chatRoomStatus.FREELANCER_ONLY)
-    ) {
-      await this.chatRoomService.changeStatus(data.chatRoomId);
+      return message;
+    } catch (error) {
+      Logger.error('Error occurred while trying to create message.');
+      if (error instanceof NotFoundException) {
+        Logger.error('Most likely that is wrong chat room id / user id');
+        throw new NotFoundException(error);
+      } else if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
     }
-    const message = await this.messageRepository.save({
-      text: data.text,
-      chatRoom: { id: data.chatRoomId },
-      user: { id: data.userId },
-      messageType: MessageType.FROM_USER,
-    });
-
-    const receiverUserId =
-      chatRoom.freelancer.id === data.userId
-        ? chatRoom.client.id
-        : chatRoom.freelancer.id;
-
-    await this.chatRoomService.updateAfterReceiveMessage(data.chatRoomId);
-    await this.notificationsService.createMessageNotification(
-      message.id,
-      receiverUserId,
-    );
-    return message;
   }
 
   async createInitialMessages(
@@ -81,70 +96,91 @@ export class MessageService {
     message: string,
     bid: number,
   ): Promise<void> {
-    await this.createSystemMessage({
-      text: `You have received a new ${
-        type === ProposalType.PROPOSAL ? 'proposal' : 'invite'
-      }`,
-      chatRoomId,
-      userId: inviteTo,
-    });
-    const values = [
-      {
-        chatRoom: { id: chatRoomId },
-        user: { id: inviteFrom },
-        text: message,
-        messageType: MessageType.FROM_USER,
-      },
-      {
-        chatRoom: { id: chatRoomId },
-        user: { id: inviteFrom },
-        text: `bid: ${bid}`,
-        messageType: MessageType.FROM_USER,
-      },
-    ];
+    try {
+      await this.createSystemMessage({
+        text: `You have received a new ${
+          type === ProposalType.PROPOSAL ? 'proposal' : 'invite'
+        }`,
+        chatRoomId,
+        userId: inviteTo,
+      });
+      const values = [
+        {
+          chatRoom: { id: chatRoomId },
+          user: { id: inviteFrom },
+          text: message,
+          messageType: MessageType.FROM_USER,
+        },
+        {
+          chatRoom: { id: chatRoomId },
+          user: { id: inviteFrom },
+          text: `bid: ${bid}`,
+          messageType: MessageType.FROM_USER,
+        },
+      ];
 
-    await this.messageRepository
-      .createQueryBuilder('message')
-      .insert()
-      .into(Message)
-      .values(values)
-      .execute();
+      await this.messageRepository
+        .createQueryBuilder('message')
+        .insert()
+        .into(Message)
+        .values(values)
+        .execute();
 
-    const messages = await this.getAllByRoomId(chatRoomId);
+      const messages = await this.getAllByRoomId(chatRoomId);
 
-    messages.map(async (message) => {
-      await this.notificationsService.createMessageNotification(
-        message.id,
-        inviteTo,
-      );
-    });
+      messages.map(async (message) => {
+        await this.notificationsService.createMessageNotification(
+          message.id,
+          inviteTo,
+        );
+      });
+    } catch (error) {
+      Logger.error('Error occurred while trying to create initial messages');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
+    }
   }
 
   async createSystemMessage(data: createMessageDto): Promise<Message> {
-    return await this.messageRepository.save({
-      text: data.text,
-      chatRoom: { id: data.chatRoomId },
-      user: { id: data.userId },
-      messageType: MessageType.FROM_SYSTEM,
-    });
+    try {
+      return await this.messageRepository.save({
+        text: data.text,
+        chatRoom: { id: data.chatRoomId },
+        user: { id: data.userId },
+        messageType: MessageType.FROM_SYSTEM,
+      });
+    } catch (error) {
+      Logger.error('Error occurred while trying to create system message');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
+    }
   }
 
   async getAllByRoomId(id: number): Promise<ReturnedMessage[]> {
-    const messages = await this.messageRepository
-      .createQueryBuilder('message')
-      .leftJoin(
-        'message.chatRoom',
-        'chat_room',
-        'message.chatRoomId = chat_room.Id',
-      )
-      .leftJoinAndSelect('message.user', 'user')
-      .where(`chat_room.id = ${id}`)
-      .orderBy(`message.created_at`, 'ASC')
-      .getMany();
+    try {
+      const messages = await this.messageRepository
+        .createQueryBuilder('message')
+        .leftJoin(
+          'message.chatRoom',
+          'chat_room',
+          'message.chatRoomId = chat_room.Id',
+        )
+        .leftJoinAndSelect('message.user', 'user')
+        .where(`chat_room.id = ${id}`)
+        .orderBy(`message.created_at`, 'ASC')
+        .getMany();
 
-    return messages.map((data) => {
-      const { user, ...message } = data;
-      return { ...message, senderId: user?.id };
-    });
+      return messages.map((data) => {
+        const { user, ...message } = data;
+        return { ...message, senderId: user?.id };
+      });
+    } catch (error) {
+      Logger.error('Error occurred while trying to query messages');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
+    }
   }
 }

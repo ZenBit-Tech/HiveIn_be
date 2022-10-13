@@ -1,5 +1,11 @@
 import { FreelancerService } from 'src/modules/freelancer/freelancer.service';
-import { HttpException, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateProposalDto } from 'src/modules/proposal/dto/create-proposal.dto';
@@ -29,53 +35,59 @@ export class ProposalService {
     createProposalDto: CreateProposalDto,
     type: ProposalType,
   ): Promise<Proposal> {
-    const { idJobPost, idFreelancer } = createProposalDto;
+    try {
+      const { idJobPost, idFreelancer } = createProposalDto;
 
-    const isChatAlreadyExist = await this.getOneByJobPostAndFreelancerId(
-      idFreelancer,
-      idJobPost,
-    );
-
-    if (isChatAlreadyExist)
-      throw new HttpException(
-        "This user can't send invite/proposal. Chat room for this users related to this job post already exist",
-        406,
+      const isChatAlreadyExist = await this.getOneByJobPostAndFreelancerId(
+        idFreelancer,
+        idJobPost,
       );
 
-    const proposal = await this.proposalRepo.save({
-      ...createProposalDto,
-      type,
-      jobPost: { id: idJobPost },
-      freelancer: { id: idFreelancer },
-    });
+      if (isChatAlreadyExist)
+        throw new HttpException(
+          "This user can't send invite/proposal. Chat room for this users related to this job post already exist",
+          406,
+        );
 
-    const chatRoom = await this.chatRoomService.create({
-      jobPostId: idJobPost,
-      freelancerId: idFreelancer,
-      status:
-        type === ProposalType.PROPOSAL
-          ? chatRoomStatus.CLIENT_ONLY
-          : chatRoomStatus.FREELANCER_ONLY,
-    });
+      const proposal = await this.proposalRepo.save({
+        ...createProposalDto,
+        type,
+        jobPost: { id: idJobPost },
+        freelancer: { id: idFreelancer },
+      });
 
-    const usersIds = await this.defineUsersIds(idFreelancer, idJobPost, type);
+      const chatRoom = await this.chatRoomService.create({
+        jobPostId: idJobPost,
+        freelancerId: idFreelancer,
+        status:
+          type === ProposalType.PROPOSAL
+            ? chatRoomStatus.CLIENT_ONLY
+            : chatRoomStatus.FREELANCER_ONLY,
+      });
 
-    await this.messageService.createInitialMessages(
-      chatRoom.id,
-      usersIds.inviteFrom,
-      usersIds.inviteTo,
-      type,
-      createProposalDto.message,
-      createProposalDto.bid,
-    );
+      const usersIds = await this.defineUsersIds(idFreelancer, idJobPost, type);
 
-    await this.notificationsService.createNewProposalNotification(
-      proposal.id,
-      usersIds.inviteTo,
-      type,
-    );
+      await this.messageService.createInitialMessages(
+        chatRoom.id,
+        usersIds.inviteFrom,
+        usersIds.inviteTo,
+        type,
+        createProposalDto.message,
+        createProposalDto.bid,
+      );
 
-    return proposal;
+      await this.notificationsService.createNewProposalNotification(
+        proposal.id,
+        usersIds.inviteTo,
+        type,
+      );
+
+      return proposal;
+    } catch (e) {
+      Logger.error('Error occurred while sending proposal');
+      if (e instanceof UnauthorizedException)
+        return Promise.reject(new UnprocessableEntityException());
+    }
   }
 
   async getOneByJobPostAndFreelancerId(

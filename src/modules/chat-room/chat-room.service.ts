@@ -1,7 +1,10 @@
 import {
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
+  ServiceUnavailableException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder, UpdateResult } from 'typeorm';
@@ -25,61 +28,113 @@ export class ChatRoomService {
   ) {}
 
   async create(data: createChatRoomDto): Promise<ChatRoom> {
-    return await this.chatRoomRepository.save({
-      jobPost: { id: data.jobPostId },
-      freelancer: { id: data.freelancerId },
-      status: data.status,
-    });
+    try {
+      return await this.chatRoomRepository.save({
+        jobPost: { id: data.jobPostId },
+        freelancer: { id: data.freelancerId },
+        status: data.status,
+      });
+    } catch (error) {
+      Logger.error(
+        'Error occurred while creating chat room. Chat room not created',
+      );
+      throw new UnprocessableEntityException();
+    }
   }
 
   async getOneById(id: number): Promise<IRoom> {
-    const chatRoom = await this.get({
-      columnName: ColumnNames.CHAT_ROOM,
-      id,
-    }).getOne();
+    try {
+      const chatRoom = await this.get({
+        columnName: ColumnNames.CHAT_ROOM,
+        id,
+      }).getOne();
 
-    if (!chatRoom) throw new NotFoundException();
+      if (!chatRoom) throw new NotFoundException();
 
-    return this.parseChatRoomData(chatRoom);
+      return this.parseChatRoomData(chatRoom);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        Logger.error(
+          'Error occurred while finding chat room in db. Chat room not found',
+        );
+        throw new NotFoundException(error);
+      }
+      Logger.error(
+        'Unexpected error occurred while finding chat room in db or parsing returned data',
+      );
+      throw new ServiceUnavailableException();
+    }
   }
 
   async getAllByJobPostId(id: number): Promise<ChatRoom[]> {
-    return await this.get({ columnName: ColumnNames.JOB_POST, id }).getMany();
+    try {
+      return await this.get({ columnName: ColumnNames.JOB_POST, id }).getMany();
+    } catch (error) {
+      Logger.error('Unexpected error occurred while finding chat rooms in db');
+      throw new ServiceUnavailableException();
+    }
   }
 
   async getAllByUserId(id: number): Promise<IRoom[]> {
-    const user = await this.usersRepository.findOneBy({ id });
+    try {
+      const user = await this.usersRepository.findOneBy({ id });
 
-    if (!user) throw new NotFoundException();
-    if (user.role === UserRole.UNDEFINED) throw new ForbiddenException();
+      if (!user) throw new NotFoundException();
+      if (user.role === UserRole.UNDEFINED) throw new ForbiddenException();
 
-    const rooms = await this.get({
-      columnName:
-        user.role === UserRole.CLIENT
-          ? ColumnNames.CLIENT
-          : ColumnNames.FREELANCER,
-      id,
-    }).getMany();
+      const rooms = await this.get({
+        columnName:
+          user.role === UserRole.CLIENT
+            ? ColumnNames.CLIENT
+            : ColumnNames.FREELANCER,
+        id,
+      }).getMany();
 
-    return rooms.map((room) => this.parseChatRoomData(room));
+      return rooms.map((room) => this.parseChatRoomData(room));
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        Logger.error(
+          "Error occurred while finding chat rooms in db. Most likely that is wrong user's id",
+        );
+        throw new NotFoundException();
+      }
+      if (error instanceof ForbiddenException) {
+        Logger.error(
+          "Error occurred while finding chat rooms in db. Most likely that is wrong user's role",
+        );
+        throw new ForbiddenException(error);
+      }
+      Logger.error('Unexpected error occurred while finding chat rooms in db');
+      throw new ServiceUnavailableException();
+    }
   }
 
   async updateAfterReceiveMessage(id: number): Promise<UpdateResult> {
-    return await this.chatRoomRepository
-      .createQueryBuilder()
-      .update(ChatRoom)
-      .set({ updated_at: new Date() })
-      .where('id = :id', { id })
-      .execute();
+    try {
+      return await this.chatRoomRepository
+        .createQueryBuilder()
+        .update(ChatRoom)
+        .set({ updated_at: new Date() })
+        .where('id = :id', { id })
+        .execute();
+    } catch (error) {
+      Logger.error('Error occurred while trying to update chat room');
+      throw new UnprocessableEntityException();
+    }
   }
 
   async changeStatus(id: number): Promise<UpdateResult> {
-    return await this.chatRoomRepository
-      .createQueryBuilder()
-      .update(ChatRoom)
-      .set({ status: chatRoomStatus.FOR_ALL, updated_at: new Date() })
-      .where('id = :id', { id })
-      .execute();
+    try {
+      return await this.chatRoomRepository
+        .createQueryBuilder()
+        .update(ChatRoom)
+        .set({ status: chatRoomStatus.FOR_ALL, updated_at: new Date() })
+        .where('id = :id', { id })
+        .execute();
+    } catch (error) {
+      Logger.error("Error occurred while trying to update chat room's status");
+      throw new UnprocessableEntityException();
+    }
   }
 
   private get({ columnName, id }: TArgs): SelectQueryBuilder<ChatRoom> {
@@ -98,25 +153,37 @@ export class ChatRoomService {
     jobPostId: number,
     freelancerId: number,
   ): Promise<number> {
-    const room = await this.chatRoomRepository
-      .createQueryBuilder('chat_room')
-      .leftJoin('chat_room.jobPost', 'jobPost')
-      .leftJoin('chat_room.freelancer', 'freelancer')
-      .where(`jobPost.id = ${jobPostId}`)
-      .andWhere(`freelancer.id = ${freelancerId}`)
-      .getOneOrFail();
+    try {
+      const room = await this.chatRoomRepository
+        .createQueryBuilder('chat_room')
+        .leftJoin('chat_room.jobPost', 'jobPost')
+        .leftJoin('chat_room.freelancer', 'freelancer')
+        .where(`jobPost.id = ${jobPostId}`)
+        .andWhere(`freelancer.id = ${freelancerId}`)
+        .getOneOrFail();
 
-    return room.id;
+      return room.id;
+    } catch (error) {
+      Logger.error(
+        'Error occurred while trying to find room in db. Most likely that is wrong jobPostId/freelancerId or there is no chat room with this parameters',
+      );
+      throw new UnprocessableEntityException();
+    }
   }
 
   async getRoomIdByMessageId(id: number): Promise<number> {
-    const room = await this.chatRoomRepository
-      .createQueryBuilder('chat_room')
-      .leftJoin('chat_room.message', 'message')
-      .where('message.id = :id', { id })
-      .getOneOrFail();
+    try {
+      const room = await this.chatRoomRepository
+        .createQueryBuilder('chat_room')
+        .leftJoin('chat_room.message', 'message')
+        .where('message.id = :id', { id })
+        .getOneOrFail();
 
-    return room.id;
+      return room.id;
+    } catch (error) {
+      Logger.error('Unexpected error while finding chat room id by message id');
+      throw new UnprocessableEntityException();
+    }
   }
 
   private parseChatRoomData(chatRoom: ChatRoom): IRoom {
@@ -124,14 +191,14 @@ export class ChatRoomService {
       id: chatRoom.freelancer.user.id,
       firstName: chatRoom.freelancer.user.firstName,
       lastName: chatRoom.freelancer.user.lastName,
-      avatarURL: chatRoom.freelancer.user.avatarURL,
+      avatarURL: 'chatRoom.freelancer.user.avatarURL',
     };
 
     const client = {
       id: chatRoom.jobPost.user.id,
       firstName: chatRoom.jobPost.user.firstName,
       lastName: chatRoom.jobPost.user.lastName,
-      avatarURL: chatRoom.jobPost.user.avatarURL,
+      avatarURL: 'chatRoom.jobPost.user.avatarURL',
     };
 
     const jobPost = {
