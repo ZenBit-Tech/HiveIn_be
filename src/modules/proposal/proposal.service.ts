@@ -12,6 +12,9 @@ import { Message } from 'src/modules/message/entities/message.entity';
 import { SettingsInfoService } from 'src/modules/settings-info/settings-info.service';
 import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
 import { MessageType } from 'src/modules/message/typesDef';
+import { LocalFilesService } from 'src/modules/job-post/localFiles.service';
+import { LocalFileDto } from 'src/modules/proposal/dto/localFile.dto';
+import { LocalFile } from 'src/modules/entities/localFile.entity';
 
 @Injectable()
 export class ProposalService {
@@ -21,6 +24,7 @@ export class ProposalService {
     private readonly chatRoomService: ChatRoomService,
     private readonly freelancerService: FreelancerService,
     private readonly settingsInfoService: SettingsInfoService,
+    private localFilesService: LocalFilesService,
     @InjectRepository(Message)
     private readonly messageRepo: Repository<Message>,
   ) {}
@@ -29,8 +33,14 @@ export class ProposalService {
     createProposalDto: CreateProposalDto,
     userId: number,
     type: ProposalType,
+    fileData: LocalFileDto | null,
   ): Promise<InsertResult> {
+    let file: LocalFile | null = null;
     const { idJobPost, idFreelancer } = createProposalDto;
+
+    if (fileData) {
+      file = await this.localFilesService.saveLocalFileData(fileData);
+    }
 
     const proposal = await this.proposalRepo
       .createQueryBuilder('proposal')
@@ -42,6 +52,7 @@ export class ProposalService {
           type,
           jobPost: { id: idJobPost },
           freelancer: { id: idFreelancer },
+          fileId: file?.id || null,
         },
       ])
       .execute();

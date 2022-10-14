@@ -3,10 +3,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
+import { LocalFile } from 'src/modules/entities/localFile.entity';
 
 export enum ProposalType {
   PROPOSAL = 'proposal',
@@ -37,4 +39,13 @@ export class Proposal {
     enum: ProposalType,
   })
   type: ProposalType;
+
+  @JoinColumn({ name: 'fileId' })
+  @OneToOne(() => LocalFile, {
+    nullable: true,
+  })
+  file?: LocalFile;
+
+  @Column({ nullable: true })
+  fileId?: number;
 }
