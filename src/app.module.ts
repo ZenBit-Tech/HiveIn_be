@@ -19,6 +19,7 @@ import { ContractsModule } from 'src/modules/contracts/contracts.module';
 import { OfferModule } from 'src/modules/offer/offer.module';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
 import { MessageModule } from 'src/modules/message/message.module';
+import { RedisCacheModule } from './redis-cache/redis-cache.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { MessageModule } from 'src/modules/message/message.module';
     OfferModule,
     ChatRoomModule,
     MessageModule,
+    RedisCacheModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtService],

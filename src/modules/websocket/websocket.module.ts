@@ -11,6 +11,7 @@ import { NotificationsModule } from 'src/modules/notifications/notifications.mod
 import { SettingsInfoModule } from 'src/modules/settings-info/settings-info.module';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
 import { MessageModule } from 'src/modules/message/message.module';
+import { RedisCacheModule } from '../../redis-cache/redis-cache.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { MessageModule } from 'src/modules/message/message.module';
     SettingsInfoModule,
     ChatRoomModule,
     MessageModule,
+    RedisCacheModule,
   ],
   controllers: [],
   providers: [WebsocketService, JwtService],

@@ -20,6 +20,7 @@ import { NotificationsService } from 'src/modules/notifications/notifications.se
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import { MessageService } from 'src/modules/message/message.service';
 import { SettingsInfoService } from 'src/modules/settings-info/settings-info.service';
+import { RedisCacheService } from '../../redis-cache/redis-cache.service';
 
 config();
 
@@ -60,6 +61,7 @@ export class WebsocketService
     private messageService: MessageService,
     @Inject(forwardRef(() => NotificationsService))
     private notificationService: NotificationsService,
+    private cacheManager: RedisCacheService,
   ) {}
 
   private users = new Map<string, number>();
@@ -70,10 +72,17 @@ export class WebsocketService
   async onModuleInit(): Promise<void> {
     this.users.clear();
     this.rooms.clear();
+    await this.cacheManager.set('huy', new Set());
   }
 
   async handleConnection(socket: Socket): Promise<void> {
     this.logger.log('🚀🔴 Connected');
+    const ss: Set<string> = await this.cacheManager.get('huy');
+    console.log(ss);
+    ss.add(socket.id);
+    await this.cacheManager.set('huy', ss);
+    const ss2 = await this.cacheManager.get('huy');
+    console.log(ss2);
     try {
       const decodedToken = await this.jwtService.verify(
         //  Removing "Bearer "
@@ -93,7 +102,7 @@ export class WebsocketService
         this.server.to(socket.id).emit(Event.ROOMS, rooms);
       }
     } catch {
-      return this.disconnect(socket);
+      // return this.disconnect(socket);
     }
   }
 
