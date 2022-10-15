@@ -96,4 +96,23 @@ export class ProposalService {
 
     return proposal;
   }
+
+  async getProposalByJobId(userId: number, jobPostId: string) {
+    try {
+      const proposals = await this.proposalRepo
+        .createQueryBuilder('proposal')
+        .leftJoinAndSelect('proposal.jobPost', 'jobPost')
+        .leftJoinAndSelect('proposal.freelancer', 'freelancer')
+        .leftJoinAndSelect('freelancer.user', 'user')
+        .where({
+          freelancer: { user: { id: userId } },
+          jobPost: { id: jobPostId },
+        })
+        .getMany();
+
+      return proposals;
+    } catch (error) {
+      return error;
+    }
+  }
 }

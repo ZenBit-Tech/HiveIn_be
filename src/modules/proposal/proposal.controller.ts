@@ -1,5 +1,8 @@
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
-import { ProposalType } from 'src/modules/proposal/entities/proposal.entity';
+import {
+  Proposal,
+  ProposalType,
+} from 'src/modules/proposal/entities/proposal.entity';
 import {
   Body,
   Controller,
@@ -11,6 +14,7 @@ import {
   UseInterceptors,
   UsePipes,
   ValidationPipe,
+  Get,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { CreateProposalDto } from 'src/modules/proposal/dto/create-proposal.dto';
@@ -47,5 +51,14 @@ export class ProposalController {
       type,
       null,
     );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('job-post/:jobId')
+  getByJobId(
+    @Request() req: AuthRequest,
+    @Param('jobId') jobId: string,
+  ): Promise<Proposal[]> {
+    return this.proposalService.getProposalByJobId(req.user.id, jobId);
   }
 }
