@@ -3,7 +3,6 @@ import {
   HttpException,
   Injectable,
   Logger,
-  UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -83,10 +82,11 @@ export class ProposalService {
       );
 
       return proposal;
-    } catch (e) {
+    } catch (error) {
       Logger.error('Error occurred while sending proposal');
-      if (e instanceof UnauthorizedException)
-        return Promise.reject(new UnprocessableEntityException());
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      throw new UnprocessableEntityException();
     }
   }
 
@@ -94,13 +94,20 @@ export class ProposalService {
     freelancerId,
     jobPostId,
   ): Promise<Proposal> {
-    return await this.proposalRepo
-      .createQueryBuilder('proposal')
-      .leftJoinAndSelect('proposal.freelancer', 'freelancer')
-      .leftJoinAndSelect('proposal.jobPost', 'jobPost')
-      .where('jobPost.id = :jobPostId', { jobPostId })
-      .andWhere('freelancer.id = :freelancerId', { freelancerId })
-      .getOne();
+    try {
+      return await this.proposalRepo
+        .createQueryBuilder('proposal')
+        .leftJoinAndSelect('proposal.freelancer', 'freelancer')
+        .leftJoinAndSelect('proposal.jobPost', 'jobPost')
+        .where('jobPost.id = :jobPostId', { jobPostId })
+        .andWhere('freelancer.id = :freelancerId', { freelancerId })
+        .getOne();
+    } catch (error) {
+      Logger.error('Error occurred while trying to get proposal from db');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      throw new UnprocessableEntityException();
+    }
   }
 
   private async defineUsersIds(
@@ -108,20 +115,29 @@ export class ProposalService {
     jobPostId: number,
     type: ProposalType,
   ): Promise<{ inviteFrom: number; inviteTo: number }> {
-    if (type === ProposalType.INVITE) {
+    try {
+      if (type === ProposalType.INVITE) {
+        return {
+          inviteTo: await this.freelancerService.getUserIdByFreelancerId(
+            freelancerId,
+          ),
+          inviteFrom: await this.jobPostService.getOwnerIdByPostId(jobPostId),
+        };
+      }
+
       return {
-        inviteTo: await this.freelancerService.getUserIdByFreelancerId(
+        inviteTo: await this.jobPostService.getOwnerIdByPostId(jobPostId),
+        inviteFrom: await this.freelancerService.getUserIdByFreelancerId(
           freelancerId,
         ),
-        inviteFrom: await this.jobPostService.getOwnerIdByPostId(jobPostId),
       };
+    } catch (error) {
+      Logger.error(
+        'Error occurred while trying to define users ids in proposal service',
+      );
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      throw new UnprocessableEntityException();
     }
-
-    return {
-      inviteTo: await this.jobPostService.getOwnerIdByPostId(jobPostId),
-      inviteFrom: await this.freelancerService.getUserIdByFreelancerId(
-        freelancerId,
-      ),
-    };
   }
 }

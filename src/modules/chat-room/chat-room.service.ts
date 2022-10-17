@@ -187,34 +187,38 @@ export class ChatRoomService {
   }
 
   private parseChatRoomData(chatRoom: ChatRoom): IRoom {
-    const freelancer = {
-      id: chatRoom.freelancer.user.id,
-      firstName: chatRoom.freelancer.user.firstName,
-      lastName: chatRoom.freelancer.user.lastName,
-      avatarURL: 'chatRoom.freelancer.user.avatarURL',
-    };
+    try {
+      const freelancer = {
+        id: chatRoom.freelancer.user.id,
+        firstName: chatRoom.freelancer.user.firstName,
+        lastName: chatRoom.freelancer.user.lastName,
+        avatarURL: chatRoom.freelancer.user.avatarURL,
+      };
 
-    const client = {
-      id: chatRoom.jobPost.user.id,
-      firstName: chatRoom.jobPost.user.firstName,
-      lastName: chatRoom.jobPost.user.lastName,
-      avatarURL: 'chatRoom.jobPost.user.avatarURL',
-    };
+      const client = {
+        id: chatRoom.jobPost.user.id,
+        firstName: chatRoom.jobPost.user.firstName,
+        lastName: chatRoom.jobPost.user.lastName,
+        avatarURL: chatRoom.jobPost.user.avatarURL,
+      };
 
-    const jobPost = {
-      id: chatRoom.jobPost.id,
-      title: chatRoom.jobPost.title,
-    };
+      const jobPost = {
+        id: chatRoom.jobPost.id,
+        title: chatRoom.jobPost.title,
+      };
 
-    const lastMessage = chatRoom.message.pop();
-
-    return {
-      id: chatRoom.id,
-      status: chatRoom.status,
-      freelancer,
-      client,
-      lastMessage,
-      jobPost,
-    };
+      const lastMessage = chatRoom?.message?.pop();
+      return {
+        id: chatRoom.id,
+        status: chatRoom.status,
+        freelancer,
+        client,
+        lastMessage,
+        jobPost,
+      };
+    } catch (error) {
+      Logger.error('Error occurred while parsing chat room data');
+      throw new UnprocessableEntityException();
+    }
   }
 }

@@ -42,15 +42,27 @@ export class Notification {
   @JoinColumn({ name: 'userId' })
   user: Users;
 
-  @ManyToOne(() => Message, { nullable: true })
+  @ManyToOne(() => Message, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'messageId' })
   message: Message;
 
-  @ManyToOne(() => Offer, { nullable: true })
+  @ManyToOne(() => Offer, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'offerId' })
   offer: Offer;
 
-  @ManyToOne(() => Proposal, { nullable: true })
+  @ManyToOne(() => Proposal, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'proposalId' })
   proposal: Proposal;
 

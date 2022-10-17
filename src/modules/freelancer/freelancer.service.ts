@@ -116,7 +116,7 @@ export class FreelancerService {
         .where('freelancer.id = :id', { id })
         .getOne();
 
-      if (freelancer) throw new NotFoundException();
+      if (!freelancer) throw new NotFoundException();
 
       return freelancer.userId;
     } catch (error) {

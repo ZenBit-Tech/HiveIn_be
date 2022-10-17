@@ -8,6 +8,9 @@ services:
       - "6380:6380"
     expose:
       - "6380"
+    environment:
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
   redis-commander:
     image: rediscommander/redis-commander:latest
     environment:

@@ -19,7 +19,7 @@ import { ContractsModule } from 'src/modules/contracts/contracts.module';
 import { OfferModule } from 'src/modules/offer/offer.module';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
 import { MessageModule } from 'src/modules/message/message.module';
-import { RedisCacheModule } from './redis-cache/redis-cache.module';
+import { WebsocketModule } from './modules/websocket/websocket.module';
 
 @Module({
   imports: [
@@ -56,7 +56,7 @@ import { RedisCacheModule } from './redis-cache/redis-cache.module';
     OfferModule,
     ChatRoomModule,
     MessageModule,
-    RedisCacheModule,
+    WebsocketModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtService],
