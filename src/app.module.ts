@@ -19,7 +19,7 @@ import { ContractsModule } from 'src/modules/contracts/contracts.module';
 import { OfferModule } from 'src/modules/offer/offer.module';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
 import { MessageModule } from 'src/modules/message/message.module';
-import { WebsocketModule } from './modules/websocket/websocket.module';
+import { WebsocketModule } from 'src/modules/websocket/websocket.module';
 
 @Module({
   imports: [

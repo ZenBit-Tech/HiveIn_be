@@ -14,7 +14,7 @@ import { NotificationsService } from 'src/modules/notifications/notifications.se
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import { MessageService } from 'src/modules/message/message.service';
 import { SettingsInfoService } from 'src/modules/settings-info/settings-info.service';
-import redisClient from '../redis/redis';
+import redisClient from 'src/modules/redis/redis';
 
 config();
 

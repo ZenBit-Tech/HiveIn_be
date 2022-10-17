@@ -36,7 +36,7 @@ export class MessageService {
       const user = await this.usersRepository.findOneBy({ id: data.userId });
       const chatRoom = await this.chatRoomService.getOneById(data.chatRoomId);
 
-      if (!user && !chatRoom) throw new NotFoundException();
+      if (!user || !chatRoom) throw new NotFoundException();
 
       if (user.role === UserRole.UNDEFINED) throw new ForbiddenException();
 

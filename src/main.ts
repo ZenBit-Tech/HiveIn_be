@@ -5,7 +5,7 @@ import * as session from 'express-session';
 import * as passport from 'passport';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import expressBasicAuth = require('express-basic-auth');
-import { connectClient } from './modules/redis/redis';
+import { connectClient } from 'src/modules/redis/redis';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
