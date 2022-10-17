@@ -24,7 +24,10 @@ export class Message {
   @JoinColumn({ name: 'senderId' })
   user: Users;
 
-  @ManyToOne(() => ChatRoom, (chatRoom) => chatRoom.message)
+  @ManyToOne(() => ChatRoom, (chatRoom) => chatRoom.message, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn({ name: 'chatRoomId' })
   chatRoom: ChatRoom;
 

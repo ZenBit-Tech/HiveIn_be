@@ -14,6 +14,7 @@ import {
   IRoom,
   TArgs,
 } from 'src/modules/chat-room/typesDef';
+import { genSalt, hash } from 'bcryptjs';
 
 @Injectable()
 export class ChatRoomService {
@@ -23,6 +24,8 @@ export class ChatRoomService {
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
   ) {}
+
+  private saltRounds = 5;
 
   async create(data: createChatRoomDto): Promise<ChatRoom> {
     return await this.chatRoomRepository.save({
@@ -117,6 +120,23 @@ export class ChatRoomService {
       .getOneOrFail();
 
     return room.id;
+  }
+
+  async prolongChat(id: number, token: string): Promise<UpdateResult> {
+    const salt = await genSalt(this.saltRounds);
+    const prolongLink = await hash('prolong' + id, salt);
+
+    const result = await this.chatRoomRepository
+      .createQueryBuilder()
+      .update(ChatRoom)
+      .set({
+        deleteDate: new Date(new Date().setMonth(new Date().getMonth() + 6)),
+        prolongLink,
+      })
+      .where('id = :id', { id })
+      .andWhere('prolongLink = :token', { token })
+      .execute();
+    return result;
   }
 
   private parseChatRoomData(chatRoom: ChatRoom): IRoom {

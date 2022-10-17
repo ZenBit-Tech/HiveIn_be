@@ -1,26 +1,24 @@
-import { CHAT } from './../../utils/auth.consts';
-import { MailerService } from '@nestjs-modules/mailer';
-import { TasksService } from 'src/modules/task.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateContractDto } from 'src/modules/contracts/dto/create-contract.dto';
 import { UpdateContractDto } from 'src/modules/contracts/dto/update-contract.dto';
 import { Contracts } from 'src/modules/contracts/entities/contracts.entity';
 import { DeleteResult, InsertResult, Repository } from 'typeorm';
-import { ConfigService } from '@nestjs/config';
+import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
+import { genSalt, hash } from 'bcryptjs';
 
 @Injectable()
 export class ContractsService {
   constructor(
     @InjectRepository(Contracts)
     private readonly contractRepo: Repository<Contracts>,
-    private readonly tasksService: TasksService,
-    private readonly mailService: MailerService,
-    private readonly configService: ConfigService,
+    @InjectRepository(ChatRoom)
+    private readonly chatRoomRepo: Repository<ChatRoom>,
   ) {}
 
+  private saltRounds = 5;
+
   async create(createContractDto: CreateContractDto): Promise<InsertResult> {
-    console.warn('contract start create');
     const result = await this.contractRepo
       .createQueryBuilder('contracts')
       .insert()
@@ -31,57 +29,35 @@ export class ContractsService {
     const contract = await this.contractRepo
       .createQueryBuilder('contracts')
       .leftJoinAndSelect('contracts.offer', 'offer')
+      .leftJoinAndSelect('offer.freelancer', 'offer_freelancer')
       .leftJoinAndSelect('offer.jobPost', 'jobPost')
-      .leftJoinAndSelect('jobPost.user', 'user')
       .leftJoinAndSelect('jobPost.chatRoom', 'chatRoom')
+      .leftJoinAndSelect('chatRoom.freelancer', 'freelancer')
       .where({ id: result.raw.insertId })
       .getOne();
-    console.log(contract);
-    console.log(contract.offer.jobPost.chatRoom);
-    const chatRoom = contract.offer.jobPost.chatRoom[0]; // it should be one chatRoom to one job
 
-    const timeDifference = this.getSecondsDiff(new Date(), contract.endDate);
-    console.log(timeDifference);
-
-    this.tasksService.addNewTimeout(
-      'task ' + timeDifference,
-      timeDifference * 1000,
-      async () => {
-        const { email } = contract.offer.jobPost.user;
-
-        const chatUrl =
-          this.configService.get<string>('FRONTEND_SIGN_IN_REDIRECT_URL') +
-          CHAT +
-          '/' +
-          chatRoom.id;
-
-        const deleteChatUrl = '';
-        const prolongChatUrl = '';
-
-        await this.mailService.sendMail({
-          to: email,
-          subject: 'GetJob Delete Chat',
-          from: 'milkav06062003@gmail.com',
-          html: `<h1>Hello</h1><h1>Your <a href="${chatUrl}">chat</a> will be automatically deleted in ${contract.endDate}</h1>
-          <h2>Please select one of the following variants:</h2>
-          <ul>
-          <li><a href="${deleteChatUrl}">Delete chat</a></li>
-          <li><a href="${prolongChatUrl}">Prolong chat chat</a></li
-          </ul>`,
-        });
+    const chatRoom = contract.offer.jobPost.chatRoom.find(
+      (chatRoom: ChatRoom) => {
+        return chatRoom.freelancer.id === contract.offer.freelancer.id;
       },
     );
+    const chatDeleteDate = new Date(
+      contract.endDate.setMinutes(contract.endDate.getMinutes() + 1), // change to months
+    );
+    const salt = await genSalt(this.saltRounds);
+    const prolongLink = await hash('prolong' + chatRoom.id, salt);
 
+    await this.chatRoomRepo
+      .createQueryBuilder('chatRoom')
+      .update(ChatRoom)
+      .set({
+        deleteDate: chatDeleteDate,
+        prolongLink,
+      })
+      .where('id = :id', { id: chatRoom.id })
+      .execute();
     return result;
   }
-
-  getSecondsDiff = (startDate, endDate) => {
-    const msInSecond = 1000;
-
-    return Math.round(
-      Math.abs(endDate.getTime() - startDate.getTime()) / msInSecond,
-    );
-  };
 
   async findAll(): Promise<Contracts[]> {
     return await this.contractRepo

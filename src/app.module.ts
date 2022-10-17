@@ -21,9 +21,12 @@ import { OfferModule } from 'src/modules/offer/offer.module';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
 import { MessageModule } from 'src/modules/message/message.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ChatRoom } from './modules/chat-room/entities/chat-room.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([ChatRoom]),
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
