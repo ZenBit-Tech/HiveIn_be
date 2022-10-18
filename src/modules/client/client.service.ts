@@ -1,3 +1,4 @@
+import { RecentlyViewedFreelancers } from 'src/modules/client/entities/recently-viewed-freelancers.entity';
 import { Skill } from 'src/modules/skill/entities/skill.entity';
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { Injectable } from '@nestjs/common';
@@ -13,6 +14,8 @@ export class ClientService {
     private readonly usersRepo: Repository<Users>,
     @InjectRepository(Freelancer)
     private readonly freelancersRepo: Repository<Freelancer>,
+    @InjectRepository(RecentlyViewedFreelancers)
+    private readonly recentlyViewedFreelancersRepo: Repository<RecentlyViewedFreelancers>,
   ) {}
 
   async filterCandidate(userId: number, filters: CandidateFilterDto) {
@@ -57,34 +60,33 @@ export class ClientService {
   }
 
   async getRecentlyViewedFreelancer(userId: any) {
-    const { recentlyViewedFreelancers } = await this.usersRepo
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.recentlyViewedFreelancers', 'freelancer')
+    const recentlyViewedFreelancers = await this.freelancersRepo
+      .createQueryBuilder('freelancer')
+      .leftJoinAndSelect(
+        'freelancer.recentlyViewedFreelancers',
+        'recentlyViewedFreelancers',
+      )
+      .leftJoinAndSelect('recentlyViewedFreelancers.user', 'user')
       .leftJoinAndSelect('freelancer.user', 'freelancerUser')
       .leftJoinAndSelect('freelancerUser.avatar', 'avatar')
-      .where({ id: userId })
-      .getOne();
-
+      .where(`user.id = ${userId}`)
+      .orderBy('recentlyViewedFreelancers.UpdatedAt', 'DESC')
+      .getMany();
     return await this.addSavesField(userId, recentlyViewedFreelancers);
   }
 
   async viewFreelancer(userId: number, freelancerId: number) {
-    const freelancer = await this.freelancersRepo.findOneBy({
-      id: freelancerId,
-    });
-
-    const user = await this.usersRepo
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.recentlyViewedFreelancers', 'freelancer')
-      .leftJoinAndSelect('freelancer.user', 'freelancerUser')
-      .leftJoinAndSelect('freelancerUser.avatar', 'avatar')
-      .where({ id: userId })
-      .getOne();
-
-    user.recentlyViewedFreelancers.push(freelancer);
-
-    this.usersRepo.save(user);
-    return await this.addSavesField(userId, user.recentlyViewedFreelancers);
+    return await this.recentlyViewedFreelancersRepo
+      .createQueryBuilder()
+      .insert()
+      .into(RecentlyViewedFreelancers)
+      .values([
+        {
+          user: { id: userId },
+          freelancer: { id: freelancerId },
+        },
+      ])
+      .execute();
   }
 
   async getSavedFreelancers(userId: number) {

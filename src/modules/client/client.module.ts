@@ -1,3 +1,4 @@
+import { RecentlyViewedFreelancers } from 'src/modules/client/entities/recently-viewed-freelancers.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from 'src/modules/entities/users.entity';
@@ -10,7 +11,7 @@ import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forFeature([Users, Freelancer]),
+    TypeOrmModule.forFeature([Users, Freelancer, RecentlyViewedFreelancers]),
     JwtModule.register({
       secret: process.env.SECRET_KEY,
       signOptions: { expiresIn: '7200s' },

@@ -1,3 +1,4 @@
+import { InsertResult } from 'typeorm';
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { ClientService } from './client.service';
 import {
@@ -51,7 +52,7 @@ export class ClientController {
   viewFreelancer(
     @Request() req: AuthRequest,
     @Param('freelancerId') freelancerId: number,
-  ): Promise<Freelancer[]> {
+  ): Promise<InsertResult> {
     return this.clientService.viewFreelancer(req.user.id, freelancerId);
   }
 

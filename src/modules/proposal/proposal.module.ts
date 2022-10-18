@@ -14,6 +14,7 @@ import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { SettingsInfoService } from 'src/modules/settings-info/settings-info.service';
 import { Message } from 'src/modules/message/entities/message.entity';
+import { RecentlyViewedFreelancers } from 'src/modules/client/entities/recently-viewed-freelancers.entity';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { Message } from 'src/modules/message/entities/message.entity';
       Education,
       ChatRoom,
       Message,
+      RecentlyViewedFreelancers,
     ]),
   ],
   controllers: [ProposalController],
