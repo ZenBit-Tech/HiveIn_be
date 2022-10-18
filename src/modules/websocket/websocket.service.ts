@@ -21,7 +21,6 @@ config();
 enum Event {
   ROOMS = 'rooms',
   ROOM = 'room',
-  ERROR = 'error',
   GET_ROOMS = 'getRooms',
   JOIN_ROOM = 'joinRoom',
   MESSAGES = 'messages',
@@ -33,6 +32,8 @@ enum Event {
   GET_NOTIFICATIONS = 'getNotifications',
   GET_MESSAGE_NOTIFICATION = 'getMessageNotification',
   MARK_AS_READ_NOTIFICATION = 'markAsRead',
+  ERROR = 'error',
+  ERROR_UNAUTHORIZED = 'errorUnauthorized',
 }
 
 @WebSocketGateway({
@@ -125,7 +126,7 @@ export class WebsocketService
     this.server
       .to(socket.id)
       .emit(
-        Event.ERROR,
+        Event.ERROR_UNAUTHORIZED,
         new WsException('Unauthorized user. Wrong token. User disconnected'),
       );
     socket.disconnect();
