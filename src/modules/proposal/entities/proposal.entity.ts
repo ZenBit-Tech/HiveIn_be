@@ -42,10 +42,8 @@ export class Proposal {
 
   @JoinColumn({ name: 'fileId' })
   @OneToOne(() => LocalFile, {
+    eager: true,
     nullable: true,
   })
   file?: LocalFile;
-
-  @Column({ nullable: true })
-  fileId?: number;
 }

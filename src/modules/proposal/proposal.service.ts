@@ -35,66 +35,70 @@ export class ProposalService {
     type: ProposalType,
     fileData: LocalFileDto | null,
   ): Promise<InsertResult> {
-    let file: LocalFile | null = null;
-    const { idJobPost, idFreelancer } = createProposalDto;
+    try {
+      let file: LocalFile | null = null;
+      const { idJobPost, idFreelancer } = createProposalDto;
 
-    if (fileData) {
-      file = await this.localFilesService.saveLocalFileData(fileData);
-    }
+      if (fileData) {
+        file = await this.localFilesService.saveLocalFileData(fileData);
+      }
 
-    const proposal = await this.proposalRepo
-      .createQueryBuilder('proposal')
-      .insert()
-      .into(Proposal)
-      .values([
+      const proposal = await this.proposalRepo
+        .createQueryBuilder('proposal')
+        .insert()
+        .into(Proposal)
+        .values([
+          {
+            ...createProposalDto,
+            type,
+            jobPost: { id: idJobPost },
+            freelancer: { id: idFreelancer },
+            file,
+          },
+        ])
+        .execute();
+
+      const user = await this.settingsInfoService.findOne(userId);
+      const freelancer = await this.freelancerService.findOneByUserId(userId);
+
+      const chatRoom = await this.chatRoomService.create({
+        jobPostId: idJobPost,
+        freelancerId: freelancer.id,
+        status: chatRoomStatus.CLIENT_ONLY,
+      });
+
+      const values = [
         {
-          ...createProposalDto,
-          type,
-          jobPost: { id: idJobPost },
-          freelancer: { id: idFreelancer },
-          fileId: file?.id || null,
+          chatRoom,
+          user,
+          text: 'You have received a new proposal!',
+          messageType: MessageType.FROM_SYSTEM,
         },
-      ])
-      .execute();
+        {
+          chatRoom,
+          user,
+          text: createProposalDto.message,
+          messageType: MessageType.FROM_USER,
+        },
+        {
+          chatRoom,
+          user,
+          text: `bid: ${createProposalDto.bid}`,
+          messageType: MessageType.FROM_USER,
+        },
+      ];
 
-    const user = await this.settingsInfoService.findOne(userId);
-    const freelancer = await this.freelancerService.findOneByUserId(userId);
+      await this.messageRepo
+        .createQueryBuilder('message')
+        .insert()
+        .into(Message)
+        .values(values)
+        .execute();
 
-    const chatRoom = await this.chatRoomService.create({
-      jobPostId: idJobPost,
-      freelancerId: freelancer.id,
-      status: chatRoomStatus.CLIENT_ONLY,
-    });
-
-    const values = [
-      {
-        chatRoom,
-        user,
-        text: 'You have received a new proposal!',
-        messageType: MessageType.FROM_SYSTEM,
-      },
-      {
-        chatRoom,
-        user,
-        text: createProposalDto.message,
-        messageType: MessageType.FROM_USER,
-      },
-      {
-        chatRoom,
-        user,
-        text: `bid: ${createProposalDto.bid}`,
-        messageType: MessageType.FROM_USER,
-      },
-    ];
-
-    await this.messageRepo
-      .createQueryBuilder('message')
-      .insert()
-      .into(Message)
-      .values(values)
-      .execute();
-
-    return proposal;
+      return proposal;
+    } catch (error) {
+      return error;
+    }
   }
 
   async getProposalByJobId(userId: number, jobPostId: string) {
