@@ -24,6 +24,7 @@ import {
   ICountedNotifications,
   ICountedParsedNotifications,
 } from 'src/modules/notifications/typesDef';
+import { constSystemMessages } from 'src/utils/systemMessages';
 
 @Injectable()
 export class NotificationsService {
@@ -64,8 +65,10 @@ export class NotificationsService {
     try {
       return await this.create({
         type: NotificationType.PROPOSAL,
-        text: `You have receive a new ${
-          type === ProposalType.PROPOSAL ? 'proposal' : 'invite'
+        text: `${constSystemMessages.messageToUser} ${
+          type === ProposalType.PROPOSAL
+            ? constSystemMessages.textProposal
+            : constSystemMessages.textInvite
         }`,
         foreignKey: proposalId,
         userId,
@@ -109,7 +112,7 @@ export class NotificationsService {
         type: NotificationType.MESSAGE,
         foreignKey: messageId,
         userId,
-        text: 'New message',
+        text: constSystemMessages.newMessage,
       });
     } catch (error) {
       Logger.error(

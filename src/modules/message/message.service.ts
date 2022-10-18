@@ -18,6 +18,7 @@ import { MessageType, ReturnedMessage } from 'src/modules/message/typesDef';
 import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
 import { ProposalType } from 'src/modules/proposal/entities/proposal.entity';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
+import { constSystemMessages } from 'src/utils/systemMessages';
 
 @Injectable()
 export class MessageService {
@@ -98,8 +99,10 @@ export class MessageService {
   ): Promise<void> {
     try {
       await this.createSystemMessage({
-        text: `You have received a new ${
-          type === ProposalType.PROPOSAL ? 'proposal' : 'invite'
+        text: `${constSystemMessages.messageToUser} ${
+          type === ProposalType.PROPOSAL
+            ? constSystemMessages.textProposal
+            : constSystemMessages.textInvite
         }`,
         chatRoomId,
         userId: inviteTo,
