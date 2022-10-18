@@ -21,6 +21,9 @@ import {
   WebsocketService,
   Event,
 } from 'src/modules/websocket/websocket.service';
+import { LocalFileDto } from 'src/modules/proposal/dto/localFile.dto';
+import { LocalFile } from '../entities/localFile.entity';
+import { LocalFilesService } from '../job-post/localFiles.service';
 
 @Injectable()
 export class ProposalService {
@@ -33,15 +36,22 @@ export class ProposalService {
     private readonly jobPostService: JobPostService,
     private readonly notificationsService: NotificationsService,
     private readonly wsService: WebsocketService,
+    private localFilesService: LocalFilesService,
   ) {}
 
   async create(
     createProposalDto: CreateProposalDto,
-    type: ProposalType,
     userId: number,
+    type: ProposalType,
+    fileData: LocalFileDto | null,
   ): Promise<Proposal> {
     try {
+      let file: LocalFile | null = null;
       const { idJobPost, idFreelancer } = createProposalDto;
+
+      if (fileData) {
+        file = await this.localFilesService.saveLocalFileData(fileData);
+      }
 
       const isChatAlreadyExist = await this.getOneByJobPostAndFreelancerId(
         idFreelancer,
@@ -59,6 +69,7 @@ export class ProposalService {
         type,
         jobPost: { id: idJobPost },
         freelancer: { id: idFreelancer },
+        file,
       });
 
       const chatRoom = await this.chatRoomService.create({
@@ -146,6 +157,25 @@ export class ProposalService {
       if (error instanceof HttpException)
         throw new HttpException(error.message, error.getStatus());
       throw new UnprocessableEntityException();
+    }
+  }
+
+  async getProposalByJobId(userId: number, jobPostId: string) {
+    try {
+      const proposals = await this.proposalRepo
+        .createQueryBuilder('proposal')
+        .leftJoinAndSelect('proposal.jobPost', 'jobPost')
+        .leftJoinAndSelect('proposal.freelancer', 'freelancer')
+        .leftJoinAndSelect('freelancer.user', 'user')
+        .where({
+          freelancer: { user: { id: userId } },
+          jobPost: { id: jobPostId },
+        })
+        .getMany();
+
+      return proposals;
+    } catch (error) {
+      return error;
     }
   }
 }

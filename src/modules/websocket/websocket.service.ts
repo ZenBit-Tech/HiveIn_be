@@ -393,10 +393,17 @@ export class WebsocketService
   }
 
   async triggerEventByUserId(id: number, event: Event): Promise<void> {
+    console.log(
+      'hereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+    );
+    console.log(id, event);
     try {
-      const users = this.redisClient.HGETALL('users');
+      console.log('ssssssssssssssssssssssssssssssssssss');
+      const users = await this.redisClient.HGETALL('users');
+      console.log('dddddddddddddddddddddddddddddddddddd', users);
       Object.keys(users).map(async (user) => {
         const userToEmit = { id: user };
+        console.log('vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv');
         if (Number(users[user]) === id) {
           //  Now in this switch only one case, because for now it's only one which I need.
           //  Still I prefer to use switch because it will be easy to extend, and I believe I will need this

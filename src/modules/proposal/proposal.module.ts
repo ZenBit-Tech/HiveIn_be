@@ -44,6 +44,6 @@ import { LocalFilesService } from 'src/modules/job-post/localFiles.service';
     WebsocketModule,
   ],
   controllers: [ProposalController],
-  providers: [ProposalService],
+  providers: [ProposalService, LocalFilesService],
 })
 export class ProposalModule {}
