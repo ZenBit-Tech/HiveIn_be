@@ -16,6 +16,7 @@ import { Skill } from 'src/modules/skill/entities/skill.entity';
 import { Users } from 'src/modules/entities/users.entity';
 import { LocalFile } from 'src/modules/entities/localFile.entity';
 import { Offer } from 'src/modules/offer/entities/offer.entity';
+import { Proposal } from 'src/modules/proposal/entities/proposal.entity';
 
 export enum DurationType {
   WEEK = 'week',
@@ -56,6 +57,10 @@ export class JobPost {
   @ManyToOne(() => Users, (user) => user.id, { cascade: true })
   @JoinColumn()
   user: Users;
+
+  @OneToMany(() => Proposal, (proposal) => proposal.jobPost)
+  @JoinColumn()
+  proposal: Proposal;
 
   @OneToMany(() => Offer, (offer) => offer.jobPost)
   @JoinColumn()

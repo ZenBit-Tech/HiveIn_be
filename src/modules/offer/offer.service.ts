@@ -153,7 +153,6 @@ export class OfferService {
         .leftJoinAndSelect('jobPost.user', 'users')
         .leftJoinAndSelect('users.avatar', 'avatar')
         .where(`user.id = ${userId}`)
-        .andWhere(`offer.status != :accepted`, { accepted: Status.ACCEPTED })
         .orderBy('offer.createdAt', 'DESC')
         .getMany();
     } catch (error) {
