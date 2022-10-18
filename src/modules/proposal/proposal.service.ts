@@ -12,6 +12,9 @@ import { Message } from 'src/modules/message/entities/message.entity';
 import { SettingsInfoService } from 'src/modules/settings-info/settings-info.service';
 import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
 import { MessageType } from 'src/modules/message/typesDef';
+import { LocalFilesService } from 'src/modules/job-post/localFiles.service';
+import { LocalFileDto } from 'src/modules/proposal/dto/localFile.dto';
+import { LocalFile } from 'src/modules/entities/localFile.entity';
 
 @Injectable()
 export class ProposalService {
@@ -21,6 +24,7 @@ export class ProposalService {
     private readonly chatRoomService: ChatRoomService,
     private readonly freelancerService: FreelancerService,
     private readonly settingsInfoService: SettingsInfoService,
+    private localFilesService: LocalFilesService,
     @InjectRepository(Message)
     private readonly messageRepo: Repository<Message>,
   ) {}
@@ -29,60 +33,90 @@ export class ProposalService {
     createProposalDto: CreateProposalDto,
     userId: number,
     type: ProposalType,
+    fileData: LocalFileDto | null,
   ): Promise<InsertResult> {
-    const { idJobPost, idFreelancer } = createProposalDto;
+    try {
+      let file: LocalFile | null = null;
+      const { idJobPost, idFreelancer } = createProposalDto;
 
-    const proposal = await this.proposalRepo
-      .createQueryBuilder('proposal')
-      .insert()
-      .into(Proposal)
-      .values([
+      if (fileData) {
+        file = await this.localFilesService.saveLocalFileData(fileData);
+      }
+
+      const proposal = await this.proposalRepo
+        .createQueryBuilder('proposal')
+        .insert()
+        .into(Proposal)
+        .values([
+          {
+            ...createProposalDto,
+            type,
+            jobPost: { id: idJobPost },
+            freelancer: { id: idFreelancer },
+            file,
+          },
+        ])
+        .execute();
+
+      const user = await this.settingsInfoService.findOne(userId);
+      const freelancer = await this.freelancerService.findOneByUserId(userId);
+
+      const chatRoom = await this.chatRoomService.create({
+        jobPostId: idJobPost,
+        freelancerId: freelancer.id,
+        status: chatRoomStatus.CLIENT_ONLY,
+      });
+
+      const values = [
         {
-          ...createProposalDto,
-          type,
-          jobPost: { id: idJobPost },
-          freelancer: { id: idFreelancer },
+          chatRoom,
+          user,
+          text: 'You have received a new proposal!',
+          messageType: MessageType.FROM_SYSTEM,
         },
-      ])
-      .execute();
+        {
+          chatRoom,
+          user,
+          text: createProposalDto.message,
+          messageType: MessageType.FROM_USER,
+        },
+        {
+          chatRoom,
+          user,
+          text: `bid: ${createProposalDto.bid}`,
+          messageType: MessageType.FROM_USER,
+        },
+      ];
 
-    const user = await this.settingsInfoService.findOne(userId);
-    const freelancer = await this.freelancerService.findOneByUserId(userId);
+      await this.messageRepo
+        .createQueryBuilder('message')
+        .insert()
+        .into(Message)
+        .values(values)
+        .execute();
 
-    const chatRoom = await this.chatRoomService.create({
-      jobPostId: idJobPost,
-      freelancerId: freelancer.id,
-      status: chatRoomStatus.CLIENT_ONLY,
-    });
+      return proposal;
+    } catch (error) {
+      return error;
+    }
+  }
 
-    const values = [
-      {
-        chatRoom,
-        user,
-        text: 'You have received a new proposal!',
-        messageType: MessageType.FROM_SYSTEM,
-      },
-      {
-        chatRoom,
-        user,
-        text: createProposalDto.message,
-        messageType: MessageType.FROM_USER,
-      },
-      {
-        chatRoom,
-        user,
-        text: `bid: ${createProposalDto.bid}`,
-        messageType: MessageType.FROM_USER,
-      },
-    ];
+  async getProposalByJobId(userId: number, jobPostId: string) {
+    try {
+      const proposals = await this.proposalRepo
+        .createQueryBuilder('proposal')
+        .leftJoinAndSelect('proposal.jobPost', 'jobPost')
+        .leftJoinAndSelect('proposal.freelancer', 'freelancer')
+        .leftJoinAndSelect('freelancer.user', 'user')
+        .where({
+          freelancer: { user: { id: userId } },
+          jobPost: { id: jobPostId },
+        })
+        .getMany();
 
-    await this.messageRepo
-      .createQueryBuilder('message')
-      .insert()
-      .into(Message)
-      .values(values)
-      .execute();
-
-    return proposal;
+      return proposals;
+    } catch (error) {
+      return error;
+    }
   }
 }
