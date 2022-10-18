@@ -1,4 +1,4 @@
-import { IsString, MaxLength } from 'class-validator';
+import { IsString } from 'class-validator';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { Users } from './users.entity';
 
@@ -14,6 +14,5 @@ export class ForgotPassword {
 
   @Column({ unique: true })
   @IsString()
-  @MaxLength(150)
   link: string;
 }
