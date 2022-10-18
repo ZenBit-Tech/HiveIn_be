@@ -18,7 +18,7 @@ import redisClient from 'src/modules/redis/redis';
 
 config();
 
-enum Event {
+export enum Event {
   ROOMS = 'rooms',
   ROOM = 'room',
   GET_ROOMS = 'getRooms',
@@ -34,6 +34,7 @@ enum Event {
   MARK_AS_READ_NOTIFICATION = 'markAsRead',
   ERROR = 'error',
   ERROR_UNAUTHORIZED = 'errorUnauthorized',
+  ERROR_ON_CONNECTION = 'errorOnConnection',
 }
 
 @WebSocketGateway({
@@ -92,7 +93,7 @@ export class WebsocketService
       this.server
         .to(socket.id)
         .emit(
-          Event.ERROR,
+          Event.ERROR_ON_CONNECTION,
           new WsException(
             'Error on initial connection. User will be disconnected',
           ),
@@ -388,6 +389,30 @@ export class WebsocketService
     } catch (error) {
       this.logger.error('Error occurred in ws onAddNotification method');
       throw new WsException('Error while trying to add notification');
+    }
+  }
+
+  async triggerEventByUserId(id: number, event: Event): Promise<void> {
+    try {
+      const users = this.redisClient.HGETALL('users');
+      Object.keys(users).map(async (user) => {
+        const userToEmit = { id: user };
+        if (Number(users[user]) === id) {
+          //  Now in this switch only one case, because for now it's only one which I need.
+          //  Still I prefer to use switch because it will be easy to extend, and I believe I will need this
+          switch (event) {
+            case Event.GET_ROOMS:
+              return await this.onGetRooms(userToEmit);
+            default:
+              throw new WsException(
+                'Wrong event passed to triggerEventByUserId',
+              );
+          }
+        }
+      });
+    } catch (error) {
+      this.logger.error('Error occurred in ws triggerEventByUserId method');
+      throw new WsException('Error while trying to trigger event by user id');
     }
   }
 }

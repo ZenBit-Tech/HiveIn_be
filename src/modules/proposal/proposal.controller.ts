@@ -6,6 +6,7 @@ import {
   Body,
   Controller,
   Post,
+  Request,
   UseGuards,
   Param,
   Logger,
@@ -15,6 +16,7 @@ import {
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { CreateProposalDto } from 'src/modules/proposal/dto/create-proposal.dto';
 import { ProposalService } from 'src/modules/proposal/proposal.service';
+import { AuthRequest } from 'src/utils/@types/AuthRequest';
 
 @Controller('proposal')
 export class ProposalController {
@@ -25,9 +27,10 @@ export class ProposalController {
   create(
     @Param('type') type: ProposalType,
     @Body() createProposalDto: CreateProposalDto,
+    @Request() req: AuthRequest,
   ): Promise<Proposal> {
     try {
-      return this.proposalService.create(createProposalDto, type);
+      return this.proposalService.create(createProposalDto, type, req.user.id);
     } catch (error) {
       Logger.error('Error occurred in offer controller (PATCH)');
       if (error instanceof HttpException)

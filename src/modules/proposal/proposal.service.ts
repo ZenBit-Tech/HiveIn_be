@@ -17,6 +17,10 @@ import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
 import { MessageService } from 'src/modules/message/message.service';
 import { JobPostService } from 'src/modules/job-post/job-post.service';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
+import {
+  WebsocketService,
+  Event,
+} from 'src/modules/websocket/websocket.service';
 
 @Injectable()
 export class ProposalService {
@@ -28,11 +32,13 @@ export class ProposalService {
     private readonly messageService: MessageService,
     private readonly jobPostService: JobPostService,
     private readonly notificationsService: NotificationsService,
+    private readonly wsService: WebsocketService,
   ) {}
 
   async create(
     createProposalDto: CreateProposalDto,
     type: ProposalType,
+    userId: number,
   ): Promise<Proposal> {
     try {
       const { idJobPost, idFreelancer } = createProposalDto;
@@ -80,6 +86,8 @@ export class ProposalService {
         usersIds.inviteTo,
         type,
       );
+
+      await this.wsService.triggerEventByUserId(userId, Event.GET_ROOMS);
 
       return proposal;
     } catch (error) {
