@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CHAT } from '../utils/auth.consts';
+import { CHAT } from 'src/utils/auth.consts';
 import { ChatRoom } from './chat-room/entities/chat-room.entity';
 
 @Injectable()
@@ -17,7 +17,7 @@ export class TasksService {
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE) //EVERY_DAY_AT_NOON
-  async some() {
+  async some(): Promise<void> {
     const dateAfterWeek = new Date(
       new Date().setDate(new Date().getDate() + 7),
     );
@@ -59,7 +59,7 @@ export class TasksService {
     return new Date(date.setDate(date.getDate() + 1));
   }
 
-  sendProlongEmailToUsers(rooms: ChatRoom[]) {
+  private sendProlongEmailToUsers(rooms: ChatRoom[]): void {
     rooms.forEach(
       async ({
         jobPost: {
