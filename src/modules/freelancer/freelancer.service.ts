@@ -1,13 +1,20 @@
-import { ClientService } from 'src/modules/client/client.service';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Education } from './entities/education.entity';
-import { Experience } from './entities/experience.entity';
-import { CreateFreelancerDto } from './dto/create-freelancer.dto';
-import { UpdateFreelancerDto } from './dto/update-freelancer.dto';
-import { Freelancer } from './entities/freelancer.entity';
-import { Users } from '../entities/users.entity';
+import { Education } from 'src/modules/freelancer/entities/education.entity';
+import { Experience } from 'src/modules/freelancer/entities/experience.entity';
+import { CreateFreelancerDto } from 'src/modules/freelancer/dto/create-freelancer.dto';
+import { UpdateFreelancerDto } from 'src/modules/freelancer/dto/update-freelancer.dto';
+import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
+import { Users } from 'src/modules/entities/users.entity';
+import { ClientService } from 'src/modules/client/client.service';
 
 @Injectable()
 export class FreelancerService {
@@ -102,13 +109,21 @@ export class FreelancerService {
   }
 
   async getUserIdByFreelancerId(id: number): Promise<number> {
-    const freelancer = await this.freelancerRepository
-      .createQueryBuilder('freelancer')
-      .select('freelancer.userId')
-      .where('freelancer.id = :id', { id })
-      .getOne();
+    try {
+      const freelancer = await this.freelancerRepository
+        .createQueryBuilder('freelancer')
+        .select('freelancer.userId')
+        .where('freelancer.id = :id', { id })
+        .getOne();
 
-    return freelancer.userId;
+      if (!freelancer) throw new NotFoundException();
+
+      return freelancer.userId;
+    } catch (error) {
+      Logger.error('Error occurred while trying to get user from db');
+      if (error instanceof NotFoundException) throw new NotFoundException();
+      throw new UnprocessableEntityException();
+    }
   }
 
   async update(id: number, data: UpdateFreelancerDto): Promise<Freelancer> {

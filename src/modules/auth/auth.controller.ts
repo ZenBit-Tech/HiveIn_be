@@ -90,4 +90,10 @@ export class AuthController {
       file.originalname,
     );
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('removeAvatar')
+  async removeAvatar(@Req() request: AuthRequest): Promise<void> {
+    return this.authService.deleteAvatar(request.user.id);
+  }
 }

@@ -20,6 +20,7 @@ import { ContractsModule } from 'src/modules/contracts/contracts.module';
 import { OfferModule } from 'src/modules/offer/offer.module';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
 import { MessageModule } from 'src/modules/message/message.module';
+import { WebsocketModule } from 'src/modules/websocket/websocket.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatRoom } from './modules/chat-room/entities/chat-room.entity';
@@ -61,6 +62,7 @@ import { ChatRoom } from './modules/chat-room/entities/chat-room.entity';
     OfferModule,
     ChatRoomModule,
     MessageModule,
+    WebsocketModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtService, TasksService],

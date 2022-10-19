@@ -1,7 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
-import { NotificationsController } from 'src/modules/notifications/notifications.controller';
 import { Notification } from 'src/modules/notifications/entities/notification.entity';
 import { Users } from 'src/modules/entities/users.entity';
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
@@ -28,7 +27,7 @@ import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
     SettingsInfoModule,
     ChatRoomModule,
   ],
-  controllers: [NotificationsController],
+  controllers: [],
   providers: [NotificationsService, ChatRoomService],
   exports: [NotificationsService],
 })

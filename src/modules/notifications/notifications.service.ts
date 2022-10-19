@@ -1,4 +1,12 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotAcceptableException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
 import { CreateNotificationDto } from 'src/modules/notifications/dto/create-notification.dto';
@@ -16,6 +24,7 @@ import {
   ICountedNotifications,
   ICountedParsedNotifications,
 } from 'src/modules/notifications/typesDef';
+import { constSystemMessages } from 'src/utils/systemMessages';
 
 @Injectable()
 export class NotificationsService {
@@ -28,17 +37,24 @@ export class NotificationsService {
   ) {}
 
   async create(data: CreateNotificationDto): Promise<Notification> {
-    const { foreignKey, userId, ...rest } = data;
-    const foreignTableConnect = this.generateColumn(data.type, foreignKey);
-    const notification = await this.notificationRepository.save({
-      ...rest,
-      ...foreignTableConnect,
-      user: { id: userId },
-    });
+    try {
+      const { foreignKey, userId, ...rest } = data;
+      const foreignTableConnect = this.generateColumn(data.type, foreignKey);
+      const notification = await this.notificationRepository.save({
+        ...rest,
+        ...foreignTableConnect,
+        user: { id: userId },
+      });
 
-    await this.wsService.onAddNotification(userId);
+      await this.wsService.onAddNotification(userId);
 
-    return notification;
+      return notification;
+    } catch (error) {
+      Logger.error('Error occurred while trying to create notification');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
+    }
   }
 
   async createNewProposalNotification(
@@ -46,14 +62,25 @@ export class NotificationsService {
     userId: number,
     type: ProposalType,
   ): Promise<Notification> {
-    return await this.create({
-      type: NotificationType.PROPOSAL,
-      text: `You have receive a new ${
-        type === ProposalType.PROPOSAL ? 'proposal' : 'invite'
-      }`,
-      foreignKey: proposalId,
-      userId,
-    });
+    try {
+      return await this.create({
+        type: NotificationType.PROPOSAL,
+        text: `${constSystemMessages.messageToUser} ${
+          type === ProposalType.PROPOSAL
+            ? constSystemMessages.textProposal
+            : constSystemMessages.textInvite
+        }`,
+        foreignKey: proposalId,
+        userId,
+      });
+    } catch (error) {
+      Logger.error(
+        'Error occurred while trying to create proposal notification',
+      );
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
+    }
   }
 
   async createOfferNotification(
@@ -61,167 +88,251 @@ export class NotificationsService {
     userId: number,
     text: string,
   ): Promise<Notification> {
-    return await this.create({
-      type: NotificationType.OFFER,
-      foreignKey: offerId,
-      userId,
-      text,
-    });
+    try {
+      return await this.create({
+        type: NotificationType.OFFER,
+        foreignKey: offerId,
+        userId,
+        text,
+      });
+    } catch (error) {
+      Logger.error('Error occurred while trying to create offer notification');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
+    }
   }
 
   async createMessageNotification(
     messageId: number,
     userId: number,
   ): Promise<Notification> {
-    return await this.create({
-      type: NotificationType.MESSAGE,
-      foreignKey: messageId,
-      userId,
-      text: 'New message',
-    });
+    try {
+      return await this.create({
+        type: NotificationType.MESSAGE,
+        foreignKey: messageId,
+        userId,
+        text: constSystemMessages.newMessage,
+      });
+    } catch (error) {
+      Logger.error(
+        'Error occurred while trying to create message notification',
+      );
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
+    }
   }
 
   private generateColumn(type: NotificationType, id: number): TColumnToJoin {
     if (type === NotificationType.MESSAGE) return { message: { id } };
     if (type === NotificationType.OFFER) return { offer: { id } };
-    return { proposal: { id } };
+    if (type === NotificationType.PROPOSAL) return { proposal: { id } };
+    Logger.error(
+      'Error occurred while trying to generate column for notification. Wrong notification type passed',
+    );
+    throw new NotAcceptableException();
   }
 
   async getAllOwn(id: number): Promise<ICountedNotifications> {
-    const [notifications, count] = await this.notificationRepository
-      .createQueryBuilder('notification')
-      .where('notification.userId = :id', { id })
-      .getManyAndCount();
+    try {
+      const [notifications, count] = await this.notificationRepository
+        .createQueryBuilder('notification')
+        .where('notification.userId = :id', { id })
+        .getManyAndCount();
 
-    return { notifications, count };
+      return { notifications, count };
+    } catch (error) {
+      Logger.error('Error occurred while trying to get notifications from db');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
+    }
   }
 
   async getAllOwnMessageType(
     id: number,
     isRead?: boolean,
   ): Promise<ICountedParsedNotifications> {
-    const [notifications, count] = await this.notificationRepository
-      .createQueryBuilder('notification')
-      .leftJoinAndSelect('notification.message', 'message')
-      .where('notification.userId = :id', { id })
-      .andWhere('notification.type = :type', { type: NotificationType.MESSAGE })
-      .andWhere(
-        typeof isRead !== 'undefined'
-          ? `notification.isRead = ${isRead}`
-          : '1 = 1',
-      )
-      .getManyAndCount();
+    try {
+      const [notifications, count] = await this.notificationRepository
+        .createQueryBuilder('notification')
+        .leftJoinAndSelect('notification.message', 'message')
+        .where('notification.userId = :id', { id })
+        .andWhere('notification.type = :type', {
+          type: NotificationType.MESSAGE,
+        })
+        .andWhere(
+          typeof isRead !== 'undefined'
+            ? `notification.isRead = ${isRead}`
+            : '1 = 1',
+        )
+        .getManyAndCount();
 
-    const parsed = await this.parseArrayOfNotification(notifications);
+      const parsed = await this.parseArrayOfNotification(notifications);
 
-    return {
-      notifications: parsed,
-      count,
-    };
+      return {
+        notifications: parsed,
+        count,
+      };
+    } catch (error) {
+      Logger.error(
+        'Error occurred while trying to get message notifications from db',
+      );
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
+    }
   }
 
   async getAllOwnNotMessageType(
     id: number,
     isRead?: boolean,
   ): Promise<ICountedParsedNotifications> {
-    const [notifications, count] = await this.notificationRepository
-      .createQueryBuilder('notification')
-      .leftJoinAndSelect('notification.message', 'message')
-      .leftJoinAndSelect('notification.offer', 'offer')
-      .leftJoinAndSelect('notification.proposal', 'proposal')
-      .leftJoinAndSelect('offer.jobPost', 'offerJP')
-      .leftJoinAndSelect('proposal.jobPost', 'proposalJP')
-      .leftJoinAndSelect('proposal.freelancer', 'freelancerOffer')
-      .leftJoinAndSelect('offer.freelancer', 'freelancerProposal')
-      .where('notification.userId = :id', { id })
-      .andWhere('notification.type != :type', {
-        type: NotificationType.MESSAGE,
-      })
-      .andWhere(
-        typeof isRead !== 'undefined'
-          ? `notification.isRead = ${isRead}`
-          : '1 = 1',
-      )
-      .orderBy('notification.createdAt', 'DESC')
-      .getManyAndCount();
+    try {
+      const [notifications, count] = await this.notificationRepository
+        .createQueryBuilder('notification')
+        .leftJoinAndSelect('notification.message', 'message')
+        .leftJoinAndSelect('notification.offer', 'offer')
+        .leftJoinAndSelect('notification.proposal', 'proposal')
+        .leftJoinAndSelect('offer.jobPost', 'offerJP')
+        .leftJoinAndSelect('proposal.jobPost', 'proposalJP')
+        .leftJoinAndSelect('proposal.freelancer', 'freelancerOffer')
+        .leftJoinAndSelect('offer.freelancer', 'freelancerProposal')
+        .where('notification.userId = :id', { id })
+        .andWhere('notification.type != :type', {
+          type: NotificationType.MESSAGE,
+        })
+        .andWhere(
+          typeof isRead !== 'undefined'
+            ? `notification.isRead = ${isRead}`
+            : '1 = 1',
+        )
+        .orderBy('notification.createdAt', 'DESC')
+        .getManyAndCount();
 
-    const parsedNotification = await this.parseArrayOfNotification(
-      notifications,
-    );
+      const parsedNotification = await this.parseArrayOfNotification(
+        notifications,
+      );
 
-    return {
-      notifications: parsedNotification,
-      count,
-    };
+      return {
+        notifications: parsedNotification,
+        count,
+      };
+    } catch (error) {
+      Logger.error(
+        'Error occurred while trying to get not message notifications from db',
+      );
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
+    }
   }
 
   async getCount(id: number): Promise<ICountOfNotifications> {
-    const { count: message } = await this.getAllOwnMessageType(id, false);
-    const { count: other } = await this.getAllOwnNotMessageType(id, false);
+    try {
+      const { count: message } = await this.getAllOwnMessageType(id, false);
+      const { count: other } = await this.getAllOwnNotMessageType(id, false);
 
-    return { message, other };
+      return { message, other };
+    } catch (error) {
+      Logger.error('Error occurred while trying to get notifications count');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
+    }
   }
 
   async markAsRead(ids: number[]) {
-    if (ids.length === 0) return;
-    return await this.notificationRepository
-      .createQueryBuilder('notification')
-      .update(Notification)
-      .set({ isRead: true })
-      .where('notification.id IN (:ids)', { ids })
-      .execute();
+    try {
+      if (ids.length === 0) return;
+      return await this.notificationRepository
+        .createQueryBuilder('notification')
+        .update(Notification)
+        .set({ isRead: true })
+        .where('notification.id IN (:ids)', { ids })
+        .execute();
+    } catch (error) {
+      Logger.error('Error occurred while trying to mark notifications read');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
+    }
   }
 
   async parseArrayOfNotification(
     notifications: Notification[],
   ): Promise<INotificationWithRoomId[]> {
-    return await Promise.all(
-      notifications.map(async (notification) => this.parseData(notification)),
-    );
+    try {
+      return await Promise.all(
+        notifications.map(async (notification) => this.parseData(notification)),
+      );
+    } catch (error) {
+      Logger.error(
+        'Error occurred while trying to parse array of notifications',
+      );
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
+    }
   }
 
   private async parseData(
     notification: Notification,
   ): Promise<INotificationWithRoomId> {
-    if (notification.type === NotificationType.MESSAGE) {
-      const roomId = await this.chatRoomService.getRoomIdByMessageId(
-        notification.message.id,
-      );
-
-      return {
-        ...notification,
-        roomId,
-      };
-    }
-
-    if (notification.type === NotificationType.OFFER) {
-      const roomId =
-        await this.chatRoomService.getRoomIdByJobPostAndFreelancerIds(
-          notification.offer.jobPost.id,
-          notification.offer.freelancer.id,
+    try {
+      if (notification.type === NotificationType.MESSAGE) {
+        const roomId = await this.chatRoomService.getRoomIdByMessageId(
+          notification.message.id,
         );
 
-      return {
-        ...notification,
-        roomId,
-      };
-    }
+        return {
+          ...notification,
+          roomId,
+        };
+      }
 
-    if (notification.type === NotificationType.PROPOSAL) {
-      const roomId =
-        await this.chatRoomService.getRoomIdByJobPostAndFreelancerIds(
-          notification.proposal.jobPost.id,
-          notification.proposal.freelancer.id,
-        );
+      if (notification.type === NotificationType.OFFER) {
+        const roomId =
+          await this.chatRoomService.getRoomIdByJobPostAndFreelancerIds(
+            notification.offer.jobPost.id,
+            notification.offer.freelancer.id,
+          );
 
-      return {
-        ...notification,
-        roomId,
-      };
+        return {
+          ...notification,
+          roomId,
+        };
+      }
+
+      if (notification.type === NotificationType.PROPOSAL) {
+        const roomId =
+          await this.chatRoomService.getRoomIdByJobPostAndFreelancerIds(
+            notification.proposal.jobPost.id,
+            notification.proposal.freelancer.id,
+          );
+
+        return {
+          ...notification,
+          roomId,
+        };
+      }
+    } catch (error) {
+      Logger.error('Error occurred while trying to parse notification object');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
     }
   }
 
   async deleteById(id: number): Promise<DeleteResult> {
-    return await this.notificationRepository.delete({ id });
+    try {
+      return await this.notificationRepository.delete({ id });
+    } catch (error) {
+      Logger.error('Error occurred while deleting notification');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
+    }
   }
 }

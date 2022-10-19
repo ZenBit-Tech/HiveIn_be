@@ -2,6 +2,9 @@ import {
   Body,
   Controller,
   Get,
+  HttpException,
+  InternalServerErrorException,
+  Logger,
   Param,
   Patch,
   Post,
@@ -23,19 +26,52 @@ export class OfferController {
   @UseGuards(JwtAuthGuard)
   @Get('self')
   getAllOwn(@Request() req: AuthRequest): Promise<Offer[]> {
-    return this.offerService.getAllOwn(req.user.id);
+    try {
+      return this.offerService.getAllOwn(req.user.id);
+    } catch (error) {
+      Logger.error('Error occurred in offer controller (GET)');
+      if (error instanceof HttpException)
+        return Promise.reject(
+          new HttpException(error.message, error.getStatus()),
+        );
+      if (error instanceof Error)
+        return Promise.reject(new Error(error.message));
+      return Promise.reject(new InternalServerErrorException());
+    }
   }
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   getOne(@Param() { id }: searchParamDto): Promise<Offer> {
-    return this.offerService.getOneById(+id);
+    try {
+      return this.offerService.getOneById(+id);
+    } catch (error) {
+      Logger.error('Error occurred in offer controller (GET)');
+      if (error instanceof HttpException)
+        return Promise.reject(
+          new HttpException(error.message, error.getStatus()),
+        );
+      if (error instanceof Error)
+        return Promise.reject(new Error(error.message));
+      return Promise.reject(new InternalServerErrorException());
+    }
   }
 
   @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createOfferDto: CreateOfferDto): Promise<Offer> {
-    return this.offerService.create(createOfferDto);
+    try {
+      return this.offerService.create(createOfferDto);
+    } catch (error) {
+      Logger.error('Error occurred in offer controller (POST)');
+      if (error instanceof HttpException)
+        return Promise.reject(
+          new HttpException(error.message, error.getStatus()),
+        );
+      if (error instanceof Error)
+        return Promise.reject(new Error(error.message));
+      return Promise.reject(new InternalServerErrorException());
+    }
   }
 
   @UseGuards(JwtAuthGuard)
@@ -44,6 +80,17 @@ export class OfferController {
     @Param('id') id: string,
     @Body() updateOfferDto: UpdateOfferDto,
   ): Promise<Offer> {
-    return this.offerService.update(+id, updateOfferDto);
+    try {
+      return this.offerService.update(+id, updateOfferDto);
+    } catch (error) {
+      Logger.error('Error occurred in offer controller (PATCH)');
+      if (error instanceof HttpException)
+        return Promise.reject(
+          new HttpException(error.message, error.getStatus()),
+        );
+      if (error instanceof Error)
+        return Promise.reject(new Error(error.message));
+      return Promise.reject(new InternalServerErrorException());
+    }
   }
 }

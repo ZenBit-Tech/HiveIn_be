@@ -18,6 +18,8 @@ import { SettingsInfoModule } from 'src/modules/settings-info/settings-info.modu
 import { MessageModule } from 'src/modules/message/message.module';
 import { JobPostModule } from 'src/modules/job-post/job-post.module';
 import { NotificationsModule } from 'src/modules/notifications/notifications.module';
+import { WebsocketModule } from 'src/modules/websocket/websocket.module';
+import { LocalFilesService } from 'src/modules/job-post/localFiles.service';
 
 @Module({
   imports: [
@@ -39,8 +41,9 @@ import { NotificationsModule } from 'src/modules/notifications/notifications.mod
     MessageModule,
     JobPostModule,
     NotificationsModule,
+    WebsocketModule,
   ],
   controllers: [ProposalController],
-  providers: [ProposalService],
+  providers: [ProposalService, LocalFilesService],
 })
 export class ProposalModule {}
