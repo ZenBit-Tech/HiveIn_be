@@ -5,6 +5,7 @@ import * as session from 'express-session';
 import * as passport from 'passport';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import expressBasicAuth = require('express-basic-auth');
+import { connectClient } from 'src/modules/redis/redis';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -32,6 +33,8 @@ async function bootstrap() {
     }),
   );
 
+  await connectClient();
+
   const options = new DocumentBuilder()
     .setTitle('GetJob backend')
     .setDescription('app')
@@ -47,4 +50,5 @@ async function bootstrap() {
 
   await app.listen(process.env.API_PORT || 4000);
 }
+
 bootstrap();

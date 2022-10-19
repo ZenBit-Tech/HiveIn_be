@@ -1,17 +1,29 @@
 import { FreelancerService } from 'src/modules/freelancer/freelancer.service';
-import { Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  Logger,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { InsertResult, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateProposalDto } from 'src/modules/proposal/dto/create-proposal.dto';
 import {
   Proposal,
   ProposalType,
 } from 'src/modules/proposal/entities/proposal.entity';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
-import { Message } from 'src/modules/message/entities/message.entity';
-import { SettingsInfoService } from 'src/modules/settings-info/settings-info.service';
 import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
-import { MessageType } from 'src/modules/message/typesDef';
+import { MessageService } from 'src/modules/message/message.service';
+import { JobPostService } from 'src/modules/job-post/job-post.service';
+import { NotificationsService } from 'src/modules/notifications/notifications.service';
+import {
+  WebsocketService,
+  Event,
+} from 'src/modules/websocket/websocket.service';
+import { LocalFileDto } from 'src/modules/proposal/dto/localFile.dto';
+import { LocalFile } from '../entities/localFile.entity';
+import { LocalFilesService } from '../job-post/localFiles.service';
 
 @Injectable()
 export class ProposalService {
@@ -20,69 +32,150 @@ export class ProposalService {
     private readonly proposalRepo: Repository<Proposal>,
     private readonly chatRoomService: ChatRoomService,
     private readonly freelancerService: FreelancerService,
-    private readonly settingsInfoService: SettingsInfoService,
-    @InjectRepository(Message)
-    private readonly messageRepo: Repository<Message>,
+    private readonly messageService: MessageService,
+    private readonly jobPostService: JobPostService,
+    private readonly notificationsService: NotificationsService,
+    private readonly wsService: WebsocketService,
+    private localFilesService: LocalFilesService,
   ) {}
 
   async create(
     createProposalDto: CreateProposalDto,
     userId: number,
     type: ProposalType,
-  ): Promise<InsertResult> {
-    const { idJobPost, idFreelancer } = createProposalDto;
+    fileData: LocalFileDto | null,
+  ): Promise<Proposal> {
+    try {
+      let file: LocalFile | null = null;
+      const { idJobPost, idFreelancer } = createProposalDto;
 
-    const proposal = await this.proposalRepo
-      .createQueryBuilder('proposal')
-      .insert()
-      .into(Proposal)
-      .values([
-        {
-          ...createProposalDto,
-          type,
-          jobPost: { id: idJobPost },
-          freelancer: { id: idFreelancer },
-        },
-      ])
-      .execute();
+      if (fileData) {
+        file = await this.localFilesService.saveLocalFileData(fileData);
+      }
 
-    const user = await this.settingsInfoService.findOne(userId);
-    const freelancer = await this.freelancerService.findOneByUserId(userId);
+      const isChatAlreadyExist = await this.getOneByJobPostAndFreelancerId(
+        idFreelancer,
+        idJobPost,
+      );
 
-    const chatRoom = await this.chatRoomService.create({
-      jobPostId: idJobPost,
-      freelancerId: freelancer.id,
-      status: chatRoomStatus.CLIENT_ONLY,
-    });
+      if (isChatAlreadyExist)
+        throw new HttpException(
+          "This user can't send invite/proposal. Chat room for this users related to this job post already exist",
+          406,
+        );
 
-    const values = [
-      {
-        chatRoom,
-        user,
-        text: 'You have received a new proposal!',
-        messageType: MessageType.FROM_SYSTEM,
-      },
-      {
-        chatRoom,
-        user,
-        text: createProposalDto.message,
-        messageType: MessageType.FROM_USER,
-      },
-      {
-        chatRoom,
-        user,
-        text: `bid: ${createProposalDto.bid}`,
-        messageType: MessageType.FROM_USER,
-      },
-    ];
+      const proposal = await this.proposalRepo.save({
+        ...createProposalDto,
+        type,
+        jobPost: { id: idJobPost },
+        freelancer: { id: idFreelancer },
+        file,
+      });
 
-    await this.messageRepo
-      .createQueryBuilder('message')
-      .insert()
-      .into(Message)
-      .values(values)
-      .execute();
+      const chatRoom = await this.chatRoomService.create({
+        jobPostId: idJobPost,
+        freelancerId: idFreelancer,
+        status:
+          type === ProposalType.PROPOSAL
+            ? chatRoomStatus.CLIENT_ONLY
+            : chatRoomStatus.FREELANCER_ONLY,
+      });
 
-    return proposal;
+      const usersIds = await this.defineUsersIds(idFreelancer, idJobPost, type);
+
+      await this.messageService.createInitialMessages(
+        chatRoom.id,
+        usersIds.inviteFrom,
+        usersIds.inviteTo,
+        type,
+        createProposalDto.message,
+        createProposalDto.bid,
+      );
+
+      await this.notificationsService.createNewProposalNotification(
+        proposal.id,
+        usersIds.inviteTo,
+        type,
+      );
+
+      await this.wsService.triggerEventByUserId(userId, Event.GET_ROOMS);
+
+      return proposal;
+    } catch (error) {
+      Logger.error('Error occurred while sending proposal');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      throw new UnprocessableEntityException();
+    }
+  }
+
+  async getOneByJobPostAndFreelancerId(
+    freelancerId,
+    jobPostId,
+  ): Promise<Proposal> {
+    try {
+      return await this.proposalRepo
+        .createQueryBuilder('proposal')
+        .leftJoinAndSelect('proposal.freelancer', 'freelancer')
+        .leftJoinAndSelect('proposal.jobPost', 'jobPost')
+        .where('jobPost.id = :jobPostId', { jobPostId })
+        .andWhere('freelancer.id = :freelancerId', { freelancerId })
+        .getOne();
+    } catch (error) {
+      Logger.error('Error occurred while trying to get proposal from db');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      throw new UnprocessableEntityException();
+    }
+  }
+
+  private async defineUsersIds(
+    freelancerId: number,
+    jobPostId: number,
+    type: ProposalType,
+  ): Promise<{ inviteFrom: number; inviteTo: number }> {
+    try {
+      if (type === ProposalType.INVITE) {
+        return {
+          inviteTo: await this.freelancerService.getUserIdByFreelancerId(
+            freelancerId,
+          ),
+          inviteFrom: await this.jobPostService.getOwnerIdByPostId(jobPostId),
+        };
+      }
+
+      return {
+        inviteTo: await this.jobPostService.getOwnerIdByPostId(jobPostId),
+        inviteFrom: await this.freelancerService.getUserIdByFreelancerId(
+          freelancerId,
+        ),
+      };
+    } catch (error) {
+      Logger.error(
+        'Error occurred while trying to define users ids in proposal service',
+      );
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      throw new UnprocessableEntityException();
+    }
+  }
+
+  async getProposalByJobId(userId: number, jobPostId: string) {
+    try {
+      const proposals = await this.proposalRepo
+        .createQueryBuilder('proposal')
+        .leftJoinAndSelect('proposal.jobPost', 'jobPost')
+        .leftJoinAndSelect('proposal.freelancer', 'freelancer')
+        .leftJoinAndSelect('freelancer.user', 'user')
+        .where({
+          freelancer: { user: { id: userId } },
+          jobPost: { id: jobPostId },
+        })
+        .getMany();
+
+      return proposals;
+    } catch (error) {
+      return error;
+    }
   }
 }

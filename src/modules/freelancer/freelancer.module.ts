@@ -1,12 +1,12 @@
 import { RecentlyViewedFreelancers } from 'src/modules/client/entities/recently-viewed-freelancers.entity';
-import { ClientService } from 'src/modules/client/client.service';
 import { Module } from '@nestjs/common';
-import { FreelancerService } from './freelancer.service';
-import { FreelancerController } from './freelancer.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Freelancer } from './entities/freelancer.entity';
-import { Experience } from './entities/experience.entity';
-import { Education } from './entities/education.entity';
+import { ClientService } from 'src/modules/client/client.service';
+import { FreelancerService } from 'src/modules/freelancer/freelancer.service';
+import { FreelancerController } from 'src/modules/freelancer/freelancer.controller';
+import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
+import { Experience } from 'src/modules/freelancer/entities/experience.entity';
+import { Education } from 'src/modules/freelancer/entities/education.entity';
 import { Users } from 'src/modules/entities/users.entity';
 
 @Module({
@@ -21,5 +21,6 @@ import { Users } from 'src/modules/entities/users.entity';
   ],
   controllers: [FreelancerController],
   providers: [FreelancerService, ClientService],
+  exports: [FreelancerService],
 })
 export class FreelancerModule {}

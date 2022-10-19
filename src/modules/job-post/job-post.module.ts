@@ -11,5 +11,6 @@ import { LocalFile } from 'src/modules/entities/localFile.entity';
   imports: [TypeOrmModule.forFeature([JobPost, LocalFile, Contracts])],
   controllers: [JobPostController],
   providers: [JobPostService, LocalFilesService],
+  exports: [JobPostService],
 })
 export class JobPostModule {}
