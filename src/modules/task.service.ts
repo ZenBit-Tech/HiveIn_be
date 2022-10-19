@@ -16,7 +16,7 @@ export class TasksService {
     private readonly configService: ConfigService,
   ) {}
 
-  @Cron(CronExpression.EVERY_MINUTE) //EVERY_DAY_AT_NOON
+  @Cron(CronExpression.EVERY_DAY_AT_NOON)
   async some(): Promise<void> {
     const dateAfterWeek = new Date(
       new Date().setDate(new Date().getDate() + 7),

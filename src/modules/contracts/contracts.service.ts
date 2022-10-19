@@ -42,7 +42,7 @@ export class ContractsService {
       },
     );
     const chatDeleteDate = new Date(
-      contract.endDate.setMinutes(contract.endDate.getMinutes() + 1), // change to months
+      contract.endDate.setMonth(contract.endDate.getMonth() + 6),
     );
     const salt = await genSalt(this.saltRounds);
     const prolongLink = await hash('prolong' + chatRoom.id, salt);
