@@ -6,6 +6,7 @@ import { Contracts } from 'src/modules/contracts/entities/contracts.entity';
 import { DeleteResult, InsertResult, Repository } from 'typeorm';
 import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { genSalt, hash } from 'bcryptjs';
+import { SALT_ROUND } from 'src/utils/jwt.consts';
 
 @Injectable()
 export class ContractsService {
@@ -15,8 +16,6 @@ export class ContractsService {
     @InjectRepository(ChatRoom)
     private readonly chatRoomRepo: Repository<ChatRoom>,
   ) {}
-
-  private saltRounds = 5;
 
   async create(createContractDto: CreateContractDto): Promise<InsertResult> {
     const result = await this.contractRepo
@@ -44,7 +43,7 @@ export class ContractsService {
     const chatDeleteDate = new Date(
       contract.endDate.setMonth(contract.endDate.getMonth() + 6),
     );
-    const salt = await genSalt(this.saltRounds);
+    const salt = await genSalt(SALT_ROUND);
     const prolongLink = await hash('prolong' + chatRoom.id, salt);
 
     await this.chatRoomRepo

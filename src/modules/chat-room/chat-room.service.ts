@@ -1,3 +1,4 @@
+import { MONTHS_IN_HALF_YEAR, SALT_ROUND } from 'src/utils/jwt.consts';
 import {
   ForbiddenException,
   Injectable,
@@ -27,8 +28,6 @@ export class ChatRoomService {
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
   ) {}
-
-  private saltRounds = 5;
 
   async create(data: createChatRoomDto): Promise<ChatRoom> {
     try {
@@ -190,14 +189,16 @@ export class ChatRoomService {
   }
 
   async prolongChat(id: number, token: string): Promise<UpdateResult> {
-    const salt = await genSalt(this.saltRounds);
+    const salt = await genSalt(SALT_ROUND);
     const prolongLink = await hash('prolong' + id, salt);
 
     const result = await this.chatRoomRepository
       .createQueryBuilder()
       .update(ChatRoom)
       .set({
-        deleteDate: new Date(new Date().setMonth(new Date().getMonth() + 6)),
+        deleteDate: new Date(
+          new Date().setMonth(new Date().getMonth() + MONTHS_IN_HALF_YEAR),
+        ),
         prolongLink,
       })
       .where('id = :id', { id })
