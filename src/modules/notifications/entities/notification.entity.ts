@@ -6,40 +6,66 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
+import { IsBoolean, IsEnum, IsString } from 'class-validator';
+import { Message } from 'src/modules/message/entities/message.entity';
+import { Offer } from 'src/modules/offer/entities/offer.entity';
+import { Proposal } from 'src/modules/proposal/entities/proposal.entity';
+
+export enum NotificationType {
+  MESSAGE = 'message',
+  OFFER = 'offer',
+  PROPOSAL = 'proposal',
+}
 
 @Entity()
 export class Notification {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  fromUserId: number;
-
-  @Column()
-  toUserId: number;
-
   @Column({ default: false })
-  read: boolean;
+  @IsBoolean()
+  isRead: boolean;
 
-  @Column({ default: false })
-  deleted: boolean;
+  @Column({
+    type: 'enum',
+    enum: NotificationType,
+  })
+  @IsEnum(NotificationType)
+  type: NotificationType;
 
   @Column()
-  type: string;
+  @IsString()
+  text: string;
 
   @ManyToOne(() => Users)
-  @JoinColumn({ name: 'fromUserId' })
-  fromUser: Users;
+  @JoinColumn({ name: 'userId' })
+  user: Users;
 
-  @ManyToOne(() => Users)
-  @JoinColumn({ name: 'toUserId' })
-  toUser: Users;
+  @ManyToOne(() => Message, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'messageId' })
+  message: Message;
+
+  @ManyToOne(() => Offer, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'offerId' })
+  offer: Offer;
+
+  @ManyToOne(() => Proposal, {
+    nullable: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'proposalId' })
+  proposal: Proposal;
 
   @CreateDateColumn()
   createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }

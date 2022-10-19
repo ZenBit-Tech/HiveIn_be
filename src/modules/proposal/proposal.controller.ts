@@ -1,26 +1,28 @@
-import { AuthRequest } from 'src/utils/@types/AuthRequest';
-import {
-  Proposal,
-  ProposalType,
-} from 'src/modules/proposal/entities/proposal.entity';
 import {
   Body,
   Controller,
   Post,
-  UseGuards,
   Request,
+  UseGuards,
   Param,
-  UploadedFile,
+  Logger,
+  HttpException,
+  InternalServerErrorException,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
+  UploadedFile,
   Get,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  Proposal,
+  ProposalType,
+} from 'src/modules/proposal/entities/proposal.entity';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { CreateProposalDto } from 'src/modules/proposal/dto/create-proposal.dto';
 import { ProposalService } from 'src/modules/proposal/proposal.service';
-import { InsertResult } from 'typeorm';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { AuthRequest } from 'src/utils/@types/AuthRequest';
 import { multerFileOptions } from 'src/config/multer.config';
 
 @Controller('proposal')
@@ -36,21 +38,37 @@ export class ProposalController {
     @UploadedFile() file: Express.Multer.File,
     @Body() createProposalDto: CreateProposalDto,
     @Request() req: AuthRequest,
-  ): Promise<InsertResult> {
-    if (file) {
-      return this.proposalService.create(createProposalDto, req.user.id, type, {
-        path: file.path,
-        filename: file.originalname,
-        mimetype: file.mimetype,
-      });
-    }
+  ): Promise<Proposal> {
+    try {
+      if (file) {
+        return this.proposalService.create(
+          createProposalDto,
+          req.user.id,
+          type,
+          {
+            path: file.path,
+            filename: file.originalname,
+            mimetype: file.mimetype,
+          },
+        );
+      }
 
-    return this.proposalService.create(
-      createProposalDto,
-      req.user.id,
-      type,
-      null,
-    );
+      return this.proposalService.create(
+        createProposalDto,
+        req.user.id,
+        type,
+        null,
+      );
+    } catch (error) {
+      Logger.error('Error occurred in offer controller (PATCH)');
+      if (error instanceof HttpException)
+        return Promise.reject(
+          new HttpException(error.message, error.getStatus()),
+        );
+      if (error instanceof Error)
+        return Promise.reject(new Error(error.message));
+      return Promise.reject(new InternalServerErrorException());
+    }
   }
 
   @UseGuards(JwtAuthGuard)

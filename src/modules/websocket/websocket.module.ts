@@ -1,34 +1,33 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { NotificationsService } from 'src/modules/notifications/notifications.service';
-import { Notification } from 'src/modules/notifications/entities/notification.entity';
+import { WebsocketService } from './websocket.service';
+import { JwtService } from '@nestjs/jwt';
 import { Users } from 'src/modules/entities/users.entity';
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { Message } from 'src/modules/message/entities/message.entity';
+import { Notification } from 'src/modules/notifications/entities/notification.entity';
+import { NotificationsModule } from 'src/modules/notifications/notifications.module';
+import { SettingsInfoModule } from 'src/modules/settings-info/settings-info.module';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
 import { MessageModule } from 'src/modules/message/message.module';
-import { SettingsInfoModule } from 'src/modules/settings-info/settings-info.module';
-import { WebsocketModule } from 'src/modules/websocket/websocket.module';
-import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      Notification,
       Users,
       Freelancer,
       ChatRoom,
       Message,
+      Notification,
     ]),
-    ChatRoomModule,
-    forwardRef(() => MessageModule),
-    forwardRef(() => WebsocketModule),
+    forwardRef(() => NotificationsModule),
     SettingsInfoModule,
     ChatRoomModule,
+    MessageModule,
   ],
   controllers: [],
-  providers: [NotificationsService, ChatRoomService],
-  exports: [NotificationsService],
+  providers: [WebsocketService, JwtService],
+  exports: [WebsocketService],
 })
-export class NotificationsModule {}
+export class WebsocketModule {}

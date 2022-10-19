@@ -4,7 +4,6 @@ import { MulterModule } from '@nestjs/platform-express';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { JwtService } from '@nestjs/jwt';
 import { NotificationsModule } from 'src/modules/notifications/notifications.module';
-import { WebsocketService } from 'src/services/websocket/websocket.service';
 import { DatabaseModule } from 'src/modules/database/database.module';
 import { ClientModule } from 'src/modules/client/client.module';
 import { AppController } from 'src/app.controller';
@@ -20,6 +19,7 @@ import { ContractsModule } from 'src/modules/contracts/contracts.module';
 import { OfferModule } from 'src/modules/offer/offer.module';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
 import { MessageModule } from 'src/modules/message/message.module';
+import { WebsocketModule } from 'src/modules/websocket/websocket.module';
 
 @Module({
   imports: [
@@ -56,8 +56,9 @@ import { MessageModule } from 'src/modules/message/message.module';
     OfferModule,
     ChatRoomModule,
     MessageModule,
+    WebsocketModule,
   ],
   controllers: [AppController],
-  providers: [AppService, WebsocketService, JwtService],
+  providers: [AppService, JwtService],
 })
 export class AppModule {}

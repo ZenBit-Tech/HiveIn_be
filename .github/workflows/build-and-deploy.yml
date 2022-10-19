@@ -50,6 +50,10 @@ jobs:
           envkey_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           envkey_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           envkey_AWS_PUBLIC_BUCKET_NAME: ${{ secrets.AWS_PUBLIC_BUCKET_NAME }}
+          envkey_REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          envkey_REDIS_PORT: ${{ secrets.REDIS_PORT }}
+          envkey_REDIS_USERNAME: ${{ secrets.REDIS_USERNAME }}
+          envkey_PASSWORD: ${{ secrets.PASSWORD }}
           file_name: .env
           fail_on_empty: false
 
