@@ -24,7 +24,9 @@ import { CreateProposalDto } from 'src/modules/proposal/dto/create-proposal.dto'
 import { ProposalService } from 'src/modules/proposal/proposal.service';
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
 import { multerFileOptions } from 'src/config/multer.config';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Proposal')
 @Controller('proposal')
 export class ProposalController {
   constructor(private readonly proposalService: ProposalService) {}

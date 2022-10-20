@@ -11,19 +11,23 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request as HttpRequest } from 'express';
-
+import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 interface UserJwtPayload {
   id: number;
 }
 
 type AuthRequest = HttpRequest & { user: UserJwtPayload };
 
+@ApiTags('Client')
 @Controller('client')
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 
+  // @ApiCreatedResponse({
+  //   description: 'Filter freelancers',
+  //   type: [Freelancer],
+  // })
   @UseGuards(AuthGuard('jwt'))
-  @HttpCode(200)
   @Get('filter/:keyWords/:category/:skills')
   filter(
     @Request() req: AuthRequest,

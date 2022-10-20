@@ -25,7 +25,14 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import PublicFile from 'src/modules/file/entities/publicFile.entity';
 import { multerAvatarOptions } from 'src/config/multer.config';
 import { Users } from 'src/modules/entities/users.entity';
+import {
+  ApiBadRequestResponse,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -42,13 +49,20 @@ export class AuthController {
     return `Your email, ${req.user.email}`;
   }
 
-  @HttpCode(200)
+  @ApiCreatedResponse({
+    description: 'Created user',
+  })
+  @ApiBadRequestResponse({
+    description: 'User cannot register. Try again',
+  })
+  @ApiConflictResponse({
+    description: 'User already exists',
+  })
   @Post('sign-up')
   async signUp(@Body() dto: AuthDto) {
     return this.authService.signUp(dto);
   }
 
-  @HttpCode(200)
   @Post('sign-in')
   async signIn(@Body() dto: AuthDto) {
     return this.authService.signIn(dto);

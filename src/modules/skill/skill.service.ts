@@ -10,13 +10,13 @@ export class SkillService {
     @InjectRepository(Skill)
     private skillRepository: Repository<Skill>,
   ) {}
-  create({ name }: CreateSkillDto) {
+  create({ name }: CreateSkillDto): Promise<Skill> {
     return this.skillRepository.save({
       name,
     });
   }
 
-  findAll() {
+  findAll(): Promise<Skill[]> {
     return this.skillRepository.find();
   }
 }

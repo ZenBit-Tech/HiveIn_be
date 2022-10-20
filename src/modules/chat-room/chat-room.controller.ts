@@ -14,7 +14,9 @@ import { searchParamDto } from 'src/modules/chat-room/dto/search-param.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
 import { IRoom } from 'src/modules/chat-room/typesDef';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Chat room')
 @Controller('chat-room')
 export class ChatRoomController {
   constructor(private readonly chatRoomService: ChatRoomService) {}

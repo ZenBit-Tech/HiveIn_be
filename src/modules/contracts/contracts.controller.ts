@@ -8,6 +8,7 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { ContractsService } from 'src/modules/contracts/contracts.service';
 import { CreateContractDto } from 'src/modules/contracts/dto/create-contract.dto';
@@ -16,6 +17,7 @@ import { Contracts } from 'src/modules/contracts/entities/contracts.entity';
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
 import { InsertResult } from 'typeorm';
 
+@ApiTags('Contracts')
 @Controller('contracts')
 export class ContractsController {
   constructor(private readonly contractsService: ContractsService) {}

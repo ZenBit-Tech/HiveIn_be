@@ -10,13 +10,13 @@ export class CategoryService {
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
   ) {}
-  create({ name }: CreateCategoryDto) {
+  create({ name }: CreateCategoryDto): Promise<Category> {
     return this.categoryRepository.save({
       name,
     });
   }
 
-  findAll() {
+  findAll(): Promise<Category[]> {
     return this.categoryRepository.find();
   }
 }

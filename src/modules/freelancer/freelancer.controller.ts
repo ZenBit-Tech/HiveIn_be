@@ -16,7 +16,9 @@ import { UpdateFreelancerDto } from './dto/update-freelancer.dto';
 import { Freelancer } from './entities/freelancer.entity';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Freelancer')
 @Controller('freelancer')
 export class FreelancerController {
   constructor(private readonly freelancerService: FreelancerService) {}
