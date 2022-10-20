@@ -27,9 +27,10 @@ export class MessageService {
     private readonly messageRepository: Repository<Message>,
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
-    private readonly chatRoomService: ChatRoomService,
     @Inject(forwardRef(() => NotificationsService))
     private notificationsService: NotificationsService,
+    @Inject(forwardRef(() => ChatRoomService))
+    private chatRoomService: ChatRoomService,
   ) {}
 
   async create(data: createMessageDto): Promise<Message> {

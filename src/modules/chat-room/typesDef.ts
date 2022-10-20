@@ -1,4 +1,5 @@
 import { Message } from 'src/modules/message/entities/message.entity';
+import { Status } from '../offer/typesDef';
 
 export enum ColumnNames {
   CLIENT = 'client_user_profile',
@@ -41,4 +42,5 @@ export interface IRoom {
   client: IUser;
   jobPost: IChatRoom;
   lastMessage: Message;
+  offerStatus?: Status;
 }

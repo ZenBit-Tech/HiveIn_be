@@ -1,7 +1,9 @@
 import {
   ForbiddenException,
+  forwardRef,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -30,11 +32,13 @@ export class OfferService {
     private readonly contractsService: ContractsService,
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
-    private readonly notificationsService: NotificationsService,
     private readonly freelancerService: FreelancerService,
     private readonly messageService: MessageService,
     private readonly jobPostService: JobPostService,
-    private readonly chatRoomService: ChatRoomService,
+    @Inject(forwardRef(() => ChatRoomService))
+    private chatRoomService: ChatRoomService,
+    @Inject(forwardRef(() => NotificationsService))
+    private notificationsService: NotificationsService,
   ) {}
 
   async create(
@@ -42,12 +46,12 @@ export class OfferService {
     userWhoMakesOffer: number,
   ): Promise<Offer> {
     try {
-      const isChatAlreadyExist = await this.getOneByFreelancerIdAndJobPostId(
+      const isOfferAlreadyExist = await this.getOneByFreelancerIdAndJobPostId(
         createOfferDto.freelancerId,
         createOfferDto.jobPostId,
       );
 
-      if (isChatAlreadyExist)
+      if (isOfferAlreadyExist)
         throw new HttpException(
           'Offer to this user related to this job post already exist',
           406,

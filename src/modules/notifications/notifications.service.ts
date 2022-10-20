@@ -25,6 +25,7 @@ import {
   ICountedParsedNotifications,
 } from 'src/modules/notifications/typesDef';
 import { constSystemMessages } from 'src/utils/systemMessages';
+import { OfferService } from '../offer/offer.service';
 
 @Injectable()
 export class NotificationsService {
@@ -34,6 +35,8 @@ export class NotificationsService {
     @Inject(forwardRef(() => WebsocketService))
     private wsService: WebsocketService,
     private chatRoomService: ChatRoomService,
+    @Inject(forwardRef(() => OfferService))
+    private offerService: OfferService,
   ) {}
 
   async create(data: CreateNotificationDto): Promise<Notification> {
