@@ -14,9 +14,13 @@ import { UserRole, Users } from 'src/modules/entities/users.entity';
 import {
   chatRoomStatus,
   ColumnNames,
+  IChatRoom,
+  IFreelancer,
   IRoom,
+  IUser,
   TArgs,
 } from 'src/modules/chat-room/typesDef';
+import { Message } from 'src/modules/message/entities/message.entity';
 
 @Injectable()
 export class ChatRoomService {
@@ -188,26 +192,27 @@ export class ChatRoomService {
 
   private parseChatRoomData(chatRoom: ChatRoom): IRoom {
     try {
-      const freelancer = {
+      const freelancer: IFreelancer = {
         id: chatRoom.freelancer.user.id,
         firstName: chatRoom.freelancer.user.firstName,
         lastName: chatRoom.freelancer.user.lastName,
         avatarURL: chatRoom.freelancer.user.avatarURL,
+        freelancerId: chatRoom.freelancer.id,
       };
 
-      const client = {
+      const client: IUser = {
         id: chatRoom.jobPost.user.id,
         firstName: chatRoom.jobPost.user.firstName,
         lastName: chatRoom.jobPost.user.lastName,
         avatarURL: chatRoom.jobPost.user.avatarURL,
       };
 
-      const jobPost = {
+      const jobPost: IChatRoom = {
         id: chatRoom.jobPost.id,
         title: chatRoom.jobPost.title,
       };
 
-      const lastMessage = chatRoom?.message?.pop();
+      const lastMessage: Message = chatRoom?.message?.pop();
       return {
         id: chatRoom.id,
         status: chatRoom.status,
