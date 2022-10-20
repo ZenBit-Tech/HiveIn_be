@@ -1,6 +1,7 @@
 import {
   ForbiddenException,
   HttpException,
+  HttpStatus,
   Injectable,
   Logger,
   NotFoundException,
@@ -18,6 +19,8 @@ import { NotificationsService } from 'src/modules/notifications/notifications.se
 import { FreelancerService } from 'src/modules/freelancer/freelancer.service';
 import { MessageService } from 'src/modules/message/message.service';
 import { JobPostService } from 'src/modules/job-post/job-post.service';
+import { constSystemMessages } from 'src/utils/systemMessages';
+import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 
 @Injectable()
 export class OfferService {
@@ -31,9 +34,13 @@ export class OfferService {
     private readonly freelancerService: FreelancerService,
     private readonly messageService: MessageService,
     private readonly jobPostService: JobPostService,
+    private readonly chatRoomService: ChatRoomService,
   ) {}
 
-  async create(createOfferDto: CreateOfferDto): Promise<Offer> {
+  async create(
+    createOfferDto: CreateOfferDto,
+    userWhoMakesOffer: number,
+  ): Promise<Offer> {
     try {
       const isChatAlreadyExist = await this.getOneByFreelancerIdAndJobPostId(
         createOfferDto.freelancerId,
@@ -57,6 +64,26 @@ export class OfferService {
           createOfferDto.freelancerId,
         );
 
+      const chatRoomId =
+        await this.chatRoomService.getRoomIdByJobPostAndFreelancerIds(
+          createOfferDto.jobPostId,
+          createOfferDto.freelancerId,
+        );
+
+      if (!chatRoomId || !freelancerUserId) throw new NotFoundException();
+
+      await this.messageService.createSystemOfferMessage({
+        chatRoomId: chatRoomId,
+        userId: freelancerUserId,
+        text: constSystemMessages.newOfferMessage,
+      });
+
+      await this.messageService.createSystemMessage({
+        chatRoomId: chatRoomId,
+        userId: userWhoMakesOffer,
+        text: constSystemMessages.newOfferSend,
+      });
+
       await this.notificationsService.createOfferNotification(
         offer.id,
         freelancerUserId,
@@ -74,6 +101,11 @@ export class OfferService {
 
   async update(id: number, updateOfferDto: UpdateOfferDto): Promise<Offer> {
     try {
+      if (updateOfferDto.status === Status.PENDING)
+        throw new HttpException(
+          'Offer should not be updated to pending status!',
+          HttpStatus.BAD_REQUEST,
+        );
       const currentOffer = await this.offerRepository.findOneBy({ id });
 
       if (!currentOffer) throw new NotFoundException();

@@ -3,4 +3,6 @@ export const constSystemMessages = Object.freeze({
   textProposal: 'proposal',
   textInvite: 'invite',
   newMessage: 'New message',
+  newOfferMessage: 'You have receive a new offer',
+  newOfferSend: 'You have send a new offer',
 });

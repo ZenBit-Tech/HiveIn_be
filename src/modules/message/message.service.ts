@@ -161,6 +161,24 @@ export class MessageService {
     }
   }
 
+  async createSystemOfferMessage(data: createMessageDto): Promise<Message> {
+    try {
+      return await this.messageRepository.save({
+        text: data.text,
+        chatRoom: { id: data.chatRoomId },
+        user: { id: data.userId },
+        messageType: MessageType.FROM_SYSTEM_OFFER,
+      });
+    } catch (error) {
+      Logger.error(
+        'Error occurred while trying to create system offer message',
+      );
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
+    }
+  }
+
   async getAllByRoomId(id: number): Promise<ReturnedMessage[]> {
     try {
       const messages = await this.messageRepository

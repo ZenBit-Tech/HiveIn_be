@@ -59,9 +59,12 @@ export class OfferController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createOfferDto: CreateOfferDto): Promise<Offer> {
+  create(
+    @Body() createOfferDto: CreateOfferDto,
+    @Request() req: AuthRequest,
+  ): Promise<Offer> {
     try {
-      return this.offerService.create(createOfferDto);
+      return this.offerService.create(createOfferDto, req.user.id);
     } catch (error) {
       Logger.error('Error occurred in offer controller (POST)');
       if (error instanceof HttpException)
