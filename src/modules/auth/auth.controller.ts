@@ -1,3 +1,4 @@
+import { UpdateResult } from 'typeorm';
 import {
   Body,
   Controller,
@@ -23,6 +24,7 @@ import { AuthRequest } from 'src/utils/@types/AuthRequest';
 import { FileInterceptor } from '@nestjs/platform-express';
 import PublicFile from 'src/modules/file/entities/publicFile.entity';
 import { multerAvatarOptions } from 'src/config/multer.config';
+import { Users } from 'src/modules/entities/users.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -36,7 +38,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
   @Get('private')
-  privateRoute(@Request() req) {
+  privateRoute(@Request() req): string {
     return `Your email, ${req.user.email}`;
   }
 
@@ -55,7 +57,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
   @Post('log-out')
-  async logOut(@Req() req: AuthRequest) {
+  async logOut(@Req() req: AuthRequest): Promise<UpdateResult> {
     return await this.authService.removeRefreshToken(req.user.id);
   }
 
@@ -67,13 +69,13 @@ export class AuthController {
 
   @HttpCode(200)
   @Post('forgot-password')
-  async forgotPassword(@Body() dto: AuthForgotPasswordDto) {
+  async forgotPassword(@Body() dto: AuthForgotPasswordDto): Promise<boolean> {
     return this.authService.forgotPassword(dto);
   }
 
   @HttpCode(200)
   @Patch('restore-password')
-  async restorePassword(@Body() dto: AuthRestorePasswordDto) {
+  async restorePassword(@Body() dto: AuthRestorePasswordDto): Promise<Users> {
     return this.authService.restorePassword(dto);
   }
 

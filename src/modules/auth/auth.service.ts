@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { compare, genSalt, hash } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -101,7 +101,7 @@ export class AuthService {
     };
   }
 
-  async getJwtRefreshToken(id: number) {
+  async getJwtRefreshToken(id: number): Promise<string> {
     const payload = { id };
 
     return this.jwtService.sign(payload, {
@@ -110,7 +110,10 @@ export class AuthService {
     });
   }
 
-  async getUserIfRefreshTokenMatches(refreshToken: string, id: number) {
+  async getUserIfRefreshTokenMatches(
+    refreshToken: string,
+    id: number,
+  ): Promise<Users> {
     const user = await this.authRepo.findOneBy({ id });
 
     const isRefreshTokenMatching = await compare(
@@ -123,23 +126,28 @@ export class AuthService {
     }
   }
 
-  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+  async setCurrentRefreshToken(
+    refreshToken: string,
+    userId: number,
+  ): Promise<void> {
     const currentHashedRefreshToken = await hash(refreshToken, this.saltRounds);
     await this.authRepo.update(userId, {
       currentHashedRefreshToken,
     });
   }
 
-  async removeRefreshToken(userId: number) {
+  async removeRefreshToken(userId: number): Promise<UpdateResult> {
     return this.authRepo.update(userId, {
       currentHashedRefreshToken: null,
     });
   }
 
-  async forgotPassword({ email }: AuthForgotPasswordDto) {
+  async forgotPassword({ email }: AuthForgotPasswordDto): Promise<boolean> {
     const user = await this.authRepo.findOneBy({ email });
 
     if (user) {
+      if (user.googleId) return false;
+
       const userAbout = await this.getJwtRefreshToken(user.id);
 
       await this.forgotPasswordRepo.save({
@@ -158,13 +166,14 @@ export class AuthService {
         from: 'milkav06062003@gmail.com',
         html: `<h1>Change password</h1><p>If you want to change password go to:</p><a href="${url}">${url}</a>`,
       });
-
-      return true;
     }
-    return false;
+    return true;
   }
 
-  async restorePassword({ password, token }: AuthRestorePasswordDto) {
+  async restorePassword({
+    password,
+    token,
+  }: AuthRestorePasswordDto): Promise<Users> {
     const forgotPassword = await this.forgotPasswordRepo.findOne({
       where: {
         link: token,
