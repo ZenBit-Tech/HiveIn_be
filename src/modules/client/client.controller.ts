@@ -23,10 +23,10 @@ type AuthRequest = HttpRequest & { user: UserJwtPayload };
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 
-  // @ApiCreatedResponse({
-  //   description: 'Filter freelancers',
-  //   type: [Freelancer],
-  // })
+  @ApiCreatedResponse({
+    description: 'Filter freelancers',
+    type: [Freelancer],
+  })
   @UseGuards(AuthGuard('jwt'))
   @Get('filter/:keyWords/:category/:skills')
   filter(

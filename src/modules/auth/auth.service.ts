@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -174,24 +175,28 @@ export class AuthService {
     password,
     token,
   }: AuthRestorePasswordDto): Promise<Users> {
-    const forgotPassword = await this.forgotPasswordRepo.findOne({
-      where: {
-        link: token,
-      },
-      relations: {
-        user: true,
-      },
-    });
-    const salt = await genSalt(this.saltRounds);
-    const updateUser = forgotPassword.user;
-    updateUser.password = await hash(password, salt);
-    const createdUser = await this.authRepo.save(updateUser);
-    if (createdUser) {
-      await this.forgotPasswordRepo.delete({
-        link: token,
+    try {
+      const forgotPassword = await this.forgotPasswordRepo.findOne({
+        where: {
+          link: token,
+        },
+        relations: {
+          user: true,
+        },
       });
+      const salt = await genSalt(this.saltRounds);
+      const updateUser = forgotPassword.user;
+      updateUser.password = await hash(password, salt);
+      const createdUser = await this.authRepo.save(updateUser);
+      if (createdUser) {
+        await this.forgotPasswordRepo.delete({
+          link: token,
+        });
+      }
+      return createdUser;
+    } catch (error) {
+      throw new NotFoundException("User doesn't exist");
     }
-    return createdUser;
   }
 
   async addAvatar(

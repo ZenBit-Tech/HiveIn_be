@@ -7,11 +7,17 @@ import { IsNumber, IsString } from 'class-validator';
 export class SaveJobDraftDto extends PartialType(
   OmitType(CreateJobPostDto, ['userId', 'title']),
 ) {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Id of user of this job post',
+    example: 1,
+  })
   @IsNumber()
   readonly userId: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Title of job post',
+    example: 'Lorem Ipsum',
+  })
   @Type(() => String)
   @IsString()
   readonly title: string;
