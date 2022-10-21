@@ -21,7 +21,11 @@ import { NotificationsService } from 'src/modules/notifications/notifications.se
 import { FreelancerService } from 'src/modules/freelancer/freelancer.service';
 import { MessageService } from 'src/modules/message/message.service';
 import { JobPostService } from 'src/modules/job-post/job-post.service';
-import { constSystemMessages } from 'src/utils/systemMessages';
+import {
+  clientOfferMessages,
+  constSystemMessages,
+  freelancerOfferMessages,
+} from 'src/utils/systemMessages.consts';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 
 @Injectable()
@@ -76,17 +80,25 @@ export class OfferService {
 
       if (!chatRoomId || !freelancerUserId) throw new NotFoundException();
 
-      await this.messageService.createSystemOfferMessage({
-        chatRoomId: chatRoomId,
-        userId: freelancerUserId,
-        text: constSystemMessages.newOfferMessage,
-      });
+      await this.messageService.createSystemOfferMessage(
+        {
+          chatRoomId: chatRoomId,
+          userId: freelancerUserId,
+          text: constSystemMessages.newOfferMessage,
+        },
+        true,
+        true,
+      );
 
-      await this.messageService.createSystemMessage({
-        chatRoomId: chatRoomId,
-        userId: userWhoMakesOffer,
-        text: constSystemMessages.newOfferSend,
-      });
+      await this.messageService.createSystemMessage(
+        {
+          chatRoomId: chatRoomId,
+          userId: userWhoMakesOffer,
+          text: constSystemMessages.newOfferSend,
+        },
+        true,
+        true,
+      );
 
       await this.notificationsService.createOfferNotification(
         offer.id,
@@ -119,17 +131,10 @@ export class OfferService {
         status: updateOfferDto.status,
       });
 
-      if (offer.status === Status.ACCEPTED)
-        await this.contractsService.create({
-          offer,
-          startDate: new Date(),
-          endDate: null,
-        });
-      await this.notificationsService.createOfferNotification(
-        offer.id,
-        await this.jobPostService.getOwnerIdByPostId(offer.jobPost.id),
-        this.generateTextForNotification(offer.status),
-      );
+      if (offer.status === Status.ACCEPTED) await this.onAcceptOffer(offer.id);
+      if (offer.status === Status.REJECTED) await this.onRejectOffer(offer.id);
+      if (offer.status === Status.EXPIRED) await this.onExpireOffer(offer.id);
+
       return offer;
     } catch (error) {
       Logger.error('Error occurred while trying to update offer');
@@ -137,6 +142,108 @@ export class OfferService {
         throw new HttpException(error.message, error.getStatus());
       throw new UnprocessableEntityException();
     }
+  }
+
+  private async onAcceptOffer(offerId: number): Promise<void> {
+    const offer = await this.getOneById(offerId);
+
+    const clientId = offer.jobPost.user.id;
+    const freelancerUserId = offer.freelancer.user.id;
+    const chatRoomId =
+      await this.chatRoomService.getRoomIdByJobPostAndFreelancerIds(
+        offer.jobPost.id,
+        offer.freelancer.id,
+      );
+
+    await this.messageService.createSystemMessage({
+      chatRoomId,
+      userId: clientId,
+      text: clientOfferMessages.accept,
+    });
+
+    await this.messageService.createSystemMessage({
+      chatRoomId,
+      userId: freelancerUserId,
+      text: freelancerOfferMessages.accept,
+    });
+
+    await this.contractsService.create({
+      offer,
+      startDate: new Date(),
+      endDate: null,
+    });
+
+    await this.notificationsService.createOfferNotification(
+      offer.id,
+      clientId,
+      this.generateTextForNotification(Status.ACCEPTED),
+    );
+  }
+
+  private async onRejectOffer(offerId: number): Promise<void> {
+    const offer = await this.getOneById(offerId);
+
+    const clientId = offer.jobPost.user.id;
+    const freelancerUserId = offer.freelancer.user.id;
+    const chatRoomId =
+      await this.chatRoomService.getRoomIdByJobPostAndFreelancerIds(
+        offer.jobPost.id,
+        offer.freelancer.id,
+      );
+
+    await this.messageService.createSystemMessage({
+      chatRoomId,
+      userId: clientId,
+      text: clientOfferMessages.reject,
+    });
+
+    await this.messageService.createSystemMessage({
+      chatRoomId,
+      userId: freelancerUserId,
+      text: freelancerOfferMessages.reject,
+    });
+
+    await this.notificationsService.createOfferNotification(
+      offer.id,
+      clientId,
+      this.generateTextForNotification(Status.REJECTED),
+    );
+  }
+
+  private async onExpireOffer(offerId: number): Promise<void> {
+    const offer = await this.getOneById(offerId);
+
+    const clientId = offer.jobPost.user.id;
+    const freelancerUserId = offer.freelancer.user.id;
+    const chatRoomId =
+      await this.chatRoomService.getRoomIdByJobPostAndFreelancerIds(
+        offer.jobPost.id,
+        offer.freelancer.id,
+      );
+
+    await this.messageService.createSystemMessage({
+      chatRoomId,
+      userId: clientId,
+      text: clientOfferMessages.expire,
+    });
+
+    await this.messageService.createSystemMessage({
+      chatRoomId,
+      userId: freelancerUserId,
+      text: clientOfferMessages.expire,
+    });
+
+    await this.notificationsService.createOfferNotification(
+      offer.id,
+      clientId,
+      this.generateTextForNotification(Status.EXPIRED),
+    );
+
+    await this.notificationsService.createOfferNotification(
+      offer.id,
+      freelancerUserId,
+      this.generateTextForNotification(Status.EXPIRED),
+    );
   }
 
   private generateTextForNotification(status: Status): string {

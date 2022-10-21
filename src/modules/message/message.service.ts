@@ -18,7 +18,7 @@ import { MessageType, ReturnedMessage } from 'src/modules/message/typesDef';
 import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
 import { ProposalType } from 'src/modules/proposal/entities/proposal.entity';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
-import { constSystemMessages } from 'src/utils/systemMessages';
+import { constSystemMessages } from 'src/utils/systemMessages.consts';
 
 @Injectable()
 export class MessageService {
@@ -146,14 +146,27 @@ export class MessageService {
     }
   }
 
-  async createSystemMessage(data: createMessageDto): Promise<Message> {
+  async createSystemMessage(
+    data: createMessageDto,
+    shouldNotify?: boolean,
+    shouldTriggerEvent?: boolean,
+  ): Promise<Message> {
     try {
-      return await this.messageRepository.save({
+      const message = await this.messageRepository.save({
         text: data.text,
         chatRoom: { id: data.chatRoomId },
         user: { id: data.userId },
         messageType: MessageType.FROM_SYSTEM,
       });
+
+      if (shouldNotify) {
+        await this.notificationsService.createMessageNotification(
+          message.id,
+          data.userId,
+        );
+      }
+
+      return message;
     } catch (error) {
       Logger.error('Error occurred while trying to create system message');
       if (error instanceof HttpException)
@@ -162,14 +175,26 @@ export class MessageService {
     }
   }
 
-  async createSystemOfferMessage(data: createMessageDto): Promise<Message> {
+  async createSystemOfferMessage(
+    data: createMessageDto,
+    shouldNotify?: boolean,
+    shouldTriggerEvent?: boolean,
+  ): Promise<Message> {
     try {
-      return await this.messageRepository.save({
+      const message = await this.messageRepository.save({
         text: data.text,
         chatRoom: { id: data.chatRoomId },
         user: { id: data.userId },
         messageType: MessageType.FROM_SYSTEM_OFFER,
       });
+
+      if (shouldNotify) {
+        await this.notificationsService.createMessageNotification(
+          message.id,
+          data.userId,
+        );
+      }
+      return message;
     } catch (error) {
       Logger.error(
         'Error occurred while trying to create system offer message',

@@ -392,6 +392,10 @@ export class WebsocketService
     }
   }
 
+  private async updateOnManuallyAddMessage() {
+    return 1;
+  }
+
   async triggerEventByUserId(id: number, event: Event): Promise<void> {
     try {
       const users = await this.redisClient.HGETALL('users');
@@ -403,6 +407,8 @@ export class WebsocketService
           switch (event) {
             case Event.GET_ROOMS:
               return await this.onGetRooms(userToEmit);
+            case Event.ADD_MESSAGE:
+              return await this.updateOnManuallyAddMessage();
             default:
               throw new WsException(
                 'Wrong event passed to triggerEventByUserId',
