@@ -8,6 +8,7 @@ import { Notification } from 'src/modules/notifications/entities/notification.en
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
 import { NotificationsModule } from 'src/modules/notifications/notifications.module';
+import { WebsocketModule } from '../websocket/websocket.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { NotificationsModule } from 'src/modules/notifications/notifications.mod
       Freelancer,
     ]),
     forwardRef(() => NotificationsModule),
+    forwardRef(() => WebsocketModule),
     forwardRef(() => ChatRoomModule),
   ],
   providers: [MessageService],

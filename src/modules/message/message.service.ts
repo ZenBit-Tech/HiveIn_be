@@ -19,6 +19,7 @@ import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
 import { ProposalType } from 'src/modules/proposal/entities/proposal.entity';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { constSystemMessages } from 'src/utils/systemMessages.consts';
+import { Event, WebsocketService } from '../websocket/websocket.service';
 
 @Injectable()
 export class MessageService {
@@ -31,6 +32,8 @@ export class MessageService {
     private notificationsService: NotificationsService,
     @Inject(forwardRef(() => ChatRoomService))
     private chatRoomService: ChatRoomService,
+    @Inject(forwardRef(() => WebsocketService))
+    private wsService: WebsocketService,
   ) {}
 
   async create(data: createMessageDto): Promise<Message> {
@@ -166,6 +169,13 @@ export class MessageService {
         );
       }
 
+      if (shouldTriggerEvent) {
+        await this.wsService.triggerEventByUserId(
+          data.userId,
+          Event.ADD_MESSAGE,
+        );
+      }
+
       return message;
     } catch (error) {
       Logger.error('Error occurred while trying to create system message');
@@ -194,6 +204,14 @@ export class MessageService {
           data.userId,
         );
       }
+
+      if (shouldTriggerEvent) {
+        await this.wsService.triggerEventByUserId(
+          data.userId,
+          Event.ADD_MESSAGE,
+        );
+      }
+
       return message;
     } catch (error) {
       Logger.error(

@@ -54,6 +54,7 @@ export class WebsocketService
     private readonly jwtService: JwtService,
     private readonly userService: SettingsInfoService,
     private readonly roomService: ChatRoomService,
+    @Inject(forwardRef(() => MessageService))
     private readonly messageService: MessageService,
     @Inject(forwardRef(() => NotificationsService))
     private readonly notificationService: NotificationsService,
@@ -392,8 +393,21 @@ export class WebsocketService
     }
   }
 
-  private async updateOnManuallyAddMessage() {
-    return 1;
+  private async updateOnManuallyAddMessage(socketId: string) {
+    await this.onGetRooms({ id: socketId });
+    const rooms = await this.redisClient.KEYS('room*');
+    rooms.map(async (room) => {
+      const usersInRoom = await this.redisClient.SMEMBERS(room);
+      usersInRoom.map(async (e) => {
+        if (e === socketId) {
+          const roomId = room.slice(4);
+          const roomm = await this.roomService.getOneById(+roomId);
+          const messages = await this.messageService.getAllByRoomId(+roomId);
+          this.server.to(socketId).emit(Event.ROOM, roomm);
+          this.server.to(socketId).emit(Event.MESSAGES, messages);
+        }
+      });
+    });
   }
 
   async triggerEventByUserId(id: number, event: Event): Promise<void> {
@@ -408,7 +422,7 @@ export class WebsocketService
             case Event.GET_ROOMS:
               return await this.onGetRooms(userToEmit);
             case Event.ADD_MESSAGE:
-              return await this.updateOnManuallyAddMessage();
+              return await this.updateOnManuallyAddMessage(user);
             default:
               throw new WsException(
                 'Wrong event passed to triggerEventByUserId',

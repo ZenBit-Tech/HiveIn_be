@@ -7,12 +7,14 @@ import { Users } from 'src/modules/entities/users.entity';
 import { Message } from 'src/modules/message/entities/message.entity';
 import { OfferModule } from '../offer/offer.module';
 import { MessageModule } from '../message/message.module';
+import { WebsocketModule } from '../websocket/websocket.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ChatRoom, Users, Message]),
     forwardRef(() => OfferModule),
     forwardRef(() => MessageModule),
+    forwardRef(() => WebsocketModule),
   ],
   controllers: [ChatRoomController],
   providers: [ChatRoomService],
