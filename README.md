@@ -147,3 +147,11 @@ To revert the most recently executed migration use the following command:
 `npm run typeorm:revert-migration`
 
 https://github.com/typeorm/typeorm/blob/master/docs/using-cli.md#generate-a-migration-from-existing-table-schema
+
+## 6. Deployment Information
+
+The website is currently being hosted in a Digital Ocean server.
+- Domain: http://getjobhivein.me
+
+We're using external services such as a MySQL RDS, Redis and a S3 bucket.
+![](https://i.imgur.com/ry7Uks1.png)
