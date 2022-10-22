@@ -18,6 +18,7 @@ import { OfferService } from 'src/modules/offer/offer.service';
 import { Offer } from 'src/modules/offer/entities/offer.entity';
 import { CreateOfferDto } from 'src/modules/offer/dto/create-offer.dto';
 import { UpdateOfferDto } from 'src/modules/offer/dto/update-offer.dto';
+import { tablesToSearch } from './typesDef';
 
 @Controller('offer')
 export class OfferController {
@@ -45,6 +46,29 @@ export class OfferController {
   getOne(@Param() { id }: searchParamDto): Promise<Offer> {
     try {
       return this.offerService.getOneById(+id);
+    } catch (error) {
+      Logger.error('Error occurred in offer controller (GET)');
+      if (error instanceof HttpException)
+        return Promise.reject(
+          new HttpException(error.message, error.getStatus()),
+        );
+      if (error instanceof Error)
+        return Promise.reject(new Error(error.message));
+      return Promise.reject(new InternalServerErrorException());
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('by-freelancer-and-job-post')
+  getOneByJobPostAndFreelancerUserIds(
+    @Body() data: CreateOfferDto,
+  ): Promise<Offer> {
+    try {
+      return this.offerService.getOneByFreelancerIdAndJobPostId(
+        data.freelancerId,
+        data.jobPostId,
+        tablesToSearch.USER,
+      );
     } catch (error) {
       Logger.error('Error occurred in offer controller (GET)');
       if (error instanceof HttpException)

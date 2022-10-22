@@ -4,3 +4,8 @@ export enum Status {
   REJECTED = 'rejected',
   EXPIRED = 'expired',
 }
+
+export enum tablesToSearch {
+  USER = 'userFreelancer',
+  FREELANCER = 'freelancer',
+}

@@ -25,6 +25,7 @@ import {
 import { Message } from 'src/modules/message/entities/message.entity';
 import { OfferService } from '../offer/offer.service';
 import { MessageService } from '../message/message.service';
+import { tablesToSearch } from '../offer/typesDef';
 
 @Injectable()
 export class ChatRoomService {
@@ -205,6 +206,7 @@ export class ChatRoomService {
       const offer = await this.offerService.getOneByFreelancerIdAndJobPostId(
         chatRoom.freelancer.id,
         chatRoom.jobPost.id,
+        tablesToSearch.FREELANCER,
       );
 
       const offerStatus = offer ? offer.status : null;

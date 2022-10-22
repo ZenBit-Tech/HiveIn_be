@@ -14,7 +14,7 @@ import { Repository } from 'typeorm';
 import { Offer } from 'src/modules/offer/entities/offer.entity';
 import { CreateOfferDto } from 'src/modules/offer/dto/create-offer.dto';
 import { UpdateOfferDto } from 'src/modules/offer/dto/update-offer.dto';
-import { Status } from 'src/modules/offer/typesDef';
+import { Status, tablesToSearch } from 'src/modules/offer/typesDef';
 import { ContractsService } from 'src/modules/contracts/contracts.service';
 import { UserRole, Users } from 'src/modules/entities/users.entity';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
@@ -53,6 +53,7 @@ export class OfferService {
       const isOfferAlreadyExist = await this.getOneByFreelancerIdAndJobPostId(
         createOfferDto.freelancerId,
         createOfferDto.jobPostId,
+        tablesToSearch.FREELANCER,
       );
 
       if (isOfferAlreadyExist)
@@ -345,6 +346,7 @@ export class OfferService {
   async getOneByFreelancerIdAndJobPostId(
     freelancerId: number,
     jobPostId: number,
+    table: tablesToSearch,
   ): Promise<Offer> {
     try {
       return await this.offerRepository
@@ -354,7 +356,7 @@ export class OfferService {
         .leftJoinAndSelect('offer.jobPost', 'jobPost')
         .leftJoinAndSelect('jobPost.user', 'userClient')
         .where('jobPost.id = :jobPostId', { jobPostId })
-        .andWhere('freelancer.id = :freelancerId', { freelancerId })
+        .andWhere(`${table}.id = ${freelancerId}`)
         .getOne();
     } catch (error) {
       Logger.error('Error occurred while trying to get one offer');
