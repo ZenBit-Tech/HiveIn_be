@@ -173,9 +173,9 @@ export class OfferService {
       const { offer, clientId, freelancerUserId, chatRoomId } =
         await this.getInfoForUpdateOffer(offerId);
 
-      if (offer.status === Status.ACCEPTED) {
+      if (offer.status !== Status.PENDING) {
         throw new HttpException(
-          'Attempted to accept offer which already accepted!',
+          'Attempted to accept offer which is not pending!',
           400,
         );
       }
@@ -224,9 +224,9 @@ export class OfferService {
       const { offer, clientId, freelancerUserId, chatRoomId } =
         await this.getInfoForUpdateOffer(offerId);
 
-      if (offer.status === Status.REJECTED) {
+      if (offer.status !== Status.PENDING) {
         throw new HttpException(
-          'Attempted to reject offer which already rejected!',
+          'Attempted to accept offer which is not pending!',
           400,
         );
       }
