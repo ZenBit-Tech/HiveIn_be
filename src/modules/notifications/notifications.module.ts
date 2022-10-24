@@ -11,7 +11,7 @@ import { MessageModule } from 'src/modules/message/message.module';
 import { SettingsInfoModule } from 'src/modules/settings-info/settings-info.module';
 import { WebsocketModule } from 'src/modules/websocket/websocket.module';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
-import { OfferModule } from '../offer/offer.module';
+import { OfferModule } from 'src/modules/offer/offer.module';
 
 @Module({
   imports: [

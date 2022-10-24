@@ -1,5 +1,5 @@
 import { Message } from 'src/modules/message/entities/message.entity';
-import { Status } from '../offer/typesDef';
+import { Status } from 'src/modules/offer/typesDef';
 
 export enum ColumnNames {
   CLIENT = 'client_user_profile',

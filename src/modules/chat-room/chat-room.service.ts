@@ -23,9 +23,9 @@ import {
   TArgs,
 } from 'src/modules/chat-room/typesDef';
 import { Message } from 'src/modules/message/entities/message.entity';
-import { OfferService } from '../offer/offer.service';
-import { MessageService } from '../message/message.service';
-import { tablesToSearch } from '../offer/typesDef';
+import { OfferService } from 'src/modules/offer/offer.service';
+import { MessageService } from 'src/modules/message/message.service';
+import { tablesToSearch } from 'src/modules/offer/typesDef';
 
 @Injectable()
 export class ChatRoomService {

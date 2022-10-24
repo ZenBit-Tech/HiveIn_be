@@ -1,4 +1,4 @@
-import { Offer } from './entities/offer.entity';
+import { Offer } from 'src/modules/offer/entities/offer.entity';
 
 export enum Status {
   PENDING = 'pending',

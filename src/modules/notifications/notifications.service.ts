@@ -25,7 +25,7 @@ import {
   ICountedParsedNotifications,
 } from 'src/modules/notifications/typesDef';
 import { constSystemMessages } from 'src/utils/systemMessages.consts';
-import { OfferService } from '../offer/offer.service';
+import { OfferService } from 'src/modules/offer/offer.service';
 
 @Injectable()
 export class NotificationsService {

@@ -5,9 +5,9 @@ import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { Users } from 'src/modules/entities/users.entity';
 import { Message } from 'src/modules/message/entities/message.entity';
-import { OfferModule } from '../offer/offer.module';
-import { MessageModule } from '../message/message.module';
-import { WebsocketModule } from '../websocket/websocket.module';
+import { OfferModule } from 'src/modules/offer/offer.module';
+import { MessageModule } from 'src/modules/message/message.module';
+import { WebsocketModule } from 'src/modules/websocket/websocket.module';
 
 @Module({
   imports: [
