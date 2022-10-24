@@ -19,7 +19,6 @@ import { OfferService } from 'src/modules/offer/offer.service';
 import { Offer } from 'src/modules/offer/entities/offer.entity';
 import { CreateOfferDto } from 'src/modules/offer/dto/create-offer.dto';
 import { UpdateOfferDto } from 'src/modules/offer/dto/update-offer.dto';
-import { tablesToSearch } from 'src/modules/offer/typesDef';
 
 @Controller('offer')
 export class OfferController {
@@ -51,7 +50,6 @@ export class OfferController {
       return this.offerService.getOneByFreelancerIdAndJobPostId(
         queryParams.freelancerId,
         queryParams.jobPostId,
-        tablesToSearch.USER,
       );
     } catch (error) {
       Logger.error('Error occurred in offer controller (GET)');

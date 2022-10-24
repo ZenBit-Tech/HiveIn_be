@@ -7,11 +7,6 @@ export enum Status {
   EXPIRED = 'expired',
 }
 
-export enum tablesToSearch {
-  USER = 'userFreelancer',
-  FREELANCER = 'freelancer',
-}
-
 export interface IInfoForUpdateOffer {
   offer: Offer;
   clientId: number;
