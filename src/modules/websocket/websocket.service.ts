@@ -401,6 +401,7 @@ export class WebsocketService
         const usersInRoom = await this.redisClient.SMEMBERS(room);
         usersInRoom.map(async (e) => {
           if (e === socketId) {
+            //  Removing 'room' to get room id
             const roomId = room.slice(4);
             const roomInfo = await this.roomService.getOneById(+roomId);
             const messages = await this.messageService.getAllByRoomId(+roomId);
