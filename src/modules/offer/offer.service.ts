@@ -226,7 +226,7 @@ export class OfferService {
 
       if (offer.status !== Status.PENDING) {
         throw new HttpException(
-          'Attempted to accept offer which is not pending!',
+          'Attempted to reject offer which is not pending!',
           400,
         );
       }
