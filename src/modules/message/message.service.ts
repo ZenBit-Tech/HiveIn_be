@@ -19,8 +19,10 @@ import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
 import { ProposalType } from 'src/modules/proposal/entities/proposal.entity';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { constSystemMessages } from 'src/utils/systemMessages.consts';
-import { Event, WebsocketService } from '../websocket/websocket.service';
-import { Notification } from '../notifications/entities/notification.entity';
+import {
+  Event,
+  WebsocketService,
+} from 'src/modules/websocket/websocket.service';
 
 @Injectable()
 export class MessageService {
