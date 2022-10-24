@@ -20,6 +20,7 @@ import { ProposalType } from 'src/modules/proposal/entities/proposal.entity';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { constSystemMessages } from 'src/utils/systemMessages.consts';
 import { Event, WebsocketService } from '../websocket/websocket.service';
+import { Notification } from '../notifications/entities/notification.entity';
 
 @Injectable()
 export class MessageService {
@@ -100,7 +101,7 @@ export class MessageService {
     type: ProposalType,
     message: string,
     bid: number,
-  ): Promise<void> {
+  ): Promise<ReturnedMessage[]> {
     try {
       await this.createSystemMessage({
         text: `${constSystemMessages.messageToUser} ${
@@ -135,12 +136,16 @@ export class MessageService {
 
       const messages = await this.getAllByRoomId(chatRoomId);
 
-      messages.map(async (message) => {
-        await this.notificationsService.createMessageNotification(
-          message.id,
-          inviteTo,
-        );
-      });
+      await Promise.all(
+        messages.map(async (message) => {
+          return await this.notificationsService.createMessageNotification(
+            message.id,
+            inviteTo,
+          );
+        }),
+      );
+
+      return messages;
     } catch (error) {
       Logger.error('Error occurred while trying to create initial messages');
       if (error instanceof HttpException)
