@@ -1,7 +1,11 @@
 import {
   ForbiddenException,
+  forwardRef,
   HttpException,
+  HttpStatus,
+  Inject,
   Injectable,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
   UnprocessableEntityException,
@@ -11,13 +15,19 @@ import { Repository } from 'typeorm';
 import { Offer } from 'src/modules/offer/entities/offer.entity';
 import { CreateOfferDto } from 'src/modules/offer/dto/create-offer.dto';
 import { UpdateOfferDto } from 'src/modules/offer/dto/update-offer.dto';
-import { Status } from 'src/modules/offer/typesDef';
+import { IInfoForUpdateOffer, Status } from 'src/modules/offer/typesDef';
 import { ContractsService } from 'src/modules/contracts/contracts.service';
 import { UserRole, Users } from 'src/modules/entities/users.entity';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { FreelancerService } from 'src/modules/freelancer/freelancer.service';
 import { MessageService } from 'src/modules/message/message.service';
 import { JobPostService } from 'src/modules/job-post/job-post.service';
+import {
+  clientOfferMessages,
+  constSystemMessages,
+  freelancerOfferMessages,
+} from 'src/utils/systemMessages.consts';
+import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 
 @Injectable()
 export class OfferService {
@@ -27,20 +37,26 @@ export class OfferService {
     private readonly contractsService: ContractsService,
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
-    private readonly notificationsService: NotificationsService,
     private readonly freelancerService: FreelancerService,
     private readonly messageService: MessageService,
     private readonly jobPostService: JobPostService,
+    @Inject(forwardRef(() => ChatRoomService))
+    private chatRoomService: ChatRoomService,
+    @Inject(forwardRef(() => NotificationsService))
+    private notificationsService: NotificationsService,
   ) {}
 
-  async create(createOfferDto: CreateOfferDto): Promise<Offer> {
+  async create(
+    createOfferDto: CreateOfferDto,
+    userWhoMakesOffer: number,
+  ): Promise<Offer> {
     try {
-      const isChatAlreadyExist = await this.getOneByFreelancerIdAndJobPostId(
+      const isOfferAlreadyExist = await this.getOneByFreelancerIdAndJobPostId(
         createOfferDto.freelancerId,
         createOfferDto.jobPostId,
       );
 
-      if (isChatAlreadyExist)
+      if (isOfferAlreadyExist)
         throw new HttpException(
           'Offer to this user related to this job post already exist',
           406,
@@ -56,6 +72,34 @@ export class OfferService {
         await this.freelancerService.getUserIdByFreelancerId(
           createOfferDto.freelancerId,
         );
+
+      const chatRoomId =
+        await this.chatRoomService.getRoomIdByJobPostAndFreelancerIds(
+          createOfferDto.jobPostId,
+          createOfferDto.freelancerId,
+        );
+
+      if (!chatRoomId || !freelancerUserId) throw new NotFoundException();
+
+      await this.messageService.createSystemOfferMessage(
+        {
+          chatRoomId: chatRoomId,
+          userId: freelancerUserId,
+          text: constSystemMessages.newOfferMessage,
+        },
+        true,
+        true,
+      );
+
+      await this.messageService.createSystemMessage(
+        {
+          chatRoomId: chatRoomId,
+          userId: userWhoMakesOffer,
+          text: constSystemMessages.newOfferSend,
+        },
+        true,
+        true,
+      );
 
       await this.notificationsService.createOfferNotification(
         offer.id,
@@ -74,6 +118,11 @@ export class OfferService {
 
   async update(id: number, updateOfferDto: UpdateOfferDto): Promise<Offer> {
     try {
+      if (updateOfferDto.status === Status.PENDING)
+        throw new HttpException(
+          'Offer should not be updated to pending status!',
+          HttpStatus.BAD_REQUEST,
+        );
       const currentOffer = await this.offerRepository.findOneBy({ id });
 
       if (!currentOffer) throw new NotFoundException();
@@ -83,20 +132,176 @@ export class OfferService {
         status: updateOfferDto.status,
       });
 
-      if (offer.status === Status.ACCEPTED)
-        await this.contractsService.create({
-          offer,
-          startDate: new Date(),
-          endDate: null,
-        });
-      await this.notificationsService.createOfferNotification(
-        offer.id,
-        await this.jobPostService.getOwnerIdByPostId(offer.jobPost.id),
-        this.generateTextForNotification(offer.status),
-      );
+      if (offer.status === Status.ACCEPTED) await this.onAcceptOffer(offer.id);
+      if (offer.status === Status.REJECTED) await this.onRejectOffer(offer.id);
+      if (offer.status === Status.EXPIRED) await this.onExpireOffer(offer.id);
+
       return offer;
     } catch (error) {
       Logger.error('Error occurred while trying to update offer');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      throw new UnprocessableEntityException();
+    }
+  }
+
+  private async getInfoForUpdateOffer(
+    offerId: number,
+  ): Promise<IInfoForUpdateOffer> {
+    try {
+      const offer = await this.getOneById(offerId);
+
+      const clientId = offer.jobPost.user.id;
+      const freelancerUserId = offer.freelancer.user.id;
+      const chatRoomId =
+        await this.chatRoomService.getRoomIdByJobPostAndFreelancerIds(
+          offer.jobPost.id,
+          offer.freelancer.id,
+        );
+
+      return { offer, clientId, freelancerUserId, chatRoomId };
+    } catch (error) {
+      Logger.error('Error occurred while trying to get info for update offer');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      throw new InternalServerErrorException();
+    }
+  }
+
+  private async onAcceptOffer(offerId: number): Promise<void> {
+    try {
+      const { offer, clientId, freelancerUserId, chatRoomId } =
+        await this.getInfoForUpdateOffer(offerId);
+
+      if (offer.status !== Status.PENDING) {
+        throw new HttpException(
+          'Attempted to accept offer which is not pending!',
+          400,
+        );
+      }
+
+      await this.messageService.createSystemMessage(
+        {
+          chatRoomId,
+          userId: clientId,
+          text: clientOfferMessages.accept,
+        },
+        true,
+        true,
+      );
+
+      await this.messageService.createSystemMessage(
+        {
+          chatRoomId,
+          userId: freelancerUserId,
+          text: freelancerOfferMessages.accept,
+        },
+        true,
+        true,
+      );
+
+      await this.contractsService.create({
+        offer,
+        startDate: new Date(),
+        endDate: null,
+      });
+
+      await this.notificationsService.createOfferNotification(
+        offer.id,
+        clientId,
+        this.generateTextForNotification(Status.ACCEPTED),
+      );
+    } catch (error) {
+      Logger.error('Error occurred while trying to accept offer');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      throw new UnprocessableEntityException();
+    }
+  }
+
+  private async onRejectOffer(offerId: number): Promise<void> {
+    try {
+      const { offer, clientId, freelancerUserId, chatRoomId } =
+        await this.getInfoForUpdateOffer(offerId);
+
+      if (offer.status !== Status.PENDING) {
+        throw new HttpException(
+          'Attempted to reject offer which is not pending!',
+          400,
+        );
+      }
+
+      await this.messageService.createSystemMessage(
+        {
+          chatRoomId,
+          userId: clientId,
+          text: clientOfferMessages.reject,
+        },
+        true,
+        true,
+      );
+
+      await this.messageService.createSystemMessage(
+        {
+          chatRoomId,
+          userId: freelancerUserId,
+          text: freelancerOfferMessages.reject,
+        },
+        true,
+        true,
+      );
+
+      await this.notificationsService.createOfferNotification(
+        offer.id,
+        clientId,
+        this.generateTextForNotification(Status.REJECTED),
+      );
+    } catch (error) {
+      Logger.error('Error occurred while trying to reject offer');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      throw new UnprocessableEntityException();
+    }
+  }
+
+  private async onExpireOffer(offerId: number): Promise<void> {
+    try {
+      const { offer, clientId, freelancerUserId, chatRoomId } =
+        await this.getInfoForUpdateOffer(offerId);
+
+      await this.messageService.createSystemMessage(
+        {
+          chatRoomId,
+          userId: clientId,
+          text: clientOfferMessages.expire,
+        },
+        true,
+        true,
+      );
+
+      await this.messageService.createSystemMessage(
+        {
+          chatRoomId,
+          userId: freelancerUserId,
+          text: clientOfferMessages.expire,
+        },
+        true,
+        true,
+      );
+
+      await this.notificationsService.createOfferNotification(
+        offer.id,
+        clientId,
+        this.generateTextForNotification(Status.EXPIRED),
+      );
+
+      await this.notificationsService.createOfferNotification(
+        offer.id,
+        freelancerUserId,
+        this.generateTextForNotification(Status.EXPIRED),
+      );
+    } catch (error) {
+      Logger.error('Error occurred while trying to expire offer');
       if (error instanceof HttpException)
         throw new HttpException(error.message, error.getStatus());
       throw new UnprocessableEntityException();

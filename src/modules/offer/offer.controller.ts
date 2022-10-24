@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -41,6 +42,28 @@ export class OfferController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('by-freelancer-and-job-post')
+  getOneByJobPostAndFreelancerUserIds(
+    @Query() queryParams: CreateOfferDto,
+  ): Promise<Offer> {
+    try {
+      return this.offerService.getOneByFreelancerIdAndJobPostId(
+        queryParams.freelancerId,
+        queryParams.jobPostId,
+      );
+    } catch (error) {
+      Logger.error('Error occurred in offer controller (GET)');
+      if (error instanceof HttpException)
+        return Promise.reject(
+          new HttpException(error.message, error.getStatus()),
+        );
+      if (error instanceof Error)
+        return Promise.reject(new Error(error.message));
+      return Promise.reject(new InternalServerErrorException());
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   getOne(@Param() { id }: searchParamDto): Promise<Offer> {
     try {
@@ -59,9 +82,12 @@ export class OfferController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createOfferDto: CreateOfferDto): Promise<Offer> {
+  create(
+    @Body() createOfferDto: CreateOfferDto,
+    @Request() req: AuthRequest,
+  ): Promise<Offer> {
     try {
-      return this.offerService.create(createOfferDto);
+      return this.offerService.create(createOfferDto, req.user.id);
     } catch (error) {
       Logger.error('Error occurred in offer controller (POST)');
       if (error instanceof HttpException)
