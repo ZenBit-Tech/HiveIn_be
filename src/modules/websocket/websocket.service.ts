@@ -401,9 +401,9 @@ export class WebsocketService
       usersInRoom.map(async (e) => {
         if (e === socketId) {
           const roomId = room.slice(4);
-          const roomm = await this.roomService.getOneById(+roomId);
+          const roomInfo = await this.roomService.getOneById(+roomId);
           const messages = await this.messageService.getAllByRoomId(+roomId);
-          this.server.to(socketId).emit(Event.ROOM, roomm);
+          this.server.to(socketId).emit(Event.ROOM, roomInfo);
           this.server.to(socketId).emit(Event.MESSAGES, messages);
         }
       });

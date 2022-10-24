@@ -1,3 +1,5 @@
+import { Offer } from './entities/offer.entity';
+
 export enum Status {
   PENDING = 'pending',
   ACCEPTED = 'accepted',
@@ -8,4 +10,11 @@ export enum Status {
 export enum tablesToSearch {
   USER = 'userFreelancer',
   FREELANCER = 'freelancer',
+}
+
+export interface IInfoForUpdateOffer {
+  offer: Offer;
+  clientId: number;
+  freelancerUserId: number;
+  chatRoomId: number;
 }
