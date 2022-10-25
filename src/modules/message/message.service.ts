@@ -18,7 +18,11 @@ import { MessageType, ReturnedMessage } from 'src/modules/message/typesDef';
 import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
 import { ProposalType } from 'src/modules/proposal/entities/proposal.entity';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
-import { constSystemMessages } from 'src/utils/systemMessages';
+import { constSystemMessages } from 'src/utils/systemMessages.consts';
+import {
+  Event,
+  WebsocketService,
+} from 'src/modules/websocket/websocket.service';
 
 @Injectable()
 export class MessageService {
@@ -27,9 +31,12 @@ export class MessageService {
     private readonly messageRepository: Repository<Message>,
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
-    private readonly chatRoomService: ChatRoomService,
     @Inject(forwardRef(() => NotificationsService))
     private notificationsService: NotificationsService,
+    @Inject(forwardRef(() => ChatRoomService))
+    private chatRoomService: ChatRoomService,
+    @Inject(forwardRef(() => WebsocketService))
+    private wsService: WebsocketService,
   ) {}
 
   async create(data: createMessageDto): Promise<Message> {
@@ -96,7 +103,7 @@ export class MessageService {
     type: ProposalType,
     message: string,
     bid: number,
-  ): Promise<void> {
+  ): Promise<ReturnedMessage[]> {
     try {
       await this.createSystemMessage({
         text: `${constSystemMessages.messageToUser} ${
@@ -131,12 +138,16 @@ export class MessageService {
 
       const messages = await this.getAllByRoomId(chatRoomId);
 
-      messages.map(async (message) => {
-        await this.notificationsService.createMessageNotification(
-          message.id,
-          inviteTo,
-        );
-      });
+      await Promise.all(
+        messages.map(async (message) => {
+          return await this.notificationsService.createMessageNotification(
+            message.id,
+            inviteTo,
+          );
+        }),
+      );
+
+      return messages;
     } catch (error) {
       Logger.error('Error occurred while trying to create initial messages');
       if (error instanceof HttpException)
@@ -145,16 +156,74 @@ export class MessageService {
     }
   }
 
-  async createSystemMessage(data: createMessageDto): Promise<Message> {
+  async createSystemMessage(
+    data: createMessageDto,
+    shouldNotify?: boolean,
+    shouldTriggerEvent?: boolean,
+  ): Promise<Message> {
     try {
-      return await this.messageRepository.save({
+      const message = await this.messageRepository.save({
         text: data.text,
         chatRoom: { id: data.chatRoomId },
         user: { id: data.userId },
         messageType: MessageType.FROM_SYSTEM,
       });
+
+      if (shouldNotify) {
+        await this.notificationsService.createMessageNotification(
+          message.id,
+          data.userId,
+        );
+      }
+
+      if (shouldTriggerEvent) {
+        await this.wsService.triggerEventByUserId(
+          data.userId,
+          Event.ADD_MESSAGE,
+        );
+      }
+
+      return message;
     } catch (error) {
       Logger.error('Error occurred while trying to create system message');
+      if (error instanceof HttpException)
+        throw new HttpException(error.message, error.getStatus());
+      else throw new InternalServerErrorException();
+    }
+  }
+
+  async createSystemOfferMessage(
+    data: createMessageDto,
+    shouldNotify?: boolean,
+    shouldTriggerEvent?: boolean,
+  ): Promise<Message> {
+    try {
+      const message = await this.messageRepository.save({
+        text: data.text,
+        chatRoom: { id: data.chatRoomId },
+        user: { id: data.userId },
+        messageType: MessageType.FROM_SYSTEM_OFFER,
+      });
+
+      if (shouldNotify) {
+        await this.notificationsService.createMessageNotification(
+          message.id,
+          data.userId,
+        );
+      }
+
+      if (shouldTriggerEvent) {
+        await this.wsService.triggerEventByUserId(
+          data.userId,
+          Event.ADD_MESSAGE,
+        );
+      }
+
+      return message;
+    } catch (error) {
+      Logger.error(
+        'Error occurred while trying to create system offer message',
+      );
       if (error instanceof HttpException)
         throw new HttpException(error.message, error.getStatus());
       else throw new InternalServerErrorException();

@@ -1,4 +1,5 @@
-import { MessageType } from 'src/modules/message/typesDef';
+import { Message } from 'src/modules/message/entities/message.entity';
+import { Status } from 'src/modules/offer/typesDef';
 
 export enum ColumnNames {
   CLIENT = 'client_user_profile',
@@ -18,26 +19,28 @@ export enum chatRoomStatus {
   CLIENT_ONLY = 'clientOnly',
 }
 
-interface IUser {
+export interface IUser {
   id: number;
   firstName: string | null;
   lastName: string | null;
   avatarURL: string | null;
 }
 
+export interface IFreelancer extends IUser {
+  freelancerId: number;
+}
+
+export interface IChatRoom {
+  id: number;
+  title: string;
+}
+
 export interface IRoom {
   id: number;
   status: chatRoomStatus;
-  freelancer: IUser;
+  freelancer: IFreelancer;
   client: IUser;
-  jobPost: {
-    id: number;
-    title: string;
-  };
-  lastMessage: {
-    created_at: Date;
-    id: number;
-    messageType: MessageType;
-    text: string;
-  };
+  jobPost: IChatRoom;
+  lastMessage: Message;
+  offerStatus?: Status;
 }

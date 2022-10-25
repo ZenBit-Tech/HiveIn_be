@@ -1,6 +1,8 @@
 import { MONTHS_IN_HALF_YEAR, SALT_ROUND } from 'src/utils/jwt.consts';
 import {
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -15,9 +17,15 @@ import { UserRole, Users } from 'src/modules/entities/users.entity';
 import {
   chatRoomStatus,
   ColumnNames,
+  IChatRoom,
+  IFreelancer,
   IRoom,
+  IUser,
   TArgs,
 } from 'src/modules/chat-room/typesDef';
+import { Message } from 'src/modules/message/entities/message.entity';
+import { OfferService } from 'src/modules/offer/offer.service';
+import { MessageService } from 'src/modules/message/message.service';
 import { genSalt, hash } from 'bcryptjs';
 
 @Injectable()
@@ -27,6 +35,10 @@ export class ChatRoomService {
     private readonly chatRoomRepository: Repository<ChatRoom>,
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
+    @Inject(forwardRef(() => OfferService))
+    private offerService: OfferService,
+    @Inject(forwardRef(() => MessageService))
+    private messageService: MessageService,
   ) {}
 
   async create(data: createChatRoomDto): Promise<ChatRoom> {
@@ -53,7 +65,7 @@ export class ChatRoomService {
 
       if (!chatRoom) throw new NotFoundException();
 
-      return this.parseChatRoomData(chatRoom);
+      return await this.parseChatRoomData(chatRoom);
     } catch (error) {
       if (error instanceof NotFoundException) {
         Logger.error(
@@ -92,7 +104,9 @@ export class ChatRoomService {
         id,
       }).getMany();
 
-      return rooms.map((room) => this.parseChatRoomData(room));
+      return await Promise.all(
+        rooms.map(async (room) => await this.parseChatRoomData(room)),
+      );
     } catch (error) {
       if (error instanceof NotFoundException) {
         Logger.error(
@@ -207,28 +221,36 @@ export class ChatRoomService {
     return result;
   }
 
-  private parseChatRoomData(chatRoom: ChatRoom): IRoom {
+  private async parseChatRoomData(chatRoom: ChatRoom): Promise<IRoom> {
     try {
-      const freelancer = {
+      const offer = await this.offerService.getOneByFreelancerIdAndJobPostId(
+        chatRoom.freelancer.id,
+        chatRoom.jobPost.id,
+      );
+
+      const offerStatus = offer ? offer.status : null;
+
+      const freelancer: IFreelancer = {
         id: chatRoom.freelancer.user.id,
         firstName: chatRoom.freelancer.user.firstName,
         lastName: chatRoom.freelancer.user.lastName,
         avatarURL: chatRoom.freelancer.user.avatarURL,
+        freelancerId: chatRoom.freelancer.id,
       };
 
-      const client = {
+      const client: IUser = {
         id: chatRoom.jobPost.user.id,
         firstName: chatRoom.jobPost.user.firstName,
         lastName: chatRoom.jobPost.user.lastName,
         avatarURL: chatRoom.jobPost.user.avatarURL,
       };
 
-      const jobPost = {
+      const jobPost: IChatRoom = {
         id: chatRoom.jobPost.id,
         title: chatRoom.jobPost.title,
       };
 
-      const lastMessage = chatRoom?.message?.pop();
+      const lastMessage: Message = chatRoom?.message?.pop();
       return {
         id: chatRoom.id,
         status: chatRoom.status,
@@ -236,6 +258,7 @@ export class ChatRoomService {
         client,
         lastMessage,
         jobPost,
+        offerStatus,
       };
     } catch (error) {
       Logger.error('Error occurred while parsing chat room data');
