@@ -7,6 +7,9 @@ import {
   Param,
   UseGuards,
   Req,
+  Logger,
+  HttpException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { ContractsService } from 'src/modules/contracts/contracts.service';
@@ -23,7 +26,18 @@ export class ContractsController {
   @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createContractDto: CreateContractDto): Promise<InsertResult> {
-    return this.contractsService.create(createContractDto);
+    try {
+      return this.contractsService.create(createContractDto);
+    } catch (error) {
+      Logger.error('Error occurred in contract controller (POST)');
+      if (error instanceof HttpException)
+        return Promise.reject(
+          new HttpException(error.message, error.getStatus()),
+        );
+      if (error instanceof Error)
+        return Promise.reject(new Error(error.message));
+      return Promise.reject(new InternalServerErrorException());
+    }
   }
 
   @UseGuards(JwtAuthGuard)

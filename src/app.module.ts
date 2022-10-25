@@ -1,3 +1,4 @@
+import { TasksService } from 'src/modules/task.service';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';
@@ -20,9 +21,13 @@ import { OfferModule } from 'src/modules/offer/offer.module';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
 import { MessageModule } from 'src/modules/message/message.module';
 import { WebsocketModule } from 'src/modules/websocket/websocket.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ChatRoom } from './modules/chat-room/entities/chat-room.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([ChatRoom]),
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -42,6 +47,7 @@ import { WebsocketModule } from 'src/modules/websocket/websocket.module';
     MulterModule.register({
       dest: '/uploads',
     }),
+    ScheduleModule.forRoot(),
     DatabaseModule,
     AuthModule,
     ClientModule,
@@ -59,6 +65,6 @@ import { WebsocketModule } from 'src/modules/websocket/websocket.module';
     WebsocketModule,
   ],
   controllers: [AppController],
-  providers: [AppService, JwtService],
+  providers: [AppService, JwtService, TasksService],
 })
 export class AppModule {}

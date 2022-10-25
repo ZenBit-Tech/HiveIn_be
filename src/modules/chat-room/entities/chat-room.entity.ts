@@ -11,6 +11,7 @@ import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { Message } from 'src/modules/message/entities/message.entity';
 import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
+import { IsString } from 'class-validator';
 
 @Entity()
 export class ChatRoom {
@@ -25,7 +26,9 @@ export class ChatRoom {
   @JoinColumn({ name: 'freelancerId' })
   freelancer: Freelancer;
 
-  @OneToMany(() => Message, (message) => message.chatRoom)
+  @OneToMany(() => Message, (message) => message.chatRoom, {
+    cascade: true,
+  })
   message: Message[];
 
   @Column({
@@ -36,4 +39,11 @@ export class ChatRoom {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Column({ nullable: true })
+  @IsString()
+  prolongLink: string;
+
+  @Column({ nullable: true })
+  deleteDate: Date;
 }

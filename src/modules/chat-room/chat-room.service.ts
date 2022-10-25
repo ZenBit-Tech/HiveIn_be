@@ -1,3 +1,4 @@
+import { MONTHS_IN_HALF_YEAR, SALT_ROUND } from 'src/utils/jwt.consts';
 import {
   ForbiddenException,
   forwardRef,
@@ -25,6 +26,7 @@ import {
 import { Message } from 'src/modules/message/entities/message.entity';
 import { OfferService } from 'src/modules/offer/offer.service';
 import { MessageService } from 'src/modules/message/message.service';
+import { genSalt, hash } from 'bcryptjs';
 
 @Injectable()
 export class ChatRoomService {
@@ -198,6 +200,25 @@ export class ChatRoomService {
       Logger.error('Unexpected error while finding chat room id by message id');
       throw new UnprocessableEntityException();
     }
+  }
+
+  async prolongChat(id: number, token: string): Promise<UpdateResult> {
+    const salt = await genSalt(SALT_ROUND);
+    const prolongLink = await hash('prolong' + id, salt);
+
+    const result = await this.chatRoomRepository
+      .createQueryBuilder()
+      .update(ChatRoom)
+      .set({
+        deleteDate: new Date(
+          new Date().setMonth(new Date().getMonth() + MONTHS_IN_HALF_YEAR),
+        ),
+        prolongLink,
+      })
+      .where('id = :id', { id })
+      .andWhere('prolongLink = :token', { token })
+      .execute();
+    return result;
   }
 
   private async parseChatRoomData(chatRoom: ChatRoom): Promise<IRoom> {

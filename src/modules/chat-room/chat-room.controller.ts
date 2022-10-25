@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Request,
   UseGuards,
@@ -14,6 +15,8 @@ import { searchParamDto } from 'src/modules/chat-room/dto/search-param.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
 import { IRoom } from 'src/modules/chat-room/typesDef';
+import { prolongDto } from './dto/prolong-param.dto';
+import { UpdateResult } from 'typeorm';
 
 @Controller('chat-room')
 export class ChatRoomController {
@@ -41,5 +44,11 @@ export class ChatRoomController {
   @Get('post/:id')
   getAllByJobPostId(@Param() { id }: searchParamDto): Promise<ChatRoom[]> {
     return this.chatRoomService.getAllByJobPostId(+id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('prolong')
+  prolongOne(@Body() { token, chatId }: prolongDto): Promise<UpdateResult> {
+    return this.chatRoomService.prolongChat(chatId, token);
   }
 }
