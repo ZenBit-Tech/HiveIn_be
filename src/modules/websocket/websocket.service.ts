@@ -54,6 +54,7 @@ export class WebsocketService
     private readonly jwtService: JwtService,
     private readonly userService: SettingsInfoService,
     private readonly roomService: ChatRoomService,
+    @Inject(forwardRef(() => MessageService))
     private readonly messageService: MessageService,
     @Inject(forwardRef(() => NotificationsService))
     private readonly notificationService: NotificationsService,
@@ -392,6 +393,33 @@ export class WebsocketService
     }
   }
 
+  private async updateOnManuallyAddMessage(socketId: string) {
+    try {
+      await this.onGetRooms({ id: socketId });
+      const rooms = await this.redisClient.KEYS('room*');
+      rooms.map(async (room) => {
+        const usersInRoom = await this.redisClient.SMEMBERS(room);
+        usersInRoom.map(async (e) => {
+          if (e === socketId) {
+            //  Removing 'room' to get room id
+            const roomId = room.slice(4);
+            const roomInfo = await this.roomService.getOneById(+roomId);
+            const messages = await this.messageService.getAllByRoomId(+roomId);
+            this.server.to(socketId).emit(Event.ROOM, roomInfo);
+            this.server.to(socketId).emit(Event.MESSAGES, messages);
+          }
+        });
+      });
+    } catch (error) {
+      this.logger.error(
+        'Error occurred in ws updateOnManuallyAddMessage method',
+      );
+      throw new WsException(
+        'Error occurred in ws updateOnManuallyAddMessage method',
+      );
+    }
+  }
+
   async triggerEventByUserId(id: number, event: Event): Promise<void> {
     try {
       const users = await this.redisClient.HGETALL('users');
@@ -403,6 +431,8 @@ export class WebsocketService
           switch (event) {
             case Event.GET_ROOMS:
               return await this.onGetRooms(userToEmit);
+            case Event.ADD_MESSAGE:
+              return await this.updateOnManuallyAddMessage(user);
             default:
               throw new WsException(
                 'Wrong event passed to triggerEventByUserId',

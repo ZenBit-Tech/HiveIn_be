@@ -11,6 +11,7 @@ import { MessageModule } from 'src/modules/message/message.module';
 import { SettingsInfoModule } from 'src/modules/settings-info/settings-info.module';
 import { WebsocketModule } from 'src/modules/websocket/websocket.module';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
+import { OfferModule } from 'src/modules/offer/offer.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
     ChatRoomModule,
     forwardRef(() => MessageModule),
     forwardRef(() => WebsocketModule),
+    forwardRef(() => OfferModule),
     SettingsInfoModule,
     ChatRoomModule,
   ],

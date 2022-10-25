@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OfferService } from 'src/modules/offer/offer.service';
 import { Offer } from 'src/modules/offer/entities/offer.entity';
@@ -34,13 +34,14 @@ import { JobPostModule } from 'src/modules/job-post/job-post.module';
       LocalFile,
     ]),
     ContractsModule,
-    NotificationsModule,
     MessageModule,
     FreelancerModule,
-    ChatRoomModule,
+    forwardRef(() => ChatRoomModule),
+    forwardRef(() => NotificationsModule),
     JobPostModule,
   ],
   providers: [OfferService],
   controllers: [OfferController],
+  exports: [OfferService],
 })
 export class OfferModule {}

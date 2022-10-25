@@ -1,5 +1,7 @@
 import {
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -21,6 +23,8 @@ import {
   TArgs,
 } from 'src/modules/chat-room/typesDef';
 import { Message } from 'src/modules/message/entities/message.entity';
+import { OfferService } from 'src/modules/offer/offer.service';
+import { MessageService } from 'src/modules/message/message.service';
 
 @Injectable()
 export class ChatRoomService {
@@ -29,6 +33,10 @@ export class ChatRoomService {
     private readonly chatRoomRepository: Repository<ChatRoom>,
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
+    @Inject(forwardRef(() => OfferService))
+    private offerService: OfferService,
+    @Inject(forwardRef(() => MessageService))
+    private messageService: MessageService,
   ) {}
 
   async create(data: createChatRoomDto): Promise<ChatRoom> {
@@ -55,7 +63,7 @@ export class ChatRoomService {
 
       if (!chatRoom) throw new NotFoundException();
 
-      return this.parseChatRoomData(chatRoom);
+      return await this.parseChatRoomData(chatRoom);
     } catch (error) {
       if (error instanceof NotFoundException) {
         Logger.error(
@@ -94,7 +102,9 @@ export class ChatRoomService {
         id,
       }).getMany();
 
-      return rooms.map((room) => this.parseChatRoomData(room));
+      return await Promise.all(
+        rooms.map(async (room) => await this.parseChatRoomData(room)),
+      );
     } catch (error) {
       if (error instanceof NotFoundException) {
         Logger.error(
@@ -190,8 +200,15 @@ export class ChatRoomService {
     }
   }
 
-  private parseChatRoomData(chatRoom: ChatRoom): IRoom {
+  private async parseChatRoomData(chatRoom: ChatRoom): Promise<IRoom> {
     try {
+      const offer = await this.offerService.getOneByFreelancerIdAndJobPostId(
+        chatRoom.freelancer.id,
+        chatRoom.jobPost.id,
+      );
+
+      const offerStatus = offer ? offer.status : null;
+
       const freelancer: IFreelancer = {
         id: chatRoom.freelancer.user.id,
         firstName: chatRoom.freelancer.user.firstName,
@@ -220,6 +237,7 @@ export class ChatRoomService {
         client,
         lastMessage,
         jobPost,
+        offerStatus,
       };
     } catch (error) {
       Logger.error('Error occurred while parsing chat room data');
