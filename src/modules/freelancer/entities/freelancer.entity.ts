@@ -16,6 +16,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { RecentlyViewedFreelancers } from 'src/modules/client/entities/recently-viewed-freelancers.entity';
 
 @Entity()
 export class Freelancer {
@@ -68,4 +69,10 @@ export class Freelancer {
 
   @Column()
   categoryId: number;
+
+  @OneToMany(
+    () => RecentlyViewedFreelancers,
+    (recentlyViewedFreelancers) => recentlyViewedFreelancers.freelancer,
+  )
+  recentlyViewedFreelancers!: RecentlyViewedFreelancers[];
 }

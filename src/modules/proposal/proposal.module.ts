@@ -10,6 +10,7 @@ import { ProposalController } from 'src/modules/proposal/proposal.controller';
 import { ProposalService } from 'src/modules/proposal/proposal.service';
 import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { Message } from 'src/modules/message/entities/message.entity';
+import { RecentlyViewedFreelancers } from 'src/modules/client/entities/recently-viewed-freelancers.entity';
 import { LocalFile } from 'src/modules/entities/localFile.entity';
 import { Notification } from 'src/modules/notifications/entities/notification.entity';
 import { FreelancerModule } from 'src/modules/freelancer/freelancer.module';
@@ -32,6 +33,7 @@ import { LocalFilesService } from 'src/modules/job-post/localFiles.service';
       Education,
       ChatRoom,
       Message,
+      RecentlyViewedFreelancers,
       LocalFile,
       Notification,
     ]),
