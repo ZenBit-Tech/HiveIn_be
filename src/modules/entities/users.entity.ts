@@ -125,11 +125,6 @@ export class Users {
   @IsString()
   avatarURL: string;
 
-  // @ApiProperty({
-  //   description: 'Description of user',
-  //   example:
-  //     'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
-  // })
   @JoinColumn()
   @OneToOne(() => PublicFile, {
     eager: true,

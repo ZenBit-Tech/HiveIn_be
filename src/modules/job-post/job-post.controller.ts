@@ -19,7 +19,13 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JobPostService } from 'src/modules/job-post/job-post.service';
 import { CreateJobPostDto } from 'src/modules/job-post/dto/create-job-post.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
@@ -31,6 +37,7 @@ import { multerFileOptions } from 'src/config/multer.config';
 import { SaveJobDraftDto } from 'src/modules/job-post/dto/save-job-draft.dto';
 import { searchJobFiltersDto } from 'src/modules/job-post/dto/search-job-filters.dto';
 import { DeleteResult, UpdateResult } from 'typeorm';
+import { FilteredJobsDto } from './dto/filter-job-post.dto';
 
 @ApiTags('JobPost')
 @Controller('job-post')
@@ -40,6 +47,11 @@ export class JobPostController {
     private readonly localFilesService: LocalFilesService,
   ) {}
 
+  @ApiCreatedResponse({
+    description: 'Created job posts',
+    type: JobPost,
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post()
   @UseInterceptors(FileInterceptor('file', multerFileOptions))
@@ -58,11 +70,23 @@ export class JobPostController {
     return this.jobPostService.save(createJobPostDto, null);
   }
 
+  @ApiCreatedResponse({
+    description: 'Created draft',
+    type: JobPost,
+  })
+  @ApiBearerAuth()
   @Post('draft')
   saveDraft(@Body() saveJobDraftDto: SaveJobDraftDto): Promise<JobPost> {
     return this.jobPostService.saveDraft(saveJobDraftDto);
   }
 
+  @ApiNotFoundResponse({
+    description: 'job post not found',
+  })
+  @ApiOkResponse({
+    description: 'Job post was updated',
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(
@@ -72,19 +96,37 @@ export class JobPostController {
     return this.jobPostService.update(+id, updateJobPostDto);
   }
 
+  @ApiOkResponse({
+    description: 'All job posts',
+    type: [JobPost],
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll(): Promise<JobPost[]> {
     return this.jobPostService.findAll();
   }
 
+  @ApiOkResponse({
+    description: 'Filtered job posts',
+    type: FilteredJobsDto,
+  })
+  @ApiBearerAuth()
   @Get('search-job')
   findAndFilterJobs(
     @Query() queryParams: searchJobFiltersDto,
-  ): Promise<{ data: JobPost[]; totalCount: number }> {
+  ): Promise<FilteredJobsDto> {
     return this.jobPostService.findAndFilterAll(queryParams);
   }
 
+  @ApiOkResponse({
+    description: 'My drafts',
+    type: [JobPost],
+  })
+  @ApiNotFoundResponse({
+    description: 'Job posts not found',
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('self')
   findByUser(
@@ -95,6 +137,14 @@ export class JobPostController {
     return this.jobPostService.findByUser(+id, isDraft);
   }
 
+  @ApiOkResponse({
+    description: 'My drafts or job posts',
+    type: [JobPost],
+  })
+  @ApiNotFoundResponse({
+    description: 'Job posts not found',
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('self/:isDraft')
   findByUserDraft(
@@ -105,18 +155,34 @@ export class JobPostController {
     return this.jobPostService.findByUser(+id, isDraft);
   }
 
+  @ApiOkResponse({
+    description: 'Job post by this id',
+    type: JobPost,
+  })
+  @ApiNotFoundResponse({
+    description: 'Job post not found',
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string): Promise<JobPost> {
     return this.jobPostService.findOne(+id);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string): Promise<DeleteResult> {
     return this.jobPostService.remove(+id);
   }
 
+  @ApiOkResponse({
+    description: 'Job post by this id was deleted',
+  })
+  @ApiNotFoundResponse({
+    description: 'Job post not found',
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('home/self/:isDraft')
   getClientHomePostsAndDrafts(
@@ -127,6 +193,10 @@ export class JobPostController {
     return this.jobPostService.getClientHomePostAndDrafts(id, isDraft);
   }
 
+  @ApiOkResponse({
+    description: 'File was uploaded',
+  })
+  @ApiBearerAuth()
   @Get('/file/:id')
   async getFile(
     @Param('id') id: string,

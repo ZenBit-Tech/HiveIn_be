@@ -18,13 +18,32 @@ import { OfferService } from 'src/modules/offer/offer.service';
 import { Offer } from 'src/modules/offer/entities/offer.entity';
 import { CreateOfferDto } from 'src/modules/offer/dto/create-offer.dto';
 import { UpdateOfferDto } from 'src/modules/offer/dto/update-offer.dto';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotAcceptableResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnprocessableEntityResponse,
+} from '@nestjs/swagger';
 
 @ApiTags('Offer')
 @Controller('offer')
 export class OfferController {
   constructor(private readonly offerService: OfferService) {}
 
+  @ApiForbiddenResponse({
+    description: 'Forbidden',
+  })
+  @ApiOkResponse({
+    description: 'Self offers',
+    type: [Offer],
+  })
+  @ApiInternalServerErrorResponse()
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('self')
   getAllOwn(@Request() req: AuthRequest): Promise<Offer[]> {
@@ -42,6 +61,12 @@ export class OfferController {
     }
   }
 
+  @ApiOkResponse({
+    description: 'Offer by room id',
+    type: Offer,
+  })
+  @ApiInternalServerErrorResponse()
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   getOne(@Param() { id }: searchParamDto): Promise<Offer> {
@@ -59,6 +84,18 @@ export class OfferController {
     }
   }
 
+  @ApiCreatedResponse({
+    description: 'Offer was created',
+    type: Offer,
+  })
+  @ApiNotAcceptableResponse({
+    description: 'Offer to this user related to this job post already exist',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'Unprocessable Entity',
+  })
+  @ApiInternalServerErrorResponse()
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createOfferDto: CreateOfferDto): Promise<Offer> {
@@ -76,6 +113,18 @@ export class OfferController {
     }
   }
 
+  @ApiOkResponse({
+    description: 'Offer was updated',
+    type: Offer,
+  })
+  @ApiNotFoundResponse({
+    description: 'Offer not found',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'Unprocessable Entity',
+  })
+  @ApiInternalServerErrorResponse()
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(

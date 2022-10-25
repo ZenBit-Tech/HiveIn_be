@@ -16,13 +16,22 @@ import { UpdateFreelancerDto } from './dto/update-freelancer.dto';
 import { Freelancer } from './entities/freelancer.entity';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @ApiTags('Freelancer')
 @Controller('freelancer')
 export class FreelancerController {
   constructor(private readonly freelancerService: FreelancerService) {}
 
+  @ApiCreatedResponse({
+    description: 'Freelancer was created',
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post()
   create(
@@ -31,12 +40,22 @@ export class FreelancerController {
     return this.freelancerService.create(createFreelancerDto);
   }
 
+  @ApiOkResponse({
+    description: 'All freelancers',
+    type: [Freelancer],
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@Request() req: AuthRequest): Promise<Freelancer[]> {
     return this.freelancerService.findAll(req.user.id);
   }
 
+  @ApiOkResponse({
+    description: 'Your freelancer entity',
+    type: Freelancer,
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('self')
   findOwn(@Req() req: AuthRequest): Promise<Freelancer> {
@@ -44,12 +63,22 @@ export class FreelancerController {
     return this.freelancerService.findOneByUserId(+id);
   }
 
+  @ApiOkResponse({
+    description: 'Freelancer by id',
+    type: Freelancer,
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Freelancer> {
     return this.freelancerService.findOneByUserId(+id);
   }
 
+  @ApiOkResponse({
+    description: 'Freelancer by id was patched',
+    type: Freelancer,
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(
@@ -59,6 +88,10 @@ export class FreelancerController {
     return this.freelancerService.update(+id, updateFreelancerDto);
   }
 
+  @ApiOkResponse({
+    description: 'Freelancer was deleted',
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string): Promise<void> {

@@ -21,7 +21,7 @@ import {
   WebsocketService,
   Event,
 } from 'src/modules/websocket/websocket.service';
-import { LocalFileDto } from 'src/modules/proposal/dto/localFile.dto';
+import { LocalFileDto } from 'src/modules/job-post/dto/localFile.dto';
 import { LocalFile } from '../entities/localFile.entity';
 import { LocalFilesService } from '../job-post/localFiles.service';
 
