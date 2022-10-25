@@ -25,11 +25,7 @@ export class ClientService {
       .leftJoinAndSelect('freelancer.skills', 'skills')
       .leftJoinAndSelect('freelancer.user', 'users')
       .leftJoinAndSelect('users.avatar', 'avatar')
-      .where({
-        category: {
-          id: +filters.category,
-        },
-      })
+      .where(filters.category ? `category = ${filters.category}` : '1 = 1')
       .getMany();
 
     const filterKeyWords = filters.keyWords.toLowerCase().split(' ');
