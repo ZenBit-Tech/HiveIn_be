@@ -28,6 +28,7 @@ import {
   freelancerOfferMessages,
 } from 'src/utils/systemMessages.consts';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class OfferService {
@@ -39,7 +40,7 @@ export class OfferService {
     private readonly usersRepository: Repository<Users>,
     private readonly freelancerService: FreelancerService,
     private readonly messageService: MessageService,
-    private readonly jobPostService: JobPostService,
+    private mailService: MailerService,
     @Inject(forwardRef(() => ChatRoomService))
     private chatRoomService: ChatRoomService,
     @Inject(forwardRef(() => NotificationsService))
@@ -126,6 +127,11 @@ export class OfferService {
       const currentOffer = await this.offerRepository.findOneBy({ id });
 
       if (!currentOffer) throw new NotFoundException();
+      if (currentOffer.status !== Status.PENDING)
+        throw new HttpException(
+          'Attempted to do something with offer which is not pending!',
+          HttpStatus.BAD_REQUEST,
+        );
 
       const offer = await this.offerRepository.save({
         ...currentOffer,
@@ -158,7 +164,6 @@ export class OfferService {
           offer.jobPost.id,
           offer.freelancer.id,
         );
-
       return { offer, clientId, freelancerUserId, chatRoomId };
     } catch (error) {
       Logger.error('Error occurred while trying to get info for update offer');
@@ -172,6 +177,13 @@ export class OfferService {
     try {
       const { offer, clientId, freelancerUserId, chatRoomId } =
         await this.getInfoForUpdateOffer(offerId);
+
+      await this.mailService.sendMail({
+        to: offer.jobPost.user.email,
+        subject: 'GetJob Accept Offer',
+        from: 'milkav06062003@gmail.com',
+        html: `<h1>Your offer to work "${offer.jobPost.title}" was accepted by freelancer ${offer.freelancer.position}</h1>`,
+      });
 
       await this.messageService.createSystemMessage(
         {
