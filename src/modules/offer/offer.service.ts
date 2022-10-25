@@ -21,7 +21,6 @@ import { UserRole, Users } from 'src/modules/entities/users.entity';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { FreelancerService } from 'src/modules/freelancer/freelancer.service';
 import { MessageService } from 'src/modules/message/message.service';
-import { JobPostService } from 'src/modules/job-post/job-post.service';
 import {
   clientOfferMessages,
   constSystemMessages,
@@ -220,6 +219,7 @@ export class OfferService {
       Logger.error('Error occurred while trying to accept offer');
       if (error instanceof HttpException)
         throw new HttpException(error.message, error.getStatus());
+      if (error instanceof Error) throw new HttpException(error.message, 444);
       throw new UnprocessableEntityException();
     }
   }

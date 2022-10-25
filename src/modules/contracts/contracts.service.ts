@@ -5,8 +5,6 @@ import { UpdateContractDto } from 'src/modules/contracts/dto/update-contract.dto
 import { Contracts } from 'src/modules/contracts/entities/contracts.entity';
 import { DeleteResult, InsertResult, Repository } from 'typeorm';
 import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
-import { genSalt, hash } from 'bcryptjs';
-import { SALT_ROUND } from 'src/utils/jwt.consts';
 
 @Injectable()
 export class ContractsService {
@@ -18,44 +16,12 @@ export class ContractsService {
   ) {}
 
   async create(createContractDto: CreateContractDto): Promise<InsertResult> {
-    const result = await this.contractRepo
+    return await this.contractRepo
       .createQueryBuilder('contracts')
       .insert()
       .into(Contracts)
       .values([createContractDto])
       .execute();
-
-    const contract = await this.contractRepo
-      .createQueryBuilder('contracts')
-      .leftJoinAndSelect('contracts.offer', 'offer')
-      .leftJoinAndSelect('offer.freelancer', 'offer_freelancer')
-      .leftJoinAndSelect('offer.jobPost', 'jobPost')
-      .leftJoinAndSelect('jobPost.chatRoom', 'chatRoom')
-      .leftJoinAndSelect('chatRoom.freelancer', 'freelancer')
-      .where({ id: result.raw.insertId })
-      .getOne();
-
-    const chatRoom = contract.offer.jobPost.chatRoom.find(
-      (chatRoom: ChatRoom) => {
-        return chatRoom.freelancer.id === contract.offer.freelancer.id;
-      },
-    );
-    const chatDeleteDate = new Date(
-      contract.endDate.setMonth(contract.endDate.getMonth() + 6),
-    );
-    const salt = await genSalt(SALT_ROUND);
-    const prolongLink = await hash('prolong' + chatRoom.id, salt);
-
-    await this.chatRoomRepo
-      .createQueryBuilder('chatRoom')
-      .update(ChatRoom)
-      .set({
-        deleteDate: chatDeleteDate,
-        prolongLink,
-      })
-      .where('id = :id', { id: chatRoom.id })
-      .execute();
-    return result;
   }
 
   async findAll(): Promise<Contracts[]> {
