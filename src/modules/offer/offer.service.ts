@@ -173,13 +173,6 @@ export class OfferService {
       const { offer, clientId, freelancerUserId, chatRoomId } =
         await this.getInfoForUpdateOffer(offerId);
 
-      if (offer.status !== Status.PENDING) {
-        throw new HttpException(
-          'Attempted to accept offer which is not pending!',
-          400,
-        );
-      }
-
       await this.messageService.createSystemMessage(
         {
           chatRoomId,
@@ -223,13 +216,6 @@ export class OfferService {
     try {
       const { offer, clientId, freelancerUserId, chatRoomId } =
         await this.getInfoForUpdateOffer(offerId);
-
-      if (offer.status !== Status.PENDING) {
-        throw new HttpException(
-          'Attempted to reject offer which is not pending!',
-          400,
-        );
-      }
 
       await this.messageService.createSystemMessage(
         {
