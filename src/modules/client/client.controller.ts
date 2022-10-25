@@ -9,6 +9,9 @@ import {
   Param,
   Post,
   Request,
+  Logger,
+  InternalServerErrorException,
+  HttpException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request as HttpRequest } from 'express';
@@ -53,7 +56,18 @@ export class ClientController {
     @Request() req: AuthRequest,
     @Param('freelancerId') freelancerId: number,
   ): Promise<InsertResult> {
-    return this.clientService.viewFreelancer(req.user.id, freelancerId);
+    try {
+      return this.clientService.viewFreelancer(req.user.id, freelancerId);
+    } catch (error) {
+      Logger.error('Error occurred in client controller (view freelancer)');
+      if (error instanceof HttpException)
+        return Promise.reject(
+          new HttpException(error.message, error.getStatus()),
+        );
+      if (error instanceof Error)
+        return Promise.reject(new Error(error.message));
+      return Promise.reject(new InternalServerErrorException());
+    }
   }
 
   @UseGuards(AuthGuard('jwt'))
