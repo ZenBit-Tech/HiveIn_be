@@ -18,3 +18,7 @@ export const clientOfferMessages = Object.freeze({
   reject: 'Your offer to this freelancer rejected!',
   expire: 'Your offer to this freelancer expired!',
 });
+
+export const contractMessages = Object.freeze({
+  closeByFreelancer: 'Contract was closed by freelancer',
+});
