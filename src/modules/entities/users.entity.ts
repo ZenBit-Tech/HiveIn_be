@@ -13,6 +13,7 @@ import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { ForgotPassword } from './forgot-password.entity';
 import { Exclude } from 'class-transformer';
 import PublicFile from 'src/modules/file/entities/publicFile.entity';
+import { RecentlyViewedFreelancers } from 'src/modules/client/entities/recently-viewed-freelancers.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum UserRole {
@@ -121,10 +122,6 @@ export class Users {
   @IsString()
   description: string;
 
-  @Column({ nullable: true })
-  @IsString()
-  avatarURL: string;
-
   @JoinColumn()
   @OneToOne(() => PublicFile, {
     eager: true,
@@ -141,9 +138,11 @@ export class Users {
   )
   forgotPassword: ForgotPassword[];
 
-  @ManyToMany(() => Freelancer)
-  @JoinTable()
-  recentlyViewedFreelancers: Freelancer[];
+  @OneToMany(
+    () => RecentlyViewedFreelancers,
+    (recentlyViewedFreelancers) => recentlyViewedFreelancers.user,
+  )
+  recentlyViewedFreelancers!: RecentlyViewedFreelancers[];
 
   @ManyToMany(() => Freelancer)
   @JoinTable()

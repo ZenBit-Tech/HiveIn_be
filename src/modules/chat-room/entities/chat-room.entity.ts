@@ -11,6 +11,7 @@ import { JobPost } from 'src/modules/job-post/entities/job-post.entity';
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { Message } from 'src/modules/message/entities/message.entity';
 import { chatRoomStatus } from 'src/modules/chat-room/typesDef';
+import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
@@ -42,7 +43,9 @@ export class ChatRoom {
     description: 'Message',
     type: [Message],
   })
-  @OneToMany(() => Message, (message) => message.chatRoom)
+  @OneToMany(() => Message, (message) => message.chatRoom, {
+    cascade: true,
+  })
   message: Message[];
 
   @ApiProperty({
@@ -61,4 +64,11 @@ export class ChatRoom {
   })
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Column({ nullable: true })
+  @IsString()
+  prolongLink: string;
+
+  @Column({ nullable: true })
+  deleteDate: Date;
 }

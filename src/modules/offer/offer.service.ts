@@ -21,13 +21,13 @@ import { UserRole, Users } from 'src/modules/entities/users.entity';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { FreelancerService } from 'src/modules/freelancer/freelancer.service';
 import { MessageService } from 'src/modules/message/message.service';
-import { JobPostService } from 'src/modules/job-post/job-post.service';
 import {
   clientOfferMessages,
   constSystemMessages,
   freelancerOfferMessages,
 } from 'src/utils/systemMessages.consts';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class OfferService {
@@ -39,7 +39,7 @@ export class OfferService {
     private readonly usersRepository: Repository<Users>,
     private readonly freelancerService: FreelancerService,
     private readonly messageService: MessageService,
-    private readonly jobPostService: JobPostService,
+    private mailService: MailerService,
     @Inject(forwardRef(() => ChatRoomService))
     private chatRoomService: ChatRoomService,
     @Inject(forwardRef(() => NotificationsService))
@@ -126,6 +126,11 @@ export class OfferService {
       const currentOffer = await this.offerRepository.findOneBy({ id });
 
       if (!currentOffer) throw new NotFoundException();
+      if (currentOffer.status !== Status.PENDING)
+        throw new HttpException(
+          'Attempted to do something with offer which is not pending!',
+          HttpStatus.BAD_REQUEST,
+        );
 
       const offer = await this.offerRepository.save({
         ...currentOffer,
@@ -158,7 +163,6 @@ export class OfferService {
           offer.jobPost.id,
           offer.freelancer.id,
         );
-
       return { offer, clientId, freelancerUserId, chatRoomId };
     } catch (error) {
       Logger.error('Error occurred while trying to get info for update offer');
@@ -173,12 +177,12 @@ export class OfferService {
       const { offer, clientId, freelancerUserId, chatRoomId } =
         await this.getInfoForUpdateOffer(offerId);
 
-      if (offer.status !== Status.PENDING) {
-        throw new HttpException(
-          'Attempted to accept offer which is not pending!',
-          400,
-        );
-      }
+      await this.mailService.sendMail({
+        to: offer.jobPost.user.email,
+        subject: 'GetJob Accept Offer',
+        from: 'milkav06062003@gmail.com',
+        html: `<h1>Your offer to work "${offer.jobPost.title}" was accepted by freelancer ${offer.freelancer.position}</h1>`,
+      });
 
       await this.messageService.createSystemMessage(
         {
@@ -215,6 +219,7 @@ export class OfferService {
       Logger.error('Error occurred while trying to accept offer');
       if (error instanceof HttpException)
         throw new HttpException(error.message, error.getStatus());
+      if (error instanceof Error) throw new HttpException(error.message, 444);
       throw new UnprocessableEntityException();
     }
   }
@@ -223,13 +228,6 @@ export class OfferService {
     try {
       const { offer, clientId, freelancerUserId, chatRoomId } =
         await this.getInfoForUpdateOffer(offerId);
-
-      if (offer.status !== Status.PENDING) {
-        throw new HttpException(
-          'Attempted to reject offer which is not pending!',
-          400,
-        );
-      }
 
       await this.messageService.createSystemMessage(
         {

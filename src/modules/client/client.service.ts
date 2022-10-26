@@ -1,3 +1,4 @@
+import { RecentlyViewedFreelancers } from 'src/modules/client/entities/recently-viewed-freelancers.entity';
 import { Skill } from 'src/modules/skill/entities/skill.entity';
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { Injectable } from '@nestjs/common';
@@ -13,78 +14,69 @@ export class ClientService {
     private readonly usersRepo: Repository<Users>,
     @InjectRepository(Freelancer)
     private readonly freelancersRepo: Repository<Freelancer>,
+    @InjectRepository(RecentlyViewedFreelancers)
+    private readonly recentlyViewedFreelancersRepo: Repository<RecentlyViewedFreelancers>,
   ) {}
 
-  async filterCandidate(userId: number, filters: CandidateFilterDto) {
+  async filterCandidate(
+    userId: number,
+    { keyWords, category, skills }: CandidateFilterDto,
+  ) {
     const filterByCategory = await this.freelancersRepo
       .createQueryBuilder('freelancer')
       .leftJoinAndSelect('freelancer.category', 'category')
       .leftJoinAndSelect('freelancer.skills', 'skills')
       .leftJoinAndSelect('freelancer.user', 'users')
       .leftJoinAndSelect('users.avatar', 'avatar')
-      .where({
-        category: {
-          id: +filters.category,
-        },
-      })
+      .where(category ? `categoryId = '${category}'` : '1 = 1')
+      .andWhere(
+        keyWords
+          ? `(description LIKE '%${keyWords}%' OR position LIKE '%${keyWords}%')`
+          : '1 = 1',
+      )
       .getMany();
 
-    const filterKeyWords = filters.keyWords.toLowerCase().split(' ');
-
-    const filterSkills: number[] = filters.skills
-      .split(',')
-      .map((skill) => +skill);
+    const filterSkills: number[] = skills.split(',').map((skill) => +skill);
 
     const result = filterByCategory.filter((freelancer: Freelancer) => {
-      const resultKeyWordsFilter =
-        freelancer.user.description
-          .toLowerCase()
-          .split(' ')
-          .concat(freelancer.position.toLowerCase().split(' '))
-          .filter((descriptionWord: string) =>
-            filterKeyWords.includes(descriptionWord),
-          ).length !== 0;
-
-      const resultSkillsFilter =
+      return (
         freelancer.skills.filter((skill: Skill) =>
           filterSkills.includes(skill.id),
-        ).length !== 0;
-
-      return resultKeyWordsFilter && resultSkillsFilter;
+        ).length !== 0
+      );
     });
 
     return await this.addSavesField(userId, result);
   }
 
   async getRecentlyViewedFreelancer(userId: any) {
-    const { recentlyViewedFreelancers } = await this.usersRepo
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.recentlyViewedFreelancers', 'freelancer')
+    const recentlyViewedFreelancers = await this.freelancersRepo
+      .createQueryBuilder('freelancer')
+      .leftJoinAndSelect(
+        'freelancer.recentlyViewedFreelancers',
+        'recentlyViewedFreelancers',
+      )
+      .leftJoinAndSelect('recentlyViewedFreelancers.user', 'user')
       .leftJoinAndSelect('freelancer.user', 'freelancerUser')
       .leftJoinAndSelect('freelancerUser.avatar', 'avatar')
-      .where({ id: userId })
-      .getOne();
-
+      .where(`user.id = ${userId}`)
+      .orderBy('recentlyViewedFreelancers.UpdatedAt', 'DESC')
+      .getMany();
     return await this.addSavesField(userId, recentlyViewedFreelancers);
   }
 
   async viewFreelancer(userId: number, freelancerId: number) {
-    const freelancer = await this.freelancersRepo.findOneBy({
-      id: freelancerId,
-    });
-
-    const user = await this.usersRepo
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.recentlyViewedFreelancers', 'freelancer')
-      .leftJoinAndSelect('freelancer.user', 'freelancerUser')
-      .leftJoinAndSelect('freelancerUser.avatar', 'avatar')
-      .where({ id: userId })
-      .getOne();
-
-    user.recentlyViewedFreelancers.push(freelancer);
-
-    this.usersRepo.save(user);
-    return await this.addSavesField(userId, user.recentlyViewedFreelancers);
+    return await this.recentlyViewedFreelancersRepo
+      .createQueryBuilder()
+      .insert()
+      .into(RecentlyViewedFreelancers)
+      .values([
+        {
+          user: { id: userId },
+          freelancer: { id: freelancerId },
+        },
+      ])
+      .execute();
   }
 
   async getSavedFreelancers(userId: number) {

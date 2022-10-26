@@ -1,3 +1,4 @@
+import { InsertResult } from 'typeorm';
 import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { ClientService } from './client.service';
 import {
@@ -8,6 +9,9 @@ import {
   Param,
   Post,
   Request,
+  Logger,
+  InternalServerErrorException,
+  HttpException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request as HttpRequest } from 'express';
@@ -71,8 +75,19 @@ export class ClientController {
   viewFreelancer(
     @Request() req: AuthRequest,
     @Param('freelancerId') freelancerId: number,
-  ): Promise<Freelancer[]> {
-    return this.clientService.viewFreelancer(req.user.id, freelancerId);
+  ): Promise<InsertResult> {
+    try {
+      return this.clientService.viewFreelancer(req.user.id, freelancerId);
+    } catch (error) {
+      Logger.error('Error occurred in client controller (view freelancer)');
+      if (error instanceof HttpException)
+        return Promise.reject(
+          new HttpException(error.message, error.getStatus()),
+        );
+      if (error instanceof Error)
+        return Promise.reject(new Error(error.message));
+      return Promise.reject(new InternalServerErrorException());
+    }
   }
 
   @ApiOkResponse({

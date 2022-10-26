@@ -1,3 +1,4 @@
+import { MONTHS_IN_HALF_YEAR, SALT_ROUND } from 'src/utils/jwt.consts';
 import {
   ForbiddenException,
   forwardRef,
@@ -25,6 +26,7 @@ import {
 import { Message } from 'src/modules/message/entities/message.entity';
 import { OfferService } from 'src/modules/offer/offer.service';
 import { MessageService } from 'src/modules/message/message.service';
+import { genSalt, hash } from 'bcryptjs';
 
 @Injectable()
 export class ChatRoomService {
@@ -159,6 +161,8 @@ export class ChatRoomService {
       .leftJoinAndSelect('chat_room.freelancer', 'freelancer')
       .leftJoinAndSelect('job_post.user', 'client_user_profile')
       .leftJoinAndSelect('freelancer.user', 'freelancer_user_profile')
+      .leftJoinAndSelect('freelancer_user_profile.avatar', 'avatarUser')
+      .leftJoinAndSelect('client_user_profile.avatar', 'avatarFreelancer')
       .where(`${columnName}.id = ${id}`)
       .orderBy('updated_at', 'DESC');
   }
@@ -200,6 +204,25 @@ export class ChatRoomService {
     }
   }
 
+  async prolongChat(id: number, token: string): Promise<UpdateResult> {
+    const salt = await genSalt(SALT_ROUND);
+    const prolongLink = await hash('prolong' + id, salt);
+
+    const result = await this.chatRoomRepository
+      .createQueryBuilder()
+      .update(ChatRoom)
+      .set({
+        deleteDate: new Date(
+          new Date().setMonth(new Date().getMonth() + MONTHS_IN_HALF_YEAR),
+        ),
+        prolongLink,
+      })
+      .where('id = :id', { id })
+      .andWhere('prolongLink = :token', { token })
+      .execute();
+    return result;
+  }
+
   private async parseChatRoomData(chatRoom: ChatRoom): Promise<IRoom> {
     try {
       const offer = await this.offerService.getOneByFreelancerIdAndJobPostId(
@@ -213,7 +236,7 @@ export class ChatRoomService {
         id: chatRoom.freelancer.user.id,
         firstName: chatRoom.freelancer.user.firstName,
         lastName: chatRoom.freelancer.user.lastName,
-        avatarURL: chatRoom.freelancer.user.avatarURL,
+        avatarURL: chatRoom.freelancer.user.avatar?.url,
         freelancerId: chatRoom.freelancer.id,
       };
 
@@ -221,7 +244,7 @@ export class ChatRoomService {
         id: chatRoom.jobPost.user.id,
         firstName: chatRoom.jobPost.user.firstName,
         lastName: chatRoom.jobPost.user.lastName,
-        avatarURL: chatRoom.jobPost.user.avatarURL,
+        avatarURL: chatRoom.jobPost.user.avatar?.url,
       };
 
       const jobPost: IChatRoom = {

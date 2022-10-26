@@ -39,7 +39,7 @@ export enum Event {
 
 @WebSocketGateway({
   cors: {
-    origin: [process.env.FRONTEND_URL],
+    origin: '*',
     methods: ['GET', 'POST'],
     credentials: true,
   },

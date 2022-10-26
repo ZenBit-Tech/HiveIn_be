@@ -17,6 +17,7 @@ import { Users } from 'src/modules/entities/users.entity';
 import { LocalFile } from 'src/modules/entities/localFile.entity';
 import { Offer } from 'src/modules/offer/entities/offer.entity';
 import { Proposal } from 'src/modules/proposal/entities/proposal.entity';
+import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum DurationType {
@@ -156,4 +157,7 @@ export class JobPost {
   })
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => ChatRoom, (chatRoom) => chatRoom.jobPost)
+  chatRoom: ChatRoom[];
 }

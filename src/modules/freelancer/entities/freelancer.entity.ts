@@ -16,6 +16,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { RecentlyViewedFreelancers } from 'src/modules/client/entities/recently-viewed-freelancers.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { EnglishLevel } from 'src/modules/job-post/entities/job-post.entity';
 
@@ -114,4 +115,10 @@ export class Freelancer {
 
   @Column()
   categoryId: number;
+
+  @OneToMany(
+    () => RecentlyViewedFreelancers,
+    (recentlyViewedFreelancers) => recentlyViewedFreelancers.freelancer,
+  )
+  recentlyViewedFreelancers!: RecentlyViewedFreelancers[];
 }

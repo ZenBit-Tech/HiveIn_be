@@ -1,3 +1,4 @@
+import { RecentlyViewedFreelancers } from 'src/modules/client/entities/recently-viewed-freelancers.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClientService } from 'src/modules/client/client.service';
@@ -10,7 +11,13 @@ import { Users } from 'src/modules/entities/users.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Freelancer, Experience, Education, Users]),
+    TypeOrmModule.forFeature([
+      Freelancer,
+      Experience,
+      Education,
+      Users,
+      RecentlyViewedFreelancers,
+    ]),
   ],
   controllers: [FreelancerController],
   providers: [FreelancerService, ClientService],
