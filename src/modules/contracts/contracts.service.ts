@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateContractDto } from 'src/modules/contracts/dto/create-contract.dto';
 import { UpdateContractDto } from 'src/modules/contracts/dto/update-contract.dto';
@@ -7,6 +12,9 @@ import { DeleteResult, InsertResult, Repository } from 'typeorm';
 import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { genSalt, hash } from 'bcryptjs';
 import { SALT_ROUND } from 'src/utils/jwt.consts';
+import { NotificationsService } from 'src/modules/notifications/notifications.service';
+import { MessageService } from 'src/modules/message/message.service';
+import { contractMessages } from 'src/utils/systemMessages.consts';
 
 @Injectable()
 export class ContractsService {
@@ -15,6 +23,10 @@ export class ContractsService {
     private readonly contractRepo: Repository<Contracts>,
     @InjectRepository(ChatRoom)
     private readonly chatRoomRepo: Repository<ChatRoom>,
+    @Inject(forwardRef(() => NotificationsService))
+    private readonly notificationsService: NotificationsService,
+    @Inject(forwardRef(() => MessageService))
+    private readonly messageService: MessageService,
   ) {}
 
   async create(createContractDto: CreateContractDto): Promise<InsertResult> {
@@ -116,6 +128,7 @@ export class ContractsService {
         .leftJoinAndSelect('offer.freelancer', 'offer_freelancer')
         .leftJoinAndSelect('offer.jobPost', 'jobPost')
         .leftJoinAndSelect('jobPost.chatRoom', 'chatRoom')
+        .leftJoinAndSelect('jobPost.user', 'user')
         .leftJoinAndSelect('chatRoom.freelancer', 'freelancer')
         .where({ id: id })
         .getOne();
@@ -140,6 +153,32 @@ export class ContractsService {
         })
         .where('id = :id', { id: chatRoom.id })
         .execute();
+
+      await this.notificationsService.createOfferNotification(
+        contract.offer.id,
+        contract.offer.jobPost.user.id,
+        contractMessages.closeByFreelancer,
+      );
+
+      await this.messageService.createSystemMessage(
+        {
+          chatRoomId: chatRoom.id,
+          userId: contract.offer.jobPost.user.id,
+          text: contractMessages.closeByFreelancer,
+        },
+        true,
+        true,
+      );
+
+      await this.messageService.createSystemMessage(
+        {
+          chatRoomId: chatRoom.id,
+          userId: contract.offer.freelancer.userId,
+          text: contractMessages.closeByFreelancer,
+        },
+        true,
+        true,
+      );
     }
   }
 

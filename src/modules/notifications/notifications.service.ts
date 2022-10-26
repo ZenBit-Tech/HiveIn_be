@@ -26,6 +26,7 @@ import {
 } from 'src/modules/notifications/typesDef';
 import { constSystemMessages } from 'src/utils/systemMessages.consts';
 import { OfferService } from 'src/modules/offer/offer.service';
+import { ContractsService } from 'src/modules/contracts/contracts.service';
 
 @Injectable()
 export class NotificationsService {
@@ -37,6 +38,8 @@ export class NotificationsService {
     private chatRoomService: ChatRoomService,
     @Inject(forwardRef(() => OfferService))
     private offerService: OfferService,
+    @Inject(forwardRef(() => ContractsService))
+    private contractsService: ContractsService,
   ) {}
 
   async create(data: CreateNotificationDto): Promise<Notification> {

@@ -9,6 +9,7 @@ import { Freelancer } from 'src/modules/freelancer/entities/freelancer.entity';
 import { ChatRoomModule } from 'src/modules/chat-room/chat-room.module';
 import { NotificationsModule } from 'src/modules/notifications/notifications.module';
 import { WebsocketModule } from 'src/modules/websocket/websocket.module';
+import { ContractsModule } from 'src/modules/contracts/contracts.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { WebsocketModule } from 'src/modules/websocket/websocket.module';
     forwardRef(() => NotificationsModule),
     forwardRef(() => WebsocketModule),
     forwardRef(() => ChatRoomModule),
+    forwardRef(() => ContractsModule),
   ],
   providers: [MessageService],
   exports: [MessageService],

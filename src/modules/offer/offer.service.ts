@@ -126,7 +126,10 @@ export class OfferService {
       const currentOffer = await this.offerRepository.findOneBy({ id });
 
       if (!currentOffer) throw new NotFoundException();
-      if (currentOffer.status !== Status.PENDING)
+      if (
+        currentOffer.status !== Status.PENDING &&
+        updateOfferDto.status !== Status.EXPIRED
+      )
         throw new HttpException(
           'Attempted to do something with offer which is not pending!',
           HttpStatus.BAD_REQUEST,
@@ -177,12 +180,16 @@ export class OfferService {
       const { offer, clientId, freelancerUserId, chatRoomId } =
         await this.getInfoForUpdateOffer(offerId);
 
-      await this.mailService.sendMail({
-        to: offer.jobPost.user.email,
-        subject: 'GetJob Accept Offer',
-        from: 'milkav06062003@gmail.com',
-        html: `<h1>Your offer to work "${offer.jobPost.title}" was accepted by freelancer ${offer.freelancer.position}</h1>`,
-      });
+      try {
+        await this.mailService.sendMail({
+          to: offer.jobPost.user.email,
+          subject: 'GetJob Accept Offer',
+          from: 'milkav06062003@gmail.com',
+          html: `<h1>Your offer to work "${offer.jobPost.title}" was accepted by freelancer ${offer.freelancer.position}</h1>`,
+        });
+      } catch (error) {
+        Logger.error('Error in mail service');
+      }
 
       await this.messageService.createSystemMessage(
         {

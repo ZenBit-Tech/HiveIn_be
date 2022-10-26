@@ -23,6 +23,7 @@ import {
   Event,
   WebsocketService,
 } from 'src/modules/websocket/websocket.service';
+import { ContractsService } from 'src/modules/contracts/contracts.service';
 
 @Injectable()
 export class MessageService {
@@ -37,6 +38,8 @@ export class MessageService {
     private chatRoomService: ChatRoomService,
     @Inject(forwardRef(() => WebsocketService))
     private wsService: WebsocketService,
+    @Inject(forwardRef(() => ContractsService))
+    private contractsService: ContractsService,
   ) {}
 
   async create(data: createMessageDto): Promise<Message> {

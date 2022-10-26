@@ -12,6 +12,7 @@ import { SettingsInfoModule } from 'src/modules/settings-info/settings-info.modu
 import { WebsocketModule } from 'src/modules/websocket/websocket.module';
 import { ChatRoomService } from 'src/modules/chat-room/chat-room.service';
 import { OfferModule } from 'src/modules/offer/offer.module';
+import { ContractsModule } from 'src/modules/contracts/contracts.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { OfferModule } from 'src/modules/offer/offer.module';
     forwardRef(() => MessageModule),
     forwardRef(() => WebsocketModule),
     forwardRef(() => OfferModule),
+    forwardRef(() => ContractsModule),
     SettingsInfoModule,
     ChatRoomModule,
   ],
