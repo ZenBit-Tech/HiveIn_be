@@ -18,38 +18,32 @@ export class ClientService {
     private readonly recentlyViewedFreelancersRepo: Repository<RecentlyViewedFreelancers>,
   ) {}
 
-  async filterCandidate(userId: number, filters: CandidateFilterDto) {
+  async filterCandidate(
+    userId: number,
+    { keyWords, category, skills }: CandidateFilterDto,
+  ) {
     const filterByCategory = await this.freelancersRepo
       .createQueryBuilder('freelancer')
       .leftJoinAndSelect('freelancer.category', 'category')
       .leftJoinAndSelect('freelancer.skills', 'skills')
       .leftJoinAndSelect('freelancer.user', 'users')
       .leftJoinAndSelect('users.avatar', 'avatar')
-      .where(filters.category ? `category = ${filters.category}` : '1 = 1')
+      .where(category ? `categoryId = '${category}'` : '1 = 1')
+      .andWhere(
+        keyWords
+          ? `(description LIKE '%${keyWords}%' OR position LIKE '%${keyWords}%')`
+          : '1 = 1',
+      )
       .getMany();
 
-    const filterKeyWords = filters.keyWords.toLowerCase().split(' ');
-
-    const filterSkills: number[] = filters.skills
-      .split(',')
-      .map((skill) => +skill);
+    const filterSkills: number[] = skills.split(',').map((skill) => +skill);
 
     const result = filterByCategory.filter((freelancer: Freelancer) => {
-      const resultKeyWordsFilter =
-        freelancer.user.description
-          .toLowerCase()
-          .split(' ')
-          .concat(freelancer.position.toLowerCase().split(' '))
-          .filter((descriptionWord: string) =>
-            filterKeyWords.includes(descriptionWord),
-          ).length !== 0;
-
-      const resultSkillsFilter =
+      return (
         freelancer.skills.filter((skill: Skill) =>
           filterSkills.includes(skill.id),
-        ).length !== 0;
-
-      return resultKeyWordsFilter && resultSkillsFilter;
+        ).length !== 0
+      );
     });
 
     return await this.addSavesField(userId, result);
