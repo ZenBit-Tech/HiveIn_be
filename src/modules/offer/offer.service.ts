@@ -180,12 +180,16 @@ export class OfferService {
       const { offer, clientId, freelancerUserId, chatRoomId } =
         await this.getInfoForUpdateOffer(offerId);
 
-      await this.mailService.sendMail({
-        to: offer.jobPost.user.email,
-        subject: 'GetJob Accept Offer',
-        from: 'milkav06062003@gmail.com',
-        html: `<h1>Your offer to work "${offer.jobPost.title}" was accepted by freelancer ${offer.freelancer.position}</h1>`,
-      });
+      try {
+        await this.mailService.sendMail({
+          to: offer.jobPost.user.email,
+          subject: 'GetJob Accept Offer',
+          from: 'milkav06062003@gmail.com',
+          html: `<h1>Your offer to work "${offer.jobPost.title}" was accepted by freelancer ${offer.freelancer.position}</h1>`,
+        });
+      } catch (error) {
+        Logger.error('Error in mail service');
+      }
 
       await this.messageService.createSystemMessage(
         {
