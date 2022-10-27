@@ -172,6 +172,8 @@ export class MessageService {
         messageType: MessageType.FROM_SYSTEM,
       });
 
+      await this.chatRoomService.updateAfterReceiveMessage(data.chatRoomId);
+
       if (shouldNotify) {
         await this.notificationsService.createMessageNotification(
           message.id,
@@ -207,6 +209,8 @@ export class MessageService {
         user: { id: data.userId },
         messageType: MessageType.FROM_SYSTEM_OFFER,
       });
+
+      await this.chatRoomService.updateAfterReceiveMessage(data.chatRoomId);
 
       if (shouldNotify) {
         await this.notificationsService.createMessageNotification(
