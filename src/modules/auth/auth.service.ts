@@ -213,7 +213,6 @@ export class AuthService {
     );
 
     await this.authRepo.update(user.id, {
-      ...user,
       avatar,
     });
     return avatar;
