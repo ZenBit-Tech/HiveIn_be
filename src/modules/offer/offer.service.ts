@@ -126,10 +126,7 @@ export class OfferService {
       const currentOffer = await this.offerRepository.findOneBy({ id });
 
       if (!currentOffer) throw new NotFoundException();
-      if (
-        currentOffer.status !== Status.PENDING &&
-        updateOfferDto.status !== Status.EXPIRED
-      )
+      if (currentOffer.status !== Status.PENDING)
         throw new HttpException(
           'Attempted to do something with offer which is not pending!',
           HttpStatus.BAD_REQUEST,
