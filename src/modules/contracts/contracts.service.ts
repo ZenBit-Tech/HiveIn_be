@@ -15,6 +15,7 @@ import { SALT_ROUND } from 'src/utils/jwt.consts';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { MessageService } from 'src/modules/message/message.service';
 import { contractMessages } from 'src/utils/systemMessages.consts';
+import { ClientService } from 'src/modules/client/client.service';
 
 @Injectable()
 export class ContractsService {
@@ -27,9 +28,19 @@ export class ContractsService {
     private readonly notificationsService: NotificationsService,
     @Inject(forwardRef(() => MessageService))
     private readonly messageService: MessageService,
+    private readonly clientService: ClientService,
   ) {}
 
   async create(createContractDto: CreateContractDto): Promise<InsertResult> {
+    const {
+      offer: {
+        freelancer: { id: freelancerId },
+        jobPost: { user },
+      },
+    } = createContractDto;
+
+    await this.clientService.hireFreelancer(user.id, freelancerId);
+
     return await this.contractRepo
       .createQueryBuilder('contracts')
       .insert()
