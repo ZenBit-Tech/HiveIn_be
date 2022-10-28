@@ -15,19 +15,29 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request as HttpRequest } from 'express';
-
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 interface UserJwtPayload {
   id: number;
 }
 
 type AuthRequest = HttpRequest & { user: UserJwtPayload };
 
+@ApiTags('Client')
 @Controller('client')
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 
+  @ApiOkResponse({
+    description: 'Filter freelancers',
+    type: [Freelancer],
+  })
+  @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-  @HttpCode(200)
   @Get('filter/:keyWords/:category/:skills')
   filter(
     @Request() req: AuthRequest,
@@ -42,6 +52,11 @@ export class ClientController {
     });
   }
 
+  @ApiOkResponse({
+    description: 'Recently viewed freelancers',
+    type: [Freelancer],
+  })
+  @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
   @Get('recently-viewed')
@@ -49,6 +64,11 @@ export class ClientController {
     return this.clientService.getRecentlyViewedFreelancer(req.user.id);
   }
 
+  @ApiOkResponse({
+    description: 'Freelacer was view',
+    type: [Freelancer],
+  })
+  @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
   @Post('view/:freelancerId')
@@ -70,6 +90,11 @@ export class ClientController {
     }
   }
 
+  @ApiOkResponse({
+    description: 'Saved freelancers',
+    type: [Freelancer],
+  })
+  @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
   @Get('saved-freelancers')
@@ -77,6 +102,11 @@ export class ClientController {
     return this.clientService.getSavedFreelancers(req.user.id);
   }
 
+  @ApiOkResponse({
+    description: 'Freelacer was save',
+    type: [Freelancer],
+  })
+  @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
   @Post('save/:freelancerId')
@@ -87,8 +117,13 @@ export class ClientController {
     return this.clientService.saveFreelancer(req.user.id, freelancerId);
   }
 
+  @ApiOkResponse({
+    description: 'Hired freelancers',
+    type: [Freelancer],
+  })
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
+  @ApiBearerAuth()
   @Get('hired-freelancers')
   getHiredFreelancers(@Request() req: AuthRequest): Promise<Freelancer[]> {
     return this.clientService.getHiredFreelancers(req.user.id);

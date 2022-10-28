@@ -24,11 +24,33 @@ import { CreateProposalDto } from 'src/modules/proposal/dto/create-proposal.dto'
 import { ProposalService } from 'src/modules/proposal/proposal.service';
 import { AuthRequest } from 'src/utils/@types/AuthRequest';
 import { multerFileOptions } from 'src/config/multer.config';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiParam,
+  ApiTags,
+  ApiUnprocessableEntityResponse,
+} from '@nestjs/swagger';
 
+@ApiTags('Proposal')
 @Controller('proposal')
 export class ProposalController {
   constructor(private readonly proposalService: ProposalService) {}
 
+  @ApiCreatedResponse({
+    description: 'Created proposal',
+    type: () => Proposal,
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'JobPost or freelancer with this id does not exist',
+  })
+  @ApiParam({
+    name: 'type',
+    required: true,
+    enum: ProposalType,
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post(':type')
   @UseInterceptors(FileInterceptor('file', multerFileOptions))
@@ -71,6 +93,11 @@ export class ProposalController {
     }
   }
 
+  @ApiOkResponse({
+    description: 'Freelancers proposals for job id',
+    type: [Proposal],
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('job-post/:jobId')
   getByJobId(

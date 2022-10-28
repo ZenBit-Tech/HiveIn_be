@@ -38,10 +38,7 @@ async function bootstrap() {
   const options = new DocumentBuilder()
     .setTitle('GetJob backend')
     .setDescription('app')
-    .addBearerAuth(
-      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT', in: 'header' },
-      'Auth',
-    )
+    .addBearerAuth()
     .setVersion('1.0')
     .build();
 

@@ -14,6 +14,7 @@ import { ForgotPassword } from './forgot-password.entity';
 import { Exclude } from 'class-transformer';
 import PublicFile from 'src/modules/file/entities/publicFile.entity';
 import { RecentlyViewedFreelancers } from 'src/modules/client/entities/recently-viewed-freelancers.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 export enum UserRole {
   CLIENT = 'client',
@@ -30,16 +31,27 @@ export enum ConfidentialSettings {
 
 @Entity()
 export class Users {
+  @ApiProperty({
+    description: 'Id of user',
+  })
   @PrimaryGeneratedColumn({
     name: 'id',
   })
   id: number;
 
+  @ApiProperty({
+    description: 'Email of user',
+    example: 'email@gmail.com',
+  })
   @Column({ unique: true })
   @IsEmail()
   @IsString()
   email: string;
 
+  @ApiProperty({
+    description: 'Password of user',
+    example: '123123qQ!',
+  })
   @Column()
   password: string;
 
@@ -58,28 +70,54 @@ export class Users {
   })
   confidentialSetting: ConfidentialSettings;
 
+  @ApiProperty({
+    description:
+      'Google id if user sing up with Google Sign Up. Otherwise null',
+    examples: [null, 'OWIEFWEIFJ0293J2039J203J20OJ230O3F'],
+  })
   @Column({ nullable: true, unique: true })
   googleId: string;
 
+  @ApiProperty({
+    description: 'Hash of Refresh token current user',
+    example: '$2a$10$x0Q.mk/NETdQUCjx7BAVQOtC8Y.0g7XoEzxGSjdI.DP',
+  })
   @Column({ nullable: true })
   @Exclude()
   public currentHashedRefreshToken?: string;
 
+  @ApiProperty({
+    description: 'First name of user',
+    example: 'Stephen',
+  })
   @Column({ nullable: true })
   @IsString()
   @MaxLength(50)
   firstName: string;
 
+  @ApiProperty({
+    description: 'Last name of user',
+    example: 'King',
+  })
   @Column({ nullable: true })
   @IsString()
   @MaxLength(50)
   lastName: string;
 
+  @ApiProperty({
+    description: 'Users phone number',
+    example: '+380999999999',
+  })
   @Column({ nullable: true })
   @IsString()
   @IsPhoneNumber()
   phone: string;
 
+  @ApiProperty({
+    description: 'Description of user',
+    example:
+      'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+  })
   @Column({ nullable: true })
   @IsString()
   description: string;
