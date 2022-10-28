@@ -131,6 +131,21 @@ export class ClientService {
     return await this.addSavesField(userId, hiredFreelancers);
   }
 
+  async hireFreelancer(userId: number, freelancerId: number) {
+    const freelancer = await this.freelancersRepo.findOneBy({
+      id: freelancerId,
+    });
+
+    const user = await this.usersRepo
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.hiredFreelancers', 'hiredFreelancers')
+      .where({ id: userId })
+      .getOne();
+
+    user.hiredFreelancers.push(freelancer);
+    return (await this.usersRepo.save(user)).hiredFreelancers;
+  }
+
   // helper functions
 
   async getIdAllSavedFreelancers(userId: number) {

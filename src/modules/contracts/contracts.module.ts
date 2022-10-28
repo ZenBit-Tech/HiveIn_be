@@ -8,15 +8,25 @@ import { ContractsService } from 'src/modules/contracts/contracts.service';
 import { ChatRoom } from 'src/modules/chat-room/entities/chat-room.entity';
 import { NotificationsModule } from 'src/modules/notifications/notifications.module';
 import { MessageModule } from 'src/modules/message/message.module';
+import { ClientService } from 'src/modules/client/client.service';
+import { Users } from 'src/modules/entities/users.entity';
+import { RecentlyViewedFreelancers } from 'src/modules/client/entities/recently-viewed-freelancers.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([JobPost, Freelancer, Contracts, ChatRoom]),
+    TypeOrmModule.forFeature([
+      JobPost,
+      Freelancer,
+      Contracts,
+      ChatRoom,
+      Users,
+      RecentlyViewedFreelancers,
+    ]),
     forwardRef(() => NotificationsModule),
     forwardRef(() => MessageModule),
   ],
   controllers: [ContractsController],
-  providers: [ContractsService],
+  providers: [ContractsService, ClientService],
   exports: [ContractsService],
 })
 export class ContractsModule {}
