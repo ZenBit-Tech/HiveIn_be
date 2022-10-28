@@ -72,10 +72,13 @@ export class ContractsService {
       .leftJoinAndSelect('contracts.offer', 'offer')
       .leftJoinAndSelect('offer.jobPost', 'jobPost')
       .leftJoinAndSelect('jobPost.user', 'user')
+      .leftJoinAndSelect('jobPost.chatRoom', 'chatRoom')
+      .leftJoinAndSelect('chatRoom.freelancer', 'chatRoomFreelancer')
       .leftJoinAndSelect('jobPost.category', 'category')
       .leftJoinAndSelect('jobPost.skills', 'skills')
       .leftJoin('offer.freelancer', 'freelancer')
       .where(`freelancer.userId = ${freelancerId}`)
+      .andWhere(`chatRoomFreelancer.userId = ${freelancerId}`)
       .getMany();
 
     if (!contract) throw new NotFoundException();
